@@ -219,6 +219,10 @@ ol.steps li::before{content:counter(s);width:30px;height:30px;border-radius:10px
 .prow small{display:block;font-size:12px;color:var(--ink-3)}
 .prow .ck{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;color:transparent;font-weight:800}
 .prow.on .ck{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.dlista{margin-top:6px;border:1.5px dashed var(--accent);background:none;color:var(--accent);border-radius:14px;padding:11px 12px;font:700 13.5px var(--head);text-align:left;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.dlista.on{border-style:solid;border-color:transparent;background:var(--accent-soft)}
+.dlista span{font-weight:600;font-size:12.5px;color:var(--ink-3);text-decoration:underline}
+.dlista.todos{justify-content:center;margin-top:0}
 .nov{display:flex;gap:12px;align-items:flex-start;background:var(--surface-2);border-radius:18px;padding:14px;margin-bottom:10px}
 .nov .e{font-size:24px;line-height:1}
 .nov b{font:700 15px var(--head)}
@@ -593,7 +597,7 @@ function buscar(q,lista){var ws=toks(q).filter(function(w){return w.length>=2;})
 var ARROZ=BY["arroz-branco"],FEIJAO=BY["feijao-carioca"];
 
 /* ---------- estado ---------- */
-var S={pessoas:2,refeicoes:{cafe:true,almoco:true,lanche:false,jantar:true},arrozFeijao:true,salada:true,variar:true,sobraMarmita:false,rapidoSemana:true,planos:{},fav:[],compras:{},vistoMM:false,versaoVista:0};
+var S={pessoas:2,refeicoes:{cafe:true,almoco:true,lanche:false,jantar:true},arrozFeijao:true,salada:true,variar:true,sobraMarmita:false,rapidoSemana:true,planos:{},fav:[],compras:{},vistoMM:false,versaoVista:0,listaPorDia:false};
 var ui={tab:"semana",wk:null,q:"",cat:"",tag:"",sheet:null,confirm:"",sugHoje:0};
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(d&&typeof d==="object"){Object.keys(S).forEach(function(k){if(d[k]!=null)S[k]=d[k];});}}catch(e){}}
 var saveT=0;function save(){clearTimeout(saveT);saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast("Não consegui salvar neste navegador.");}},150);}
@@ -695,9 +699,11 @@ function listaCompras(wk){
   if(!p)return [];
   var seq=[];for(var d=0;d<7;d++)MEALS.forEach(function(mm){if(S.refeicoes[mm[0]])seq.push([d,mm[0]]);});
   var extra={};
-  seq.forEach(function(dm,i){var s=p[dm[0]]&&p[dm[0]][dm[1]];if(s&&s.x==="sobra"){for(var j=i-1;j>=0;j--){var ps=p[seq[j][0]]&&p[seq[j][0]][seq[j][1]];if(ps&&ps.r&&ps.r.length){var k=seq[j][0]+"|"+seq[j][1];extra[k]=(extra[k]||0)+1;break;}}}});
+  var dias=comp(wk).dias;
+  seq.forEach(function(dm,i){var s=p[dm[0]]&&p[dm[0]][dm[1]];if(s&&s.x==="sobra"&&dias[dm[0]]){for(var j=i-1;j>=0;j--){var ps=p[seq[j][0]]&&p[seq[j][0]][seq[j][1]];if(ps&&ps.r&&ps.r.length){var k=seq[j][0]+"|"+seq[j][1];extra[k]=(extra[k]||0)+1;break;}}}});
   seq.forEach(function(dm){
     var s=p[dm[0]]&&p[dm[0]][dm[1]];if(!s||!s.r)return;var mult=1+(extra[dm[0]+"|"+dm[1]]||0);
+    if(!dias[dm[0]]&&mult===1)return; if(!dias[dm[0]])mult-=1;
     s.r.forEach(function(id){var r=BY[id];if(!r)return;var f=fator(r,porcDe(s,id))*mult;
       r.ing.forEach(function(g){
         var fam=g.u==="kg"?"g":g.u==="l"?"ml":g.u,q=g.u==="kg"||g.u==="l"?g.q*1000:g.q;
@@ -717,7 +723,11 @@ function listaCompras(wk){
     it.src.forEach(function(s){if(out[nk].src.indexOf(s)<0)out[nk].src.push(s);});});
   return Object.keys(out).map(function(k){return out[k];});}
 function qtdTxt(i){return i.parts.map(function(p){return fmtQ(p.q,p.u,true);}).join(" + ");}
-function comp(wk){if(!S.compras[wk])S.compras[wk]={ok:{},extras:[]};if(!S.compras[wk].rm)S.compras[wk].rm={};return S.compras[wk];}
+function comp(wk){if(!S.compras[wk])S.compras[wk]={ok:{},extras:[]};if(!S.compras[wk].rm)S.compras[wk].rm={};if(!S.compras[wk].dias)S.compras[wk].dias={};return S.compras[wk];}
+/* dias que entram na lista de compras (o usuário escolhe tocando em "Pôr na lista" no dia) */
+function diaNaLista(wk,d){return !!comp(wk).dias[d];}
+function diaTemPrato(wk,d){return mealsOn().some(function(mm){var sl=slot(wk,d,mm[0],false);return sl.r&&sl.r.length;});}
+function diasComPrato(wk){var o=[];for(var d=0;d<7;d++)if(diaTemPrato(wk,d))o.push(d);return o;}
 /* itens da lista que não foram tirados por "Limpar lista" */
 function itensLista(wk){var c=comp(wk);return listaCompras(wk).filter(function(i){return !c.rm[i.key];});}
 
@@ -737,6 +747,8 @@ function vSemana(){
   }
   h+='<div class="btns"><button class="btn green" data-act="sugerir" style="flex:1"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>Sugerir a semana</button>'+
      '<button class="btn" data-act="maisSemana" aria-label="Mais opções" style="min-width:52px">•••</button></div>';
+  var comPrato=diasComPrato(wk), fora=comPrato.filter(function(d){return !diaNaLista(wk,d);});
+  if(fora.length)h+='<button class="dlista todos" data-act="semanaNaLista">🛒 Pôr '+(fora.length===comPrato.length?'a semana toda':fora.length===1?(fora[0]>=5?'o ':'a ')+DIAS[fora[0]].toLowerCase():'os outros '+fora.length+' dias')+' na lista de compras</button>';
   if(ui.maisSemana)h+='<div class="menu-s"><button data-act="diaadia">📅 Montar dia a dia<small>Aprove ou troque um dia por vez</small></button><button data-act="repetir">🔁 Repetir a semana anterior<small>Copia para os espaços vazios</small></button><button class="danger" data-act="limpar">🗑️ '+(ui.confirm==="limpar"?'Toque de novo para limpar a semana':'Limpar a semana')+'</button></div>';
   // dias que já passaram ficam recolhidos
   var passados=atual?tdi:0;
@@ -752,9 +764,11 @@ function vSemana(){
       inner+=vazioSlot(s)?'<button class="add wide" data-pick="'+d+'|'+m+'">+ Escolher</button>':'<button class="add" data-pick="'+d+'|'+m+'" aria-label="Adicionar no '+MEALN[m]+' de '+DIAS[d]+'">+</button>';
       h+='<div class="meal"><span class="ml">'+MEALN[m]+(vazioSlot(s)?'':'<button class="trc" data-strc="'+d+'|'+m+'" aria-label="Trocar '+MEALN[m]+' de '+DIAS[d]+' por outra sugestão">↻ trocar</button>')+'</span><div class="slot">'+inner+'</div></div>';
     });
+    if(diaTemPrato(wk,d)){var nl=diaNaLista(wk,d);
+      h+='<button class="dlista'+(nl?' on':'')+'" data-dlista="'+d+'">'+(nl?'✓ '+DIAS[d]+' está na lista de compras <span>tirar</span>':'🛒 Pôr os ingredientes de '+DIAS[d].toLowerCase()+' na lista')+'</button>';}
     h+='</section>';
   }
-  h+='<p class="note">Toque num prato para ver a receita e ajustar as porções: a lista de compras acompanha.</p>';
+  h+='<p class="note">Toque num prato para ver a receita e ajustar as porções. Os dias com 🛒 ativado vão para a lista de compras, que acompanha as mudanças.</p>';
   return h;}
 function rcHTML(r){var fav=S.fav.indexOf(r.id)>=0;
   return '<div class="rc" style="cursor:pointer" data-open="'+r.id+'" role="button" tabindex="0"><span class="plate">'+r.e+'</span><b>'+esc(r.nome)+'</b><small>'+r.tempo+' min · '+r.porc+(r.porc===1?' porção':' porções')+'</small>'+
@@ -775,13 +789,14 @@ function vReceitas(){
 function drawRres(){var el=$("#rres");if(!el)return;var res=filtrarR(),r=res.r;
   el.innerHTML=r.length?(ui.q.trim()?'<p class="note" style="margin:0 0 10px">'+r.length+(r.length===1?' receita':' receitas')+(res.parecido?' parecidas (nenhuma tinha todas as palavras)':'')+'</p>':'')+'<div class="grid">'+r.map(rcHTML).join("")+'</div>':(ui.cat==="fav"&&!ui.q&&!ui.tag?'<div class="empty"><b>Nenhuma favorita ainda</b>Toque no coração das receitas que vocês gostam.</div>':'<div class="empty"><b>Nada encontrado</b>Tente outra palavra ou tire um filtro.</div>');}
 function vCompras(){
-  var wk=ui.wk,itens=itensLista(wk),c=comp(wk),h='',tirados=Object.keys(c.rm).length;
+  var wk=ui.wk,itens=itensLista(wk),c=comp(wk),h='',tirados=Object.keys(c.rm).length||!!c.diasAntes;
   h+='<div class="row"><h1 class="h1">Compras</h1><div class="weeknav"><button data-wk="-1" aria-label="Semana anterior">‹</button><b>'+wkLabel(wk)+'</b><button data-wk="1" aria-label="Próxima semana">›</button></div></div>';
   var tot=itens.length+c.extras.length,ok=itens.filter(function(i){return c.ok[i.key];}).length+c.extras.filter(function(e){return e.ok;}).length;
   h+='<div class="addline"><input id="extra" placeholder="Adicionar item (ex.: papel-toalha)" autocomplete="off" aria-label="Novo item da lista"><button class="btn green" data-act="extra" aria-label="Adicionar item">+</button></div>';
   if(!tot){
-    return h+'<div class="empty"><b>'+(tirados?'Lista limpa':'A lista está vazia')+'</b>'+(tirados?'Os ingredientes do cardápio foram tirados da lista.':'Monte o cardápio da semana e os ingredientes aparecem aqui, já somados.')+'</div>'+
-      (tirados?'<div class="btns" style="justify-content:center"><button class="btn line" data-act="restaurarLista">Trazer de volta os itens do cardápio</button></div>':'');
+    var comP=diasComPrato(wk).length;
+    return h+'<div class="empty"><b>'+(tirados?'Lista limpa':'A lista está vazia')+'</b>'+(tirados?'Os ingredientes do cardápio foram tirados da lista.':comP?'Escolha os dias: no cardápio, toque em 🛒 “Pôr na lista” em cada dia, ou ponha a semana toda.':'Monte o cardápio da semana e toque em 🛒 nos dias para os ingredientes aparecerem aqui, já somados.')+'</div>'+
+      '<div class="btns" style="justify-content:center">'+(tirados?'<button class="btn line" data-act="restaurarLista">Trazer de volta</button>':'')+(comP?'<button class="btn green" data-act="semanaNaLista">🛒 Pôr a semana toda</button>':'')+'</div>';
   }
   h+='<div class="ctop"><span><b>'+(tot-ok)+'</b> para comprar'+(ok?' · '+ok+' no carrinho':'')+'</span><span class="ctools">'+
      '<button data-act="copiar">Copiar</button>'+(ok?'<button data-act="desmarcar">Desmarcar</button>':'')+
@@ -795,7 +810,8 @@ function vCompras(){
       h+='<button class="item'+(on?' ok':'')+'" data-ck="'+esc(i.key)+'" aria-pressed="'+on+'"><span class="ck">✓</span><span><span class="t">'+(i.parts.length?'<b>'+qtdTxt(i)+'</b>':'')+esc(i.n)+(!i.parts.length?' <span style="color:var(--ink-3);font-weight:400">(a gosto)</span>':'')+'</span><small>'+esc(i.src.join(", "))+'</small></span></button>';});
     ex.forEach(function(e,ix){h+='<button class="item'+(e.ok?' ok':'')+'" data-ckx="'+ix+'" aria-pressed="'+!!e.ok+'"><span class="ck">✓</span><span><span class="t">'+esc(e.t)+'</span><small>Item seu · <span data-delx="'+ix+'" style="text-decoration:underline">apagar</span></small></span></button>';});
     h+='</section>';});
-  h+='<p class="note">Quantidades para as porções de cada prato no cardápio ('+S.pessoas+(S.pessoas===1?' pessoa':' pessoas')+', se você não mudou), arredondadas para cima no que se compra por unidade.'+(tirados?' <button data-act="restaurarLista" style="border:0;background:none;color:var(--accent);font-weight:700;padding:0">Trazer de volta os itens tirados</button>':'')+'</p>';
+  var dl=[];for(var dx=0;dx<7;dx++)if(c.dias[dx]&&diaTemPrato(wk,dx))dl.push(DIAC[dx]);
+  h+='<p class="note">Dias na lista: <b>'+(dl.length?dl.join(", "):'nenhum')+'</b>. Para mudar, toque em 🛒 nos dias do cardápio. Quantidades para as porções de cada prato no cardápio ('+S.pessoas+(S.pessoas===1?' pessoa':' pessoas')+', se você não mudou), arredondadas para cima no que se compra por unidade.'+(tirados?' <button data-act="restaurarLista" style="border:0;background:none;color:var(--accent);font-weight:700;padding:0">Trazer de volta os itens tirados</button>':'')+'</p>';
   h+='<button class="fixmm" data-act="meumercado"><svg viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 11h10.6L20.5 7H7"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg>Enviar para o Meu Mercado</button>';
   return h;}
 function vAjustes(){
@@ -870,8 +886,9 @@ function diaHTML(){
 function abrirDia(d){var x=sugerirDia(ui.wk,d,false,null);ui.sheet={type:"dia",d:d,draft:x.res};drawSheet(true);}
 function openSheet(o){ui.sheet=o;drawSheet(true);}
 /* ---------- novidades da versão ---------- */
-var VERSAO=2;
+var VERSAO=3;
 var NOVIDADES=[
+ {e:"🛒",t:"Você escolhe os dias da lista",d:"Cada dia do cardápio tem o botão 🛒 “Pôr na lista”: todos os ingredientes das receitas daquele dia vão para Compras. Se quiser, ponha a semana toda de uma vez.",tab:"semana",sel:".dlista",dica:"Toque para mandar os ingredientes deste dia para a lista",precisa:"Monte o cardápio para ver o botão nos dias"},
  {e:"📖",t:"116 receitas novas",d:"Agora são 256 receitas: mais pratos do dia a dia, massas, lanches, sopas, saladas, cafés e sobremesas.",tab:"receitas",sel:".cats",dica:"Escolha uma categoria para ver as novas"},
  {e:"🍽️",t:"Porções vão para a lista",d:"Toque num prato do cardápio e ajuste as porções no − / +. A lista de compras acompanha e o prato ganha uma etiqueta (ex.: 6p).",tab:"semana",sel:".dish .dn",dica:"Toque num prato para ajustar as porções",precisa:"Monte o cardápio para ver os pratos aqui"},
  {e:"✨",t:"Semana mais simples",d:"Um botão para sugerir a semana e o ••• com Montar dia a dia, Repetir a semana anterior e Limpar. Os dias que já passaram ficam recolhidos.",tab:"semana",sel:"[data-act=maisSemana]",dica:"Mais opções da semana ficam aqui"},
@@ -960,6 +977,10 @@ document.addEventListener("click",function(e){
   var el=e.target.closest("[data-delx],button,[data-open],[data-close]");if(!el)return;var d=el.dataset,wk=ui.wk;
   if(d.close!==undefined){if(ui.sheet&&ui.sheet.volta){ui.sheet=ui.sheet.volta;drawSheet(true);return;}closeSheet();return;}
   if(d.undo!==undefined){desfazer();return;}
+  if(d.dlista!==undefined){var dd=+d.dlista,cd=comp(wk),antes=itensLista(wk).length;
+    if(cd.dias[dd]){delete cd.dias[dd];save();render();toast(DIAS[dd]+" saiu da lista de compras");}
+    else{cd.dias[dd]=true;save();render();var n=itensLista(wk).length-antes;toast("Ingredientes de "+DIAS[dd].toLowerCase()+" na lista"+(n>0?" (+"+n+(n===1?" item)":" itens)"):""));}
+    return;}
   if(d.sdia!==undefined){var sd=+d.sdia,cheio=diaCompleto(wk,sd);guardar(wk);var rx=sugerirDia(wk,sd,cheio,null);Object.keys(rx.res).forEach(function(m){gravarSlot(wk,sd,m,rx.res[m]);});save();render();toast(rx.n?(cheio?DIAS[sd]+" refeito":DIAS[sd]+" sugerido"):"Nada para sugerir",rx.n);return;}
   if(d.strc){var sp=d.strc.split("|"),sdd=+sp[0],sm=sp[1],ant=principal(slot(wk,sdd,sm,false)),ov={};ov[sdd]={};ov[sdd][sm]={r:[],x:""};var v1=sugerirRefeicao(wk,sdd,sm,ov,ant?ant.id:null);if(!v1){toast("Sem outra opção agora");return;}guardar(wk);gravarSlot(wk,sdd,sm,v1);save();render();toast(MEALN[sm]+" de "+DIAS[sdd].toLowerCase()+(ant?" trocado":" sugerido"),true);return;}
   if(d.dd!==undefined&&ui.sheet){abrirDia(+d.dd);return;}
@@ -992,6 +1013,7 @@ document.addEventListener("click",function(e){
   if(d.pc!==undefined&&ui.sheet){ui.sheet.cat=d.pc;drawSheet();return;}
   if(d.tg&&ui.sheet){var st=slot(wk,ui.sheet.d,ui.sheet.m,true),ix=st.r.indexOf(d.tg);if(ix>=0)st.r.splice(ix,1);else{st.r.push(d.tg);st.x="";}save();drawSheet();render();return;}
   switch(d.act){
+    case "semanaNaLista":var cw=comp(wk);diasComPrato(wk).forEach(function(x){cw.dias[x]=true;});save();render();toast("Semana na lista de compras");break;
     case "maisSemana":ui.maisSemana=!ui.maisSemana;render();break;
     case "verPassados":ui.verPassados=true;render();break;
     case "diaadia":ui.maisSemana=false;var hj=(parse(hoje()).getDay()+6)%7,d0=ui.wk===curWk()?hj:0,dd=d0;for(var i2=0;i2<7;i2++){var c2=(d0+i2)%7;if(!diaCompleto(ui.wk,c2)){dd=c2;break;}}abrirDia(dd);break;
@@ -1010,8 +1032,8 @@ document.addEventListener("click",function(e){
     case "meumercado":paraMeuMercado();break;
     case "desmarcar":comp(wk).ok={};comp(wk).extras.forEach(function(x){x.ok=false;});save();render();break;
     case "limparLista":if(ui.confirm!=="limparLista"){pedirConfirma("limparLista");break;}
-      var cl=comp(wk);listaCompras(wk).forEach(function(i){cl.rm[i.key]=true;});cl.extras=[];cl.ok={};ui.confirm="";save();render();toast("Lista de compras limpa");break;
-    case "restaurarLista":comp(wk).rm={};save();render();toast("Itens do cardápio de volta na lista");break;
+      var cl=comp(wk);cl.diasAntes=cl.dias;cl.extrasAntes=cl.extras;cl.dias={};cl.rm={};cl.extras=[];cl.ok={};ui.confirm="";save();render();toast("Lista de compras limpa");break;
+    case "restaurarLista":var cr=comp(wk);cr.rm={};if(cr.diasAntes){cr.dias=cr.diasAntes;cr.extras=cr.extrasAntes||cr.extras;delete cr.diasAntes;delete cr.extrasAntes;}save();render();toast("Itens de volta na lista");break;
     case "extra":var inp=$("#extra"),t=inp&&inp.value.trim();if(t){comp(wk).extras.push({t:t.slice(0,80),ok:false});save();render();setTimeout(function(){var i2=$("#extra");if(i2)i2.focus();},30);}break;
     case "pornocardapio":var r=BY[ui.sheet.id],td=(parse(hoje()).getDay()+6)%7;
       ui.sheet.add=true;ui.sheet.d=ui.wk===curWk()?td:0;
@@ -1040,6 +1062,7 @@ document.addEventListener("keydown",function(e){
 });
 window.addEventListener("hashchange",function(){go(location.hash.slice(1));});
 load();
+if(!S.listaPorDia){Object.keys(S.planos).forEach(function(wk){var c=comp(wk);for(var d=0;d<7;d++)c.dias[d]=true;});S.listaPorDia=true;save();}
 ui.wk=curWk();
 ui.tab=["semana","receitas","compras","ajustes"].indexOf(location.hash.slice(1))>=0?location.hash.slice(1):"semana";
 draw();
