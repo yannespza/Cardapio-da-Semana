@@ -1,0 +1,705 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#F3F6F4"><meta name="description" content="Cardápio da semana com receitas do dia a dia e lista de compras automática."><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style><title>Cardápio da Semana</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
+<style>
+/* Conceito: geladeira organizada. Fundo claro, cartões brancos bem arredondados, verde-folha de destaque,
+   comida como ilustração grande. Quatro telas: Semana, Receitas, Compras, Ajustes. */
+:root{
+  --bg:#F3F6F4; --surface:#FFFFFF; --surface-2:#EEF3F0; --ink:#141815; --ink-2:#5F6B64; --ink-3:#97A29B; --line:#E3E9E5;
+  --accent:#27AE60; --accent-ink:#FFFFFF; --accent-soft:#E2F4E9; --mint:#D9F0E2; --dark:#17201B; --dark-ink:#FFFFFF;
+  --heart:#EE4B59; --warn:#C9821A; --shadow:0 10px 30px rgba(24,48,34,.08);
+  --head:"Montserrat",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --body:"Nunito Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1411; --surface:#171E1A; --surface-2:#1F2823; --ink:#EEF3EF; --ink-2:#A4B0A8; --ink-3:#6E7A72; --line:#28332D;
+    --accent:#3CC876; --accent-ink:#06150C; --accent-soft:#183324; --mint:#173A27; --dark:#EEF3EF; --dark-ink:#0F1411;
+    --heart:#FF6B77; --warn:#F0B35A; --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1411; --surface:#171E1A; --surface-2:#1F2823; --ink:#EEF3EF; --ink-2:#A4B0A8; --ink-3:#6E7A72; --line:#28332D;
+  --accent:#3CC876; --accent-ink:#06150C; --accent-soft:#183324; --mint:#173A27; --dark:#EEF3EF; --dark-ink:#0F1411;
+  --heart:#FF6B77; --warn:#F0B35A; --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--body);padding-block:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--head);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.wrap{max-width:760px;margin:0 auto}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0 10px}
+.brand{border:0;background:none;padding:0;font:700 19px/1 var(--head);letter-spacing:-.02em}
+.brand span{color:var(--accent)}
+.ibtn{width:44px;height:44px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;color:var(--ink)}
+.ibtn svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.view{display:flex;flex-direction:column;gap:22px;padding-top:4px}
+.h1{font:800 30px/1.1 var(--head);letter-spacing:-.02em}
+.h1 small{display:block;font:600 13px/1.4 var(--body);color:var(--ink-2);letter-spacing:0;margin-top:4px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.note{font-size:12.5px;color:var(--ink-3)}
+.sec{display:flex;flex-direction:column;gap:10px;min-width:0}
+.sec-t{font:700 17px/1.2 var(--head)}
+
+/* semana */
+.weeknav{display:flex;align-items:center;gap:4px;background:var(--surface);border-radius:999px;padding:4px;box-shadow:var(--shadow)}
+.weeknav button{width:36px;height:36px;border-radius:50%;border:0;background:transparent;font-size:20px;line-height:1;color:var(--ink-2)}
+.weeknav b{font:700 13px var(--head);min-width:94px;text-align:center;white-space:nowrap}
+.banner{position:relative;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;background:var(--mint);border-radius:26px;padding:20px 18px 20px 22px;overflow:hidden}
+.banner::before{content:"";position:absolute;inset:0;opacity:.35;pointer-events:none;
+  background:repeating-radial-gradient(circle at 85% 20%,transparent 0 14px,rgba(39,174,96,.18) 14px 15px)}
+.banner>*{position:relative}
+.banner h2{font:700 21px/1.2 var(--head)}
+.banner p{margin:6px 0 14px;font-size:13px;color:var(--ink-2)}
+.banner .big{font-size:76px;line-height:1;filter:drop-shadow(0 10px 14px rgba(0,0,0,.18))}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 20px;border-radius:16px;border:0;background:var(--surface);color:var(--ink);font:700 14px var(--head);box-shadow:var(--shadow)}
+.btn.dark{background:var(--dark);color:var(--dark-ink);box-shadow:none}
+.btn.green{background:var(--accent);color:var(--accent-ink);box-shadow:0 8px 20px rgba(39,174,96,.28)}
+.btn.soft{background:var(--accent-soft);color:var(--accent);box-shadow:none}
+.btn.line{background:transparent;border:1.5px solid var(--line);box-shadow:none}
+.btn.danger{color:var(--heart)}
+.btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.day{background:var(--surface);border-radius:24px;padding:14px 14px 10px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:4px}
+.day.past{opacity:.7}
+.day.today{outline:2px solid var(--accent)}
+.day-h{display:flex;align-items:baseline;gap:8px;padding:0 4px 4px}
+.day-h b{font:700 16px var(--head)}
+.day-h span{font-size:13px;color:var(--ink-3)}
+.pill{font:700 11px var(--head);background:var(--accent);color:var(--accent-ink);padding:3px 9px;border-radius:999px;margin-left:auto}
+.meal{display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:start;padding:8px 4px;border-top:1px solid var(--line)}
+.meal>span{font:600 12px/32px var(--head);color:var(--ink-2)}
+.slot{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.dish{display:inline-flex;align-items:center;gap:6px;max-width:100%;min-height:32px;padding:0 4px 0 10px;border-radius:12px;background:var(--surface-2);border:0;font-size:13.5px;font-weight:600;text-align:left}
+.dish .e{font-size:16px}
+.dish .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.dish .x{width:28px;height:28px;border-radius:8px;border:0;background:transparent;display:grid;place-items:center;color:var(--ink-3);font-size:17px;flex:none;padding:0}
+.dish .dn{display:inline-flex;align-items:center;gap:6px;min-width:0;border:0;background:none;padding:0;font:inherit;color:inherit;text-align:left}
+.dish.tag{background:transparent;border:1.5px dashed var(--line);color:var(--ink-2)}
+.add{width:32px;height:32px;border-radius:12px;border:1.5px dashed var(--line);background:transparent;color:var(--accent);font-size:20px;line-height:1;display:grid;place-items:center}
+.add.wide{width:auto;padding:0 12px;font:700 13px var(--head);gap:4px;display:inline-flex}
+
+/* receitas */
+.search{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:18px;padding:0 16px;box-shadow:var(--shadow)}
+.search svg{width:19px;height:19px;flex:none;fill:none;stroke:var(--ink-3);stroke-width:2;stroke-linecap:round}
+.search input{flex:1;min-width:0;border:0;background:transparent;padding:14px 0;font-size:16px;outline:none}
+.cats{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex:0 0 96px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 6px 12px;border-radius:22px;border:1.5px solid var(--line);background:var(--surface);text-align:center}
+.cat .e{font-size:34px;line-height:1.1}
+.cat b{font:700 12.5px/1.2 var(--head)}
+.cat small{font:700 11px var(--head);color:var(--accent)}
+.cat[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:36px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font:600 13px var(--head);color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--dark);border-color:transparent;color:var(--dark-ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.rc{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 12px 14px;border-radius:24px;background:var(--surface);border:0;box-shadow:var(--shadow);text-align:center;min-width:0}
+.rc .plate{width:84px;height:84px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;font-size:46px;margin-bottom:4px}
+.rc b{font:700 14px/1.25 var(--head);overflow-wrap:anywhere}
+.rc small{font-size:12px;color:var(--ink-3)}
+.heart{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:0;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-3)}
+.heart svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2}
+.heart.on{color:var(--heart)}
+.heart.on svg{fill:currentColor}
+.empty{padding:28px 18px;text-align:center;color:var(--ink-2);background:var(--surface);border:1.5px dashed var(--line);border-radius:22px}
+.empty b{display:block;color:var(--ink);margin-bottom:4px;font:700 16px var(--head)}
+
+/* compras */
+.sum{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-radius:22px;box-shadow:var(--shadow)}
+.sum div{padding:14px;border-left:1px solid var(--line);min-width:0}
+.sum div:first-child{border-left:0}
+.sum b{display:block;font:800 24px/1 var(--head)}
+.sum span{font-size:11.5px;color:var(--ink-3);font-weight:700}
+.group{background:var(--surface);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.group-h{display:flex;align-items:center;gap:10px;padding:14px 16px 8px;font:700 14px var(--head)}
+.group-h .e{font-size:20px}
+.group-h small{margin-left:auto;font:600 12px var(--body);color:var(--ink-3)}
+.item{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:center;width:100%;padding:10px 16px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left}
+.item .ck{width:26px;height:26px;border-radius:9px;border:2px solid var(--line);display:grid;place-items:center;color:transparent;font-size:15px;font-weight:800}
+.item.ok .ck{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.item.ok .t{text-decoration:line-through;color:var(--ink-3)}
+.item .t{display:block;font-weight:600;overflow-wrap:anywhere}
+.item .t b{font-family:var(--head);font-weight:700;margin-right:4px}
+.item small{display:block;font-size:12px;color:var(--ink-3);overflow-wrap:anywhere}
+.addline{display:flex;gap:8px}
+.addline input{flex:1;min-width:0;border:0;border-radius:16px;background:var(--surface);box-shadow:var(--shadow);padding:13px 16px;font-size:16px}
+
+/* ajustes */
+.card{background:var(--surface);border-radius:22px;box-shadow:var(--shadow);padding:6px 0}
+.set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
+.set:first-child{border-top:0}
+.set span small{display:block;font-size:12px;color:var(--ink-3)}
+.step{display:flex;align-items:center;gap:6px}
+.step button{width:38px;height:38px;border-radius:12px;border:0;background:var(--surface-2);font-size:20px;font-weight:700}
+.step b{font:800 20px var(--head);min-width:26px;text-align:center}
+.tog{position:relative;width:50px;height:30px;border-radius:999px;border:0;background:var(--line);flex:none}
+.tog::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.tog[aria-checked="true"]{background:var(--accent)}
+.tog[aria-checked="true"]::after{transform:translateX(20px)}
+
+/* navegação */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tabs-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:transparent;color:var(--ink-3);font:600 11px var(--head);min-height:52px;border-radius:14px}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current="page"]{color:var(--accent)}
+
+/* folhas */
+.sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.scrim{position:absolute;inset:0;background:rgba(10,20,14,.45)}
+.panel{position:relative;width:100%;max-width:620px;max-height:94%;overflow-y:auto;overscroll-behavior:contain;background:var(--bg);border-radius:30px 30px 0 0;
+  padding:12px max(18px,env(safe-area-inset-right,0px)) 0 max(18px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:18px}
+.panel>*{flex-shrink:0}
+.grab{width:42px;height:4px;border-radius:2px;background:var(--line);margin:0 auto}
+.sh{display:flex;align-items:center;gap:10px}
+.sh h2{font:700 18px/1.2 var(--head);flex:1;text-align:center}
+.sh .ibtn{background:var(--surface);box-shadow:var(--shadow);width:40px;height:40px}
+.hero{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:6px 0 0}
+.bigplate{position:relative;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle at 50% 45%,var(--surface) 0 56%,var(--accent-soft) 57%);display:grid;place-items:center;font-size:104px;line-height:1;margin-bottom:8px;box-shadow:var(--shadow)}
+.bigplate i{position:absolute;font-style:normal;font-size:24px;width:42px;height:42px;border-radius:50%;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow)}
+.hero h3{font:800 26px/1.15 var(--head);max-width:22ch}
+.facts{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:13px;color:var(--ink-2)}
+.facts b{color:var(--accent);font-family:var(--head)}
+.ing{display:flex;flex-direction:column;background:var(--surface);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.ing div{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:10px 16px;border-top:1px solid var(--line);font-size:14.5px}
+.ing div:first-child{border-top:0}
+.ing div b{font:700 13.5px var(--head);color:var(--accent)}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:10px}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start}
+ol.steps li::before{content:counter(s);width:30px;height:30px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font:800 14px/30px var(--head);text-align:center}
+.foot{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;background:linear-gradient(transparent,var(--bg) 30%);padding:18px 0 calc(14px + env(safe-area-inset-bottom,0px))}
+.foot .btn.green{flex:1;min-height:56px;border-radius:20px;font-size:16px}
+.foot .heart{position:static;width:56px;height:56px;background:var(--surface);box-shadow:var(--shadow)}
+.foot .heart svg{width:22px;height:22px}
+.pick{display:flex;flex-direction:column;gap:12px;background:var(--surface);border-radius:22px;padding:16px;box-shadow:var(--shadow)}
+.plist{display:flex;flex-direction:column;background:var(--surface);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.prow{display:grid;grid-template-columns:44px 1fr 32px;gap:12px;align-items:center;width:100%;padding:9px 14px;border:0;border-top:1px solid var(--line);background:transparent;text-align:left}
+.prow:first-child{border-top:0}
+.prow .e{width:44px;height:44px;border-radius:14px;background:var(--accent-soft);display:grid;place-items:center;font-size:24px}
+.prow b{display:block;font:700 14px/1.25 var(--head)}
+.prow small{display:block;font-size:12px;color:var(--ink-3)}
+.prow .ck{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;color:transparent;font-weight:800}
+.prow.on .ck{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;background:var(--dark);color:var(--dark-ink);padding:12px 18px;border-radius:14px;font:600 14px var(--head);max-width:calc(100% - 32px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+@media (prefers-reduced-motion:no-preference){
+  .panel{animation:up .24s ease-out}.scrim{animation:fade .24s ease-out}
+  @keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+}
+@media (min-width:700px){.sheet{align-items:center}.panel{border-radius:30px;max-height:90%}}
+</style>
+
+</head><body><div class="wrap">
+  <header class="top">
+    <button class="brand" data-go="semana" aria-label="Ir para a semana">Cardápio <span>da Semana</span></button>
+    <button class="ibtn" data-act="buscar" aria-label="Buscar receita"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+  </header>
+  <main id="main"></main>
+</div>
+
+<nav class="tabs" aria-label="Seções"><div class="tabs-in">
+  <button class="tab" data-go="semana"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>Semana</button>
+  <button class="tab" data-go="receitas"><svg viewBox="0 0 24 24"><path d="M5 21V4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5 1.5 1.5 0 0 0 6.5 21H19"/><path d="M9 7.5h6"/></svg>Receitas</button>
+  <button class="tab" data-go="compras"><svg viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 11h10.6L20.5 7H7"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg>Compras</button>
+  <button class="tab" data-go="ajustes"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Ajustes</button>
+</div></nav>
+
+<div class="sheet" id="sheet" hidden><div class="scrim" data-close></div><div class="panel" id="panel" role="dialog" aria-modal="true" aria-label="Detalhes"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+var RAW=[
+["Pão na chapa","🍞","cafe",5,2,1,1,"veg","2 un pão francês #P; 2 csp manteiga #L","Corte os pães ao meio e passe manteiga no miolo.|Doure na frigideira quente com a manteiga para baixo, por uns 2 minutos."],
+["Ovos mexidos cremosos","🍳","cafe",10,2,1,1,"veg,fit","4 un ovo #L; 1 csp manteiga #L; 2 csp leite #L; ag sal #T","Bata os ovos com o leite e uma pitada de sal.|Derreta a manteiga em fogo baixo e junte os ovos.|Mexa sem parar e desligue quando ainda estiverem cremosos."],
+["Tapioca de queijo","🫓","cafe",10,2,1,1,"veg","8 csp goma de tapioca #M; 100 g queijo muçarela #L","Peneire a goma numa frigideira antiaderente fria, formando um disco.|Leve ao fogo médio até a massa grudar.|Recheie com o queijo, dobre ao meio e sirva."],
+["Cuscuz nordestino","🌽","cafe",20,4,1,1,"veg","250 g flocão de milho #M; 1 csc sal #T; 2 csp manteiga #L; 4 un ovo #L","Hidrate o flocão com um copo de água e o sal por 10 minutos.|Cozinhe na cuscuzeira por 10 minutos depois que a água ferver.|Sirva com manteiga e ovo frito."],
+["Panqueca americana","🥞","cafe",20,4,1,1,"veg,kids","1.5 xic farinha de trigo #M; 1 xic leite #L; 1 un ovo #L; 2 csp açúcar #M; 1 csp fermento em pó #M; 2 csp manteiga #L","Misture os ingredientes secos e depois o leite, o ovo e a manteiga derretida.|Despeje conchas pequenas na frigideira untada em fogo baixo.|Vire quando aparecerem bolhinhas e doure o outro lado.|Sirva com mel ou frutas."],
+["Crepioca","🥚","cafe",10,1,1,1,"veg,fit","1 un ovo #L; 2 csp goma de tapioca #M; 30 g queijo minas #L","Bata o ovo com a goma e uma pitada de sal.|Despeje na frigideira untada e espere firmar.|Vire, recheie com o queijo e dobre."],
+["Vitamina de banana com aveia","🍌","cafe",5,2,1,1,"veg,fit,kids","2 un banana #H; 400 ml leite #L; 2 csp aveia #M; 1 csp mel #M","Bata tudo no liquidificador.|Sirva gelada."],
+["Bolo de cenoura com chocolate","🥕","cafe",50,10,2,1,"veg,forno,kids","3 un cenoura #H; 3 un ovo #L; 1 xic óleo #M; 2 xic açúcar #M; 2.5 xic farinha de trigo #M; 1 csp fermento em pó #M; 200 g chocolate meio amargo #M; 200 ml creme de leite #L","Bata a cenoura, os ovos e o óleo no liquidificador.|Misture com o açúcar e a farinha, e por último o fermento.|Asse em forma untada a 180 °C por cerca de 40 minutos.|Derreta o chocolate com o creme de leite e cubra o bolo."],
+["Pão de queijo","🧀","cafe",40,30,2,2,"veg,forno,congela","500 g polvilho azedo #M; 250 ml leite #L; 120 ml óleo #M; 2 un ovo #L; 200 g queijo meia cura #L; 1 csc sal #T","Ferva o leite com o óleo e o sal e despeje sobre o polvilho, mexendo.|Quando amornar, junte os ovos e o queijo ralado e sove até ficar liso.|Faça bolinhas com as mãos untadas.|Asse a 200 °C por 25 minutos, até dourar."],
+["Misto quente","🥪","cafe",10,2,1,1,"kids","4 fatia pão de forma #P; 4 fatia presunto #A; 4 fatia queijo muçarela #L; 1 csp manteiga #L","Monte os sanduíches com presunto e queijo.|Passe manteiga por fora.|Doure na sanduicheira ou na frigideira, virando uma vez."],
+["Iogurte com granola e frutas","🥣","cafe",5,2,1,2,"veg,fit","340 g iogurte natural #L; 6 csp granola #M; 1 un banana #H; 6 un morango #H; 1 csp mel #M","Divida o iogurte em duas tigelas.|Cubra com a granola, as frutas picadas e o mel."],
+["Mingau de aveia","🥣","cafe",10,2,1,1,"veg,fit","400 ml leite #L; 6 csp aveia #M; 2 csp açúcar #M; ag canela #T","Leve o leite, a aveia e o açúcar ao fogo baixo.|Mexa por uns 5 minutos até engrossar.|Sirva polvilhado com canela."],
+["Omelete de queijo e tomate","🍳","cafe",15,2,1,1,"veg,fit","4 un ovo #L; 1 un tomate #H; 50 g queijo muçarela #L; ag cheiro-verde #H; ag sal #T","Bata os ovos com sal.|Junte o tomate picado, o queijo e o cheiro-verde.|Cozinhe em fogo baixo com a frigideira tampada até firmar e dobre ao meio."],
+["Bolo de fubá","🌽","cafe",50,10,1,1,"veg,forno","2 xic fubá #M; 1 xic farinha de trigo #M; 1.5 xic açúcar #M; 3 un ovo #L; 1 xic leite #L; 0.5 xic óleo #M; 1 csp fermento em pó #M","Bata os ovos, o leite, o óleo e o açúcar.|Misture com o fubá e a farinha e, por último, o fermento.|Asse em forma untada a 180 °C por cerca de 40 minutos."],
+["Torrada com abacate e ovo","🥑","cafe",10,2,1,2,"veg,fit","2 fatia pão integral #P; 1 un abacate #H; 2 un ovo #L; 1 un limão #H; ag sal #T","Toste o pão.|Amasse o abacate com limão e sal e espalhe nas torradas.|Cubra com ovo frito ou cozido."],
+["Bolinho de chuva","🍩","cafe",30,6,1,1,"veg,kids","2 xic farinha de trigo #M; 2 un ovo #L; 1 xic leite #L; 0.5 xic açúcar #M; 1 csp fermento em pó #M; 500 ml óleo #M; ag canela #T","Misture tudo, menos o óleo, até formar uma massa grossa.|Frite colheradas em óleo quente até dourar.|Escorra e passe em açúcar com canela."],
+["Suco verde","🥬","cafe",5,2,1,1,"veg,fit","2 folha couve #H; 1 un limão #H; 2 fatia abacaxi #H; ag gengibre #H; 400 ml água #M","Bata tudo no liquidificador com gelo.|Coe se preferir e sirva na hora."],
+["Pão de queijo de frigideira","🧀","cafe",10,1,1,1,"veg","1 un ovo #L; 2 csp goma de tapioca #M; 1 csp requeijão #L; 2 csp queijo parmesão #L","Misture tudo com um garfo.|Despeje na frigideira untada em fogo baixo e tampe.|Vire quando firmar e doure o outro lado."],
+["Hambúrguer caseiro","🍔","lanche",30,4,1,2,"kids,fds","600 g carne moída #A; 4 un pão de hambúrguer #P; 4 fatia queijo prato #L; 1 un tomate #H; 1 un alface #H; 1 un cebola #H; ag sal #T","Tempere a carne só com sal e pimenta e modele 4 discos.|Grelhe na frigideira bem quente, 3 minutos de cada lado.|Ponha o queijo por cima no fim para derreter.|Monte nos pães com alface, tomate e cebola."],
+["Cachorro-quente","🌭","lanche",30,6,1,1,"kids,fds","6 un pão de cachorro-quente #P; 6 un salsicha #A; 500 g molho de tomate #M; 1 un cebola #H; 1 lata milho #M; ag batata palha #M","Refogue a cebola, junte o molho e as salsichas cortadas e cozinhe 10 minutos.|Recheie os pães com o molho.|Finalize com milho e batata palha."],
+["Pizza caseira","🍕","lanche",90,6,2,2,"fds,forno,kids","500 g farinha de trigo #M; 10 g fermento biológico seco #M; 300 ml água #M; 3 csp azeite #M; 300 g molho de tomate #M; 400 g queijo muçarela #L; 200 g linguiça calabresa #A; ag orégano #T","Misture a farinha, o fermento, a água morna, o azeite e uma colher de chá de sal e sove por 10 minutos.|Deixe crescer coberto por 1 hora.|Divida em duas, abra nas formas e pré-asse por 8 minutos a 220 °C.|Cubra com molho, queijo, calabresa e orégano e asse mais 12 minutos."],
+["Sanduíche natural de frango","🥪","lanche",20,4,1,1,"fit,marmita","8 fatia pão integral #P; 300 g peito de frango #A; 1 un cenoura #H; 3 csp requeijão #L; 1 un alface #H","Cozinhe e desfie o frango.|Misture com a cenoura ralada e o requeijão e acerte o sal.|Monte os sanduíches com folhas de alface."],
+["Wrap de frango","🌯","lanche",20,4,1,2,"fit","4 un tortilha #P; 400 g peito de frango #A; 1 un alface #H; 1 un tomate #H; 4 csp requeijão #L","Grelhe o frango temperado e corte em tiras.|Espalhe o requeijão nas tortilhas.|Recheie com frango, alface e tomate e enrole."],
+["Torta de atum de liquidificador","🥧","lanche",50,8,1,1,"forno","2 xic farinha de trigo #M; 3 un ovo #L; 1 xic leite #L; 0.5 xic óleo #M; 1 csp fermento em pó #M; 2 lata atum #M; 1 un tomate #H; 1 un cebola #H","Bata os ovos, o leite, o óleo e a farinha no liquidificador e junte o fermento.|Misture o atum com tomate e cebola picados.|Em forma untada, faça camadas de massa, recheio e massa.|Asse a 180 °C por 40 minutos."],
+["Bauru","🥪","lanche",15,2,1,2,"","2 un pão francês #P; 150 g rosbife #A; 100 g queijo muçarela #L; 1 un tomate #H; 1 un pepino em conserva #M","Derreta o queijo numa frigideira com um pouco de água.|Abra o pão e monte com rosbife, queijo derretido, tomate e pepino."],
+["Pastel caseiro","🥟","lanche",40,12,2,1,"fds,kids","500 g massa de pastel #M; 300 g carne moída #A; 200 g queijo muçarela #L; 1 l óleo #M; 1 un cebola #H","Refogue a carne com a cebola e tempere.|Recheie a massa com carne ou queijo e feche com um garfo.|Frite em óleo bem quente até dourar e escorra."],
+["Bolinho de arroz","🍙","lanche",30,4,1,1,"veg","2 xic arroz cozido #M; 1 un ovo #L; 3 csp farinha de trigo #M; 50 g queijo parmesão #L; ag cheiro-verde #H; 500 ml óleo #M","Misture o arroz com o ovo, a farinha, o queijo e o cheiro-verde.|Modele bolinhos com duas colheres.|Frite em óleo quente até dourar."],
+["Pipoca","🍿","lanche",10,3,1,1,"veg,kids","0.5 xic milho de pipoca #M; 2 csp óleo #M; ag sal #T","Aqueça o óleo com três grãos de milho na panela tampada.|Quando estourarem, junte o resto do milho.|Balance a panela até parar de estourar e salgue."],
+["Bruschetta de tomate","🍅","lanche",15,4,1,1,"veg","1 un baguete #P; 3 un tomate #H; 2 dente alho #H; ag manjericão #H; ag azeite #M","Corte a baguete em fatias e toste no forno.|Esfregue alho nas torradas.|Cubra com tomate picado, manjericão, sal e azeite."],
+["Batata recheada","🥔","lanche",60,4,1,1,"forno","4 un batata #H; 200 g requeijão #L; 200 g peito de frango #A; 100 g queijo muçarela #L","Cozinhe as batatas com casca até ficarem macias.|Corte uma tampa e retire um pouco do miolo.|Misture o miolo com frango desfiado e requeijão e recheie.|Cubra com queijo e gratine no forno."],
+["Brigadeiro","🍫","doce",20,25,1,1,"kids","1 lata leite condensado #M; 2 csp chocolate em pó #M; 1 csp manteiga #L; ag granulado #M","Leve o leite condensado, o chocolate e a manteiga ao fogo baixo.|Mexa até desgrudar do fundo da panela.|Espere esfriar, enrole e passe no granulado."],
+["Pudim de leite condensado","🍮","doce",90,10,2,1,"fds,forno","1 lata leite condensado #M; 2 xic leite #L; 3 un ovo #L; 1 xic açúcar #M","Derreta o açúcar na forma até virar caramelo e espalhe.|Bata o leite condensado, o leite e os ovos e despeje na forma.|Asse em banho-maria a 180 °C por 1 hora.|Gele por 4 horas antes de desenformar."],
+["Mousse de maracujá","🍹","doce",15,8,1,1,"","1 lata leite condensado #M; 200 ml creme de leite #L; 3 un maracujá #H","Bata no liquidificador o leite condensado, o creme de leite e a polpa coada dos maracujás.|Despeje em taças e leve à geladeira por 3 horas."],
+["Pavê de bolacha","🍰","doce",30,10,1,1,"fds","1 lata leite condensado #M; 500 ml leite #L; 2 un ovo #L; 2 csp amido de milho #M; 200 g bolacha maisena #M; 200 ml creme de leite #L; 3 csp chocolate em pó #M","Cozinhe o leite condensado, o leite, as gemas e o amido até engrossar.|Faça camadas de creme e bolachas molhadas no leite numa travessa.|Misture o creme de leite com o chocolate e cubra.|Gele por 4 horas."],
+["Bolo de chocolate","🍫","doce",50,12,1,1,"forno,kids","2 xic farinha de trigo #M; 1.5 xic açúcar #M; 1 xic chocolate em pó #M; 3 un ovo #L; 1 xic leite #L; 0.5 xic óleo #M; 1 csp fermento em pó #M","Bata os ovos, o leite, o óleo e o açúcar.|Misture a farinha e o chocolate e por último o fermento.|Asse a 180 °C por 40 minutos.|Cubra com brigadeiro mole se quiser."],
+["Arroz-doce","🍚","doce",40,8,1,1,"fds","1 xic arroz #M; 1 l leite #L; 1 lata leite condensado #M; ag canela #T; ag cravo #T","Cozinhe o arroz em 2 xícaras de água com cravo até secar.|Junte o leite e cozinhe em fogo baixo por 20 minutos.|Acrescente o leite condensado e mexa até ficar cremoso.|Sirva com canela."],
+["Canjica","🌽","doce",90,10,1,1,"","500 g milho de canjica #M; 1 l leite #L; 1 lata leite condensado #M; 100 g amendoim #M; 200 ml leite de coco #M","Deixe o milho de molho na véspera.|Cozinhe na pressão por 40 minutos.|Junte o leite, o leite condensado, o leite de coco e o amendoim e cozinhe até engrossar."],
+["Banana caramelizada","🍌","doce",15,4,1,1,"veg","4 un banana #H; 3 csp açúcar #M; ag canela #T","Derreta o açúcar na frigideira até caramelizar.|Junte as bananas cortadas ao meio e doure dos dois lados.|Sirva com canela, puro ou com sorvete."],
+["Salada de frutas","🍓","doce",15,6,1,1,"veg,fit","2 un banana #H; 1 un maçã #H; 1 un mamão papaia #H; 10 un morango #H; 2 un laranja #H","Pique todas as frutas.|Regue com o suco das laranjas e misture.|Sirva gelada."],
+["Torta de limão","🍋","doce",40,10,2,2,"fds","200 g bolacha maisena #M; 100 g manteiga #L; 1 lata leite condensado #M; 3 un limão #H; 200 ml creme de leite #L","Triture a bolacha, misture com a manteiga derretida e forre a forma.|Bata o leite condensado, o creme de leite e o suco dos limões.|Despeje sobre a base e rale casca de limão por cima.|Gele por 4 horas."],
+["Beijinho","🥥","doce",20,25,1,1,"kids","1 lata leite condensado #M; 100 g coco ralado #M; 1 csp manteiga #L","Cozinhe o leite condensado, metade do coco e a manteiga em fogo baixo.|Mexa até desgrudar da panela.|Espere esfriar, enrole e passe no resto do coco."],
+["Manjar de coco","🥥","doce",30,10,2,2,"fds","1 l leite #L; 200 ml leite de coco #M; 1 xic açúcar #M; 6 csp amido de milho #M; 100 g coco ralado #M; 200 g ameixa seca #M","Cozinhe o leite, o leite de coco, o açúcar, o amido e o coco mexendo até engrossar.|Despeje em forma de furo molhada e gele por 6 horas.|Faça uma calda com as ameixas, açúcar e água e sirva por cima."],
+["Brownie","🍫","doce",45,12,1,2,"forno","200 g chocolate meio amargo #M; 150 g manteiga #L; 1 xic açúcar #M; 3 un ovo #L; 0.75 xic farinha de trigo #M","Derreta o chocolate com a manteiga.|Bata os ovos com o açúcar e misture ao chocolate.|Junte a farinha sem bater muito.|Asse a 180 °C por 25 minutos; o meio deve ficar úmido."],
+["Sorvete de banana","🍌","doce",10,4,1,1,"veg,fit","4 un banana #H; 1 csp cacau em pó #M","Congele as bananas descascadas em rodelas.|Bata no processador até virar um creme.|Misture o cacau e sirva na hora."],
+["Gelatina com creme","🍮","doce",20,8,1,1,"kids","2 pct gelatina #M; 1 lata leite condensado #M; 200 ml creme de leite #L","Prepare as gelatinas como na embalagem e deixe firmar em cubos.|Bata o leite condensado com o creme de leite.|Misture os cubos ao creme e gele."],
+["Strogonoff de frango","🍗","prato",30,4,1,2,"arroz,marmita,kids","600 g peito de frango #A; 1 un cebola #H; 2 dente alho #H; 1 csp manteiga #L; 3 csp ketchup #M; 1 csp mostarda #M; 1 lata champignon #M; 200 ml creme de leite #L; ag batata palha #M","Corte o frango em cubos e tempere com sal.|Doure na manteiga e junte a cebola e o alho.|Acrescente o ketchup, a mostarda e o champignon e cozinhe 5 minutos.|Desligue, misture o creme de leite e sirva com batata palha."],
+["Strogonoff de carne","🥩","prato",35,4,2,3,"arroz","600 g alcatra #A; 1 un cebola #H; 2 dente alho #H; 1 csp manteiga #L; 3 csp ketchup #M; 1 csp mostarda #M; 1 lata champignon #M; 200 ml creme de leite #L; ag batata palha #M","Corte a carne em tiras finas e doure aos poucos em panela bem quente.|Refogue a cebola e o alho na manteiga e volte a carne.|Junte ketchup, mostarda e champignon e cozinhe 5 minutos.|Desligue, misture o creme de leite e sirva com batata palha."],
+["Frango assado com batatas","🍗","prato",70,4,1,2,"forno,fds","1 kg sobrecoxa de frango #A; 600 g batata #H; 4 dente alho #H; 1 un limão #H; ag páprica #T; ag azeite #M; ag sal #T","Tempere o frango com alho, limão, páprica e sal e deixe pegar gosto por 30 minutos.|Arrume numa assadeira com as batatas em pedaços e regue com azeite.|Cubra com papel-alumínio e asse a 200 °C por 30 minutos.|Retire o papel e asse mais 25 minutos até dourar."],
+["Frango grelhado","🍗","prato",20,2,1,1,"fit,arroz,feijao,marmita","400 g filé de peito de frango #A; 1 un limão #H; 2 dente alho #H; ag sal #T; ag azeite #M","Tempere os filés com alho, limão e sal.|Grelhe em frigideira bem quente com um fio de azeite, 4 minutos de cada lado."],
+["Frango xadrez","🥡","prato",30,4,2,2,"arroz","600 g peito de frango #A; 1 un pimentão verde #H; 1 un pimentão vermelho #H; 1 un cebola #H; 4 csp shoyu #M; 1 csp amido de milho #M; 50 g amendoim #M","Doure o frango em cubos em fogo alto.|Junte a cebola e os pimentões em quadrados e refogue rapidamente.|Dissolva o amido no shoyu com meia xícara de água e despeje.|Cozinhe até engrossar e finalize com amendoim."],
+["Frango ensopado com batata","🍲","prato",50,4,1,1,"arroz,feijao,marmita","800 g coxa e sobrecoxa #A; 3 un batata #H; 1 un cebola #H; 2 un tomate #H; 2 dente alho #H; ag colorau #T; ag cheiro-verde #H","Tempere o frango e doure na panela.|Junte cebola, alho, tomate e colorau e refogue.|Cubra com água e cozinhe 20 minutos.|Acrescente as batatas e cozinhe até ficarem macias. Finalize com cheiro-verde."],
+["Galinhada","🍛","prato",50,6,2,1,"marmita,fds","800 g sobrecoxa de frango #A; 2 xic arroz #M; 1 un cebola #H; 2 dente alho #H; 1 csc açafrão-da-terra #T; 1 un pimentão #H; ag cheiro-verde #H","Doure o frango em pedaços com cebola, alho e pimentão.|Junte o arroz e o açafrão e refogue.|Cubra com 4 xícaras de água quente, acerte o sal e cozinhe tampado até secar.|Finalize com cheiro-verde."],
+["Frango à parmegiana","🍗","prato",50,4,2,2,"arroz,forno","4 un filé de peito de frango #A; 2 un ovo #L; 1 xic farinha de rosca #M; 1 xic farinha de trigo #M; 400 g molho de tomate #M; 200 g queijo muçarela #L; 500 ml óleo #M","Tempere e bata os filés para afinar.|Empane na farinha de trigo, no ovo e na farinha de rosca e frite.|Arrume numa travessa, cubra com molho e queijo.|Gratine no forno a 200 °C por 15 minutos."],
+["Frango empanado","🍗","prato",30,4,1,1,"arroz,feijao,kids","600 g filé de peito de frango #A; 2 un ovo #L; 1 xic farinha de rosca #M; 1 xic farinha de trigo #M; 500 ml óleo #M","Tempere os filés com sal e alho.|Passe na farinha de trigo, no ovo batido e na farinha de rosca.|Frite em óleo quente até dourar e escorra."],
+["Sobrecoxa na airfryer","🍗","prato",30,4,1,1,"arroz,feijao","800 g sobrecoxa de frango #A; 1 un limão #H; 3 dente alho #H; ag páprica #T; ag sal #T","Tempere as sobrecoxas com alho, limão, páprica e sal.|Coloque na airfryer com a pele para cima.|Asse a 200 °C por 25 a 30 minutos, até dourar."],
+["Frango com batata-doce e brócolis","🍠","prato",40,4,1,1,"fit,marmita","600 g peito de frango #A; 800 g batata-doce #H; 1 un brócolis #H; ag azeite #M; ag sal #T","Asse a batata-doce em cubos com azeite a 200 °C por 30 minutos.|Grelhe o frango temperado em cubos.|Cozinhe o brócolis no vapor por 5 minutos.|Divida em potes para a semana."],
+["Frango com quiabo","🍗","prato",50,4,1,1,"arroz","800 g coxa e sobrecoxa #A; 300 g quiabo #H; 1 un cebola #H; 2 un tomate #H; 2 dente alho #H","Doure o quiabo em rodelas em fogo alto e reserve.|Doure o frango, junte cebola, alho e tomate.|Cubra com água e cozinhe 25 minutos.|Volte o quiabo e cozinhe mais 5 minutos."],
+["Frango ao curry","🍛","prato",35,4,2,2,"arroz","600 g peito de frango #A; 200 ml leite de coco #M; 1 csp curry #T; 1 un cebola #H; 2 dente alho #H","Refogue a cebola e o alho e junte o curry.|Acrescente o frango em cubos e doure.|Junte o leite de coco e cozinhe 10 minutos até encorpar."],
+["Fricassê de frango","🍗","prato",50,6,2,2,"arroz,forno","500 g peito de frango #A; 200 ml creme de leite #L; 200 g requeijão #L; 1 lata milho #M; 150 g queijo muçarela #L; ag batata palha #M; 1 un cebola #H","Cozinhe e desfie o frango e refogue com a cebola.|Bata o milho com o creme de leite e o requeijão e misture ao frango.|Coloque numa travessa, cubra com queijo e gratine.|Sirva com batata palha por cima."],
+["Torta de frango de liquidificador","🥧","prato",60,8,2,2,"forno,congela,marmita","2 xic farinha de trigo #M; 3 un ovo #L; 1 xic leite #L; 0.5 xic óleo #M; 1 csp fermento em pó #M; 500 g peito de frango #A; 1 lata milho #M; 1 un tomate #H; 1 un cebola #H","Cozinhe, desfie e refogue o frango com cebola, tomate e milho.|Bata ovos, leite, óleo e farinha e junte o fermento.|Faça camadas de massa, recheio e massa numa forma untada.|Asse a 180 °C por 40 minutos."],
+["Bife acebolado","🥩","prato",20,4,1,2,"arroz,feijao","600 g bife de contrafilé #A; 2 un cebola #H; 2 dente alho #H; ag sal #T; ag óleo #M","Tempere os bifes com sal e alho.|Frite em frigideira bem quente, poucos de cada vez.|Na mesma frigideira, doure a cebola em rodelas e cubra os bifes."],
+["Bife à milanesa","🥩","prato",30,4,1,2,"arroz,feijao,kids","600 g bife de coxão mole #A; 2 un ovo #L; 1 xic farinha de rosca #M; 1 xic farinha de trigo #M; 500 ml óleo #M","Tempere os bifes finos com sal e alho.|Passe na farinha de trigo, no ovo e na farinha de rosca.|Frite em óleo quente até dourar."],
+["Carne de panela","🥩","prato",90,6,2,2,"arroz,feijao,marmita,congela","1 kg acém #A; 2 un batata #H; 2 un cenoura #H; 1 un cebola #H; 3 dente alho #H; 2 un tomate #H; ag louro #T","Doure a carne em pedaços grandes na panela de pressão.|Junte cebola, alho, tomate e louro e refogue.|Cubra com água e cozinhe 40 minutos após pegar pressão.|Acrescente batata e cenoura e cozinhe mais 8 minutos."],
+["Picadinho de carne","🥘","prato",45,4,1,2,"arroz,feijao,marmita","600 g patinho #A; 2 un batata #H; 1 un cenoura #H; 1 un cebola #H; 2 dente alho #H; 2 un tomate #H","Doure a carne em cubos pequenos aos poucos.|Refogue cebola, alho e tomate e volte a carne.|Junte água e cozinhe 20 minutos.|Acrescente batata e cenoura em cubos e cozinhe até amaciar."],
+["Carne moída com batata","🥔","prato",30,4,1,1,"arroz,feijao,marmita","500 g carne moída #A; 3 un batata #H; 1 un cebola #H; 2 dente alho #H; 1 un tomate #H; ag cheiro-verde #H","Refogue a cebola e o alho e doure a carne moída.|Junte o tomate e as batatas em cubos pequenos.|Adicione meia xícara de água e cozinhe tampado até a batata amaciar.|Finalize com cheiro-verde."],
+["Escondidinho de carne moída","🥧","prato",60,6,2,2,"forno,marmita,congela","1 kg mandioca #H; 500 g carne moída #A; 1 un cebola #H; 2 dente alho #H; 2 csp manteiga #L; 200 ml leite #L; 100 g queijo muçarela #L","Cozinhe a mandioca e amasse com manteiga e leite até virar purê.|Refogue a carne com cebola e alho.|Monte numa travessa: carne embaixo e purê por cima.|Cubra com queijo e gratine a 200 °C por 20 minutos."],
+["Almôndegas ao sugo","🍝","prato",45,4,2,2,"marmita,congela","500 g carne moída #A; 1 un ovo #L; 3 csp farinha de rosca #M; 1 un cebola #H; 2 dente alho #H; 500 g molho de tomate #M","Misture a carne, o ovo, a farinha de rosca, metade da cebola e sal.|Modele bolinhas e doure na frigideira.|Refogue o resto da cebola e o alho, junte o molho e as almôndegas.|Cozinhe 15 minutos em fogo baixo. Sirva com arroz ou macarrão."],
+["Abobrinha recheada","🥒","prato",40,4,1,1,"fit,forno","2 un abobrinha #H; 300 g carne moída #A; 1 un tomate #H; 1 un cebola #H; 80 g queijo muçarela #L","Corte as abobrinhas ao meio no comprimento e retire o miolo.|Refogue a carne com cebola, tomate e o miolo picado.|Recheie as abobrinhas e cubra com queijo.|Asse a 200 °C por 25 minutos."],
+["Quibe assado","🥙","prato",60,8,2,2,"forno,congela","500 g trigo para quibe #M; 500 g carne moída #A; 1 un cebola #H; ag hortelã #H; 2 csp azeite #M","Deixe o trigo de molho por 30 minutos e esprema bem.|Misture com a carne, a cebola ralada, a hortelã e sal.|Espalhe numa assadeira untada, risque em losangos e regue com azeite.|Asse a 200 °C por 35 minutos."],
+["Feijoada","🍲","prato",180,8,3,3,"fds,congela","1 kg feijão preto #M; 300 g costelinha suína salgada #A; 300 g carne seca #A; 300 g paio #A; 200 g linguiça calabresa #A; 200 g bacon #A; 2 un cebola #H; 6 dente alho #H; ag louro #T","Dessalgue as carnes de molho na véspera, trocando a água.|Cozinhe o feijão com o louro e as carnes mais duras na pressão por 40 minutos.|Refogue bacon, cebola e alho, junte o paio e a calabresa.|Misture tudo e cozinhe em fogo baixo até encorpar. Sirva com arroz, couve, farofa e laranja."],
+["Feijão tropeiro","🫘","prato",40,6,2,2,"fds","300 g feijão carioca #M; 200 g bacon #A; 200 g linguiça calabresa #A; 4 un ovo #L; 1.5 xic farinha de mandioca #M; 1 maco couve #H; 1 un cebola #H","Cozinhe o feijão al dente e escorra.|Frite o bacon e a calabresa e refogue a cebola.|Junte os ovos mexidos, o feijão e a couve fatiada.|Acrescente a farinha aos poucos, mexendo até ficar soltinho."],
+["Baião de dois","🍛","prato",60,6,2,2,"marmita","2 xic arroz #M; 300 g feijão-de-corda #M; 200 g queijo coalho #L; 200 g bacon #A; 200 g linguiça calabresa #A; 1 un cebola #H; ag coentro #H","Cozinhe o feijão-de-corda até ficar macio e guarde o caldo.|Frite o bacon e a calabresa e refogue a cebola.|Junte o arroz, o feijão e 4 xícaras do caldo e cozinhe até secar.|Misture o queijo coalho em cubos e o coentro."],
+["Arroz carreteiro","🍛","prato",45,6,1,2,"marmita","2 xic arroz #M; 400 g carne seca #A; 1 un cebola #H; 2 dente alho #H; 1 un tomate #H; ag cheiro-verde #H","Dessalgue a carne seca, cozinhe e desfie.|Doure a carne com cebola e alho.|Junte o tomate e o arroz e refogue.|Cubra com 4 xícaras de água quente e cozinhe até secar."],
+["Arroz de forno","🍛","prato",40,6,1,1,"forno,marmita","3 xic arroz cozido #M; 300 g peito de frango #A; 1 lata milho #M; 1 lata ervilha #M; 200 g presunto #A; 200 g queijo muçarela #L; 200 ml creme de leite #L","Cozinhe e desfie o frango.|Misture o arroz, o frango, o milho, a ervilha, o presunto e o creme de leite.|Coloque numa travessa e cubra com queijo.|Asse a 200 °C por 20 minutos."],
+["Moqueca de peixe","🐟","prato",45,4,2,3,"arroz,fds","800 g posta de peixe #A; 1 un pimentão vermelho #H; 1 un pimentão amarelo #H; 2 un tomate #H; 1 un cebola #H; 200 ml leite de coco #M; 2 csp azeite de dendê #M; 1 un limão #H; ag coentro #H","Tempere o peixe com limão e sal.|Numa panela larga, faça camadas de cebola, tomate, pimentões e peixe.|Regue com leite de coco e dendê e cozinhe tampado por 20 minutos.|Finalize com coentro. Sirva com arroz e pirão."],
+["Peixe assado com legumes","🐟","prato",40,4,2,2,"fit,forno","800 g filé de tilápia #A; 3 un batata #H; 1 un tomate #H; 1 un cebola #H; 1 un limão #H; ag azeite #M","Tempere o peixe com limão e sal.|Forre a assadeira com batatas em rodelas finas.|Cubra com o peixe, tomate e cebola e regue com azeite.|Asse coberto a 200 °C por 25 minutos e mais 10 descoberto."],
+["Tilápia grelhada","🐟","prato",20,2,1,2,"fit,arroz","400 g filé de tilápia #A; 1 un limão #H; ag sal #T; ag azeite #M","Tempere os filés com limão e sal.|Grelhe em frigideira antiaderente com azeite, 3 minutos de cada lado."],
+["Peixe empanado","🐟","prato",30,4,1,2,"arroz,kids","600 g filé de merluza #A; 2 un ovo #L; 1 xic farinha de trigo #M; 1 xic farinha de rosca #M; 500 ml óleo #M; 1 un limão #H","Tempere o peixe com limão e sal.|Empane na farinha de trigo, no ovo e na farinha de rosca.|Frite até dourar e escorra."],
+["Salmão ao forno com brócolis","🐟","prato",25,2,1,3,"fit,forno","400 g filé de salmão #A; 1 un brócolis #H; 1 un limão #H; ag azeite #M; ag sal #T","Tempere o salmão com limão, sal e azeite.|Arrume na assadeira com o brócolis em floretes.|Asse a 200 °C por 15 a 18 minutos."],
+["Bobó de camarão","🦐","prato",60,6,3,3,"arroz,fds","800 g camarão limpo #A; 1 kg mandioca #H; 200 ml leite de coco #M; 2 csp azeite de dendê #M; 1 un cebola #H; 2 un tomate #H; 1 un pimentão #H; ag coentro #H","Cozinhe a mandioca e bata com parte do leite de coco até virar creme.|Refogue cebola, tomate e pimentão e junte o camarão por 3 minutos.|Misture o creme de mandioca, o resto do leite de coco e o dendê.|Finalize com coentro."],
+["Bacalhoada","🐟","prato",70,6,3,3,"forno,fds","800 g bacalhau dessalgado #A; 6 un batata #H; 2 un cebola #H; 1 un pimentão #H; 0.5 xic azeite #M; 4 un ovo #L; ag azeitona preta #M","Cozinhe as batatas em rodelas e os ovos.|Afervente o bacalhau e separe em lascas.|Numa travessa, faça camadas de batata, bacalhau, cebola e pimentão.|Regue com bastante azeite e asse a 200 °C por 25 minutos. Finalize com ovos e azeitonas."],
+["Costelinha de porco assada","🍖","prato",120,4,2,2,"forno,fds","1 kg costelinha suína #A; 1 un limão #H; 4 dente alho #H; 3 csp molho barbecue #M; ag sal #T","Tempere a costelinha com alho, limão e sal.|Asse coberta com papel-alumínio a 180 °C por 1h20.|Retire o papel, pincele o barbecue e asse mais 20 minutos a 220 °C."],
+["Lombo suíno assado","🍖","prato",90,6,2,2,"forno,fds","1 kg lombo suíno #A; 2 un laranja #H; 4 dente alho #H; ag alecrim #T; ag sal #T","Tempere o lombo com alho, suco de laranja, alecrim e sal e deixe de um dia para o outro.|Asse coberto a 200 °C por 50 minutos.|Descubra e asse mais 20 minutos regando com o caldo."],
+["Bisteca acebolada","🥩","prato",25,4,1,1,"arroz,feijao","4 un bisteca suína #A; 2 un cebola #H; 1 un limão #H; 2 dente alho #H","Tempere as bistecas com alho, limão e sal.|Frite em frigideira quente até dourar dos dois lados.|Doure a cebola em rodelas na mesma frigideira e cubra as bistecas."],
+["Linguiça acebolada","🌭","prato",20,4,1,1,"arroz,feijao","600 g linguiça toscana #A; 2 un cebola #H","Fure as linguiças e cozinhe na frigideira com um pouco de água até secar.|Doure em fogo médio e junte a cebola em rodelas no final."],
+["Maminha assada","🥩","prato",70,6,2,3,"forno,fds","1.2 kg maminha #A; 4 dente alho #H; ag sal grosso #T; ag azeite #M","Esfregue alho e sal grosso na peça.|Asse coberta a 200 °C por 40 minutos.|Descubra e asse mais 20 minutos para dourar. Descanse 10 minutos antes de fatiar."],
+["Carne de sol com mandioca","🥩","prato",60,4,2,3,"fds","800 g carne de sol #A; 1 kg mandioca #H; 2 un cebola #H; 3 csp manteiga de garrafa #L","Dessalgue a carne de sol por algumas horas.|Cozinhe a mandioca até ficar macia.|Corte a carne em cubos e frite na manteiga de garrafa com cebola.|Sirva com a mandioca regada com manteiga."],
+["Vaca atolada","🍲","prato",120,6,2,2,"fds,congela","1 kg costela bovina #A; 1 kg mandioca #H; 1 un cebola #H; 3 dente alho #H; 2 un tomate #H; ag cheiro-verde #H","Doure a costela na pressão e junte cebola, alho e tomate.|Cubra com água e cozinhe 50 minutos após pegar pressão.|Junte a mandioca em pedaços e cozinhe mais 15 minutos.|Finalize com cheiro-verde."],
+["Polenta cremosa com ragu","🌽","prato",50,4,2,1,"","1 xic fubá #M; 1 l água #M; 2 csp manteiga #L; 400 g carne moída #A; 500 g molho de tomate #M; 50 g queijo parmesão #L","Cozinhe a carne no molho de tomate por 20 minutos.|Dissolva o fubá na água fria e leve ao fogo mexendo por 20 minutos.|Finalize a polenta com manteiga e parmesão.|Sirva com o ragu por cima."],
+["Panqueca de carne","🥞","prato",50,4,2,2,"forno,congela","1 xic farinha de trigo #M; 1 xic leite #L; 1 un ovo #L; 400 g carne moída #A; 500 g molho de tomate #M; 100 g queijo muçarela #L; 1 un cebola #H","Bata farinha, leite e ovo e faça discos finos na frigideira.|Refogue a carne com cebola e um pouco de molho.|Recheie e enrole as panquecas.|Cubra com molho e queijo e gratine."],
+["Yakisoba","🥢","prato",40,4,2,2,"","500 g macarrão para yakisoba #M; 400 g alcatra #A; 1 un brócolis #H; 1 un cenoura #H; 0.25 un repolho #H; 1 un cebola #H; 6 csp shoyu #M; 1 csp amido de milho #M","Cozinhe o macarrão e escorra.|Doure a carne em tiras em fogo alto.|Junte os legumes e refogue rapidamente.|Acrescente o shoyu com o amido dissolvido em água e o macarrão e misture."],
+["Risoto de cogumelos","🍄","prato",40,4,2,3,"veg,fds","1.5 xic arroz arbóreo #M; 200 g cogumelo paris #H; 1 un cebola #H; 150 ml vinho branco #M; 1 l caldo de legumes #M; 50 g queijo parmesão #L; 2 csp manteiga #L","Refogue a cebola na manteiga, junte o arroz e o vinho.|Acrescente o caldo quente aos poucos, mexendo, por 18 minutos.|Junte os cogumelos salteados.|Desligue e finalize com parmesão e manteiga."],
+["Berinjela à parmegiana","🍆","prato",50,4,2,1,"veg,forno","2 un berinjela #H; 2 un ovo #L; 1 xic farinha de rosca #M; 500 g molho de tomate #M; 200 g queijo muçarela #L","Corte a berinjela em fatias e deixe 15 minutos com sal.|Empane no ovo e na farinha de rosca e asse ou frite.|Faça camadas de molho, berinjela e queijo.|Gratine a 200 °C por 20 minutos."],
+["Fritada de legumes","🍳","prato",35,4,1,1,"veg,fit,forno","6 un ovo #L; 1 un abobrinha #H; 1 un tomate #H; 1 un cebola #H; 100 g queijo muçarela #L","Refogue a abobrinha e a cebola.|Bata os ovos com sal e junte os legumes, o tomate e o queijo.|Asse em forma untada a 180 °C por 20 minutos."],
+["Ovos ao molho de tomate","🍳","prato",25,2,1,1,"veg,fit","4 un ovo #L; 500 g molho de tomate #M; 1 un cebola #H; 1 un pimentão #H; ag cheiro-verde #H","Refogue a cebola e o pimentão e junte o molho.|Faça covinhas no molho e quebre os ovos nelas.|Tampe e cozinhe até as claras firmarem.|Sirva com pão."],
+["Grão-de-bico ensopado","🫘","prato",40,4,1,1,"veg,fit,marmita","400 g grão-de-bico cozido #M; 2 un tomate #H; 1 un cebola #H; 2 dente alho #H; 1 un abobrinha #H; ag cominho #T","Refogue a cebola, o alho e o cominho.|Junte o tomate e a abobrinha em cubos.|Acrescente o grão-de-bico e meia xícara de água e cozinhe 15 minutos."],
+["Lasanha à bolonhesa","🍝","massa",70,6,2,2,"forno,fds,congela","500 g massa de lasanha #M; 500 g carne moída #A; 500 g molho de tomate #M; 300 g presunto #A; 400 g queijo muçarela #L; 1 un cebola #H; 2 dente alho #H","Refogue a carne com cebola e alho e junte o molho.|Faça camadas de molho, massa, presunto e queijo.|Termine com molho e queijo.|Asse coberto a 200 °C por 30 minutos e mais 10 descoberto."],
+["Macarrão à bolonhesa","🍝","massa",30,4,1,1,"kids,marmita","500 g espaguete #M; 400 g carne moída #A; 500 g molho de tomate #M; 1 un cebola #H; 2 dente alho #H; ag queijo parmesão #L","Refogue a carne com cebola e alho.|Junte o molho e cozinhe 15 minutos.|Cozinhe o macarrão al dente e misture.|Sirva com parmesão."],
+["Macarrão alho e óleo","🍝","massa",20,4,1,1,"veg","500 g espaguete #M; 6 dente alho #H; 0.5 xic azeite #M; ag salsinha #H","Cozinhe o macarrão al dente.|Doure o alho fatiado no azeite em fogo baixo.|Misture o macarrão, um pouco da água do cozimento e a salsinha."],
+["Macarrão com frango e creme","🍝","massa",30,4,1,1,"marmita","500 g penne #M; 400 g peito de frango #A; 200 ml creme de leite #L; 1 un cebola #H; 100 g queijo muçarela #L","Doure o frango em cubos com a cebola.|Junte o creme de leite e o queijo e mexa até derreter.|Misture o macarrão cozido."],
+["Espaguete à carbonara","🍝","massa",25,4,2,2,"","500 g espaguete #M; 200 g bacon #A; 3 un ovo #L; 80 g queijo parmesão #L; ag pimenta-do-reino #T","Frite o bacon em cubos.|Bata os ovos com o parmesão e pimenta.|Misture o macarrão quente ao bacon, desligue o fogo e junte os ovos mexendo rápido.|Use um pouco da água do cozimento para dar cremosidade."],
+["Nhoque de batata","🥔","massa",60,4,2,1,"veg,fds","1 kg batata #H; 1.5 xic farinha de trigo #M; 1 un ovo #L; 500 g molho de tomate #M; ag queijo parmesão #L","Cozinhe as batatas com casca, descasque e amasse ainda quentes.|Junte o ovo, sal e a farinha aos poucos até soltar das mãos.|Faça rolinhos, corte e cozinhe em água fervente até subirem.|Sirva com molho e parmesão."],
+["Macarrão de panela de pressão","🍝","massa",20,4,1,1,"kids","500 g macarrão parafuso #M; 300 g linguiça calabresa #A; 500 g molho de tomate #M; 1 un cebola #H; 100 g queijo muçarela #L","Refogue a calabresa com a cebola na panela de pressão.|Junte o macarrão cru, o molho e 3 xícaras de água.|Cozinhe 3 minutos após pegar pressão.|Misture o queijo e sirva."],
+["Macarrão com atum","🍝","massa",20,4,1,1,"","500 g espaguete #M; 2 lata atum #M; 500 g molho de tomate #M; 1 un cebola #H; ag azeitona #M","Refogue a cebola, junte o molho e o atum escorrido.|Cozinhe 5 minutos e acrescente as azeitonas.|Misture com o macarrão cozido."],
+["Rondelli de presunto e queijo","🍝","massa",50,6,2,2,"forno,fds","500 g massa de lasanha #M; 300 g presunto #A; 300 g queijo muçarela #L; 500 ml leite #L; 2 csp farinha de trigo #M; 2 csp manteiga #L","Faça um molho branco com manteiga, farinha e leite.|Recheie as folhas de massa com presunto e queijo e enrole.|Corte em rodelas e arrume numa travessa com molho.|Cubra com queijo e asse a 200 °C por 25 minutos."],
+["Arroz branco","🍚","acomp",25,4,1,1,"veg","2 xic arroz #M; 2 dente alho #H; 1 csp óleo #M; ag sal #T","Refogue o alho no óleo e junte o arroz.|Acrescente 4 xícaras de água quente e sal.|Cozinhe tampado em fogo baixo até secar, uns 15 minutos."],
+["Feijão carioca","🫘","acomp",60,6,1,1,"veg,congela","500 g feijão carioca #M; 3 dente alho #H; 1 un cebola #H; ag louro #T; ag sal #T","Deixe o feijão de molho por algumas horas e escorra.|Cozinhe com água e louro na pressão por 25 minutos.|Refogue alho e cebola, junte uma concha de feijão amassado e devolva à panela.|Cozinhe mais 10 minutos para engrossar."],
+["Feijão preto","🫘","acomp",60,6,1,1,"veg,congela","500 g feijão preto #M; 3 dente alho #H; 1 un cebola #H; ag louro #T; ag sal #T","Deixe o feijão de molho e escorra.|Cozinhe com água e louro na pressão por 30 minutos.|Refogue alho e cebola e junte ao feijão.|Cozinhe mais 10 minutos para engrossar."],
+["Arroz integral","🍚","acomp",45,4,1,1,"veg,fit","2 xic arroz integral #M; 1 dente alho #H; 1 csp azeite #M; ag sal #T","Refogue o alho e o arroz no azeite.|Junte 5 xícaras de água quente e sal.|Cozinhe tampado por 35 a 40 minutos."],
+["Farofa de bacon","🥓","acomp",15,6,1,1,"","250 g farinha de mandioca #M; 150 g bacon #A; 1 un cebola #H; 2 csp manteiga #L","Frite o bacon até dourar.|Junte a manteiga e a cebola e refogue.|Acrescente a farinha aos poucos, mexendo até tostar levemente."],
+["Purê de batata","🥔","acomp",30,4,1,1,"veg,kids","1 kg batata #H; 2 csp manteiga #L; 150 ml leite #L; ag sal #T","Cozinhe as batatas descascadas até ficarem bem macias.|Amasse ainda quentes.|Leve ao fogo com a manteiga e o leite e mexa até ficar cremoso."],
+["Batata frita","🍟","acomp",30,4,1,1,"veg,kids","800 g batata #H; 1 l óleo #M; ag sal #T","Corte as batatas em palitos e seque bem.|Frite em óleo morno por 5 minutos e escorra.|Frite de novo em óleo bem quente até dourar e salgue."],
+["Mandioca cozida na manteiga","🥔","acomp",40,4,1,1,"veg","1 kg mandioca #H; 2 csp manteiga #L; ag sal #T","Cozinhe a mandioca na pressão com sal por 15 minutos.|Escorra e retire o fio do meio.|Doure na manteiga."],
+["Legumes no vapor","🥦","acomp",15,4,1,1,"veg,fit","1 un brócolis #H; 2 un cenoura #H; 1 un abobrinha #H; ag azeite #M; ag sal #T","Corte os legumes em pedaços parecidos.|Cozinhe no vapor: cenoura por 8 minutos, brócolis e abobrinha por mais 5.|Tempere com sal e azeite."],
+["Couve refogada","🥬","acomp",10,4,1,1,"veg,fit","1 maco couve #H; 3 dente alho #H; 1 csp azeite #M","Corte a couve em tiras finas.|Doure o alho no azeite.|Refogue a couve por 2 minutos em fogo alto e salgue."],
+["Arroz à grega","🍚","acomp",30,6,1,1,"veg,fds","2 xic arroz #M; 1 un cenoura #H; 1 lata ervilha #M; 1 lata milho #M; 50 g uva-passa #M","Cozinhe o arroz com a cenoura em cubinhos.|Misture a ervilha, o milho e a uva-passa ainda quente."],
+["Vinagrete","🍅","acomp",10,6,1,1,"veg,fit","3 un tomate #H; 1 un cebola #H; 1 un pimentão #H; ag cheiro-verde #H; 3 csp vinagre #M; 3 csp azeite #M","Pique tudo em cubos pequenos.|Tempere com vinagre, azeite e sal.|Deixe descansar 10 minutos antes de servir."],
+["Batata-doce assada","🍠","acomp",40,4,1,1,"veg,fit,forno","800 g batata-doce #H; ag azeite #M; ag alecrim #T; ag sal #T","Corte a batata-doce em gomos.|Tempere com azeite, alecrim e sal.|Asse a 200 °C por 30 a 35 minutos, virando na metade."],
+["Abóbora refogada","🎃","acomp",30,4,1,1,"veg,fit","800 g abóbora cabotiá #H; 1 un cebola #H; 2 dente alho #H; ag cheiro-verde #H","Refogue a cebola e o alho.|Junte a abóbora em cubos e um pouco de água.|Cozinhe tampado até amaciar e finalize com cheiro-verde."],
+["Polenta frita","🌽","acomp",40,6,1,1,"veg","2 xic fubá #M; 1.5 l água #M; 500 ml óleo #M; ag sal #T","Cozinhe o fubá na água com sal mexendo por 20 minutos.|Espalhe numa travessa e deixe firmar na geladeira.|Corte em palitos e frite até dourar."],
+["Salada verde com tomate","🥗","salada",10,4,1,1,"veg,fit","1 un alface #H; 2 un tomate #H; 1 un cebola roxa #H; 1 un limão #H; ag azeite #M","Lave e seque bem as folhas.|Junte o tomate e a cebola fatiados.|Tempere na hora com limão, azeite e sal."],
+["Salpicão de frango","🥗","salada",40,6,2,2,"fds","500 g peito de frango #A; 1 un cenoura #H; 1 lata milho #M; 1 lata ervilha #M; 200 g maionese #M; 50 g uva-passa #M; ag batata palha #M","Cozinhe e desfie o frango.|Misture com cenoura ralada, milho, ervilha, uva-passa e maionese.|Gele e cubra com batata palha na hora de servir."],
+["Maionese de batata","🥔","salada",30,6,1,1,"veg,fds","1 kg batata #H; 2 un cenoura #H; 3 un ovo #L; 200 g maionese #M; ag cheiro-verde #H","Cozinhe a batata e a cenoura em cubos sem deixar desmanchar.|Cozinhe os ovos e pique.|Misture tudo com a maionese, sal e cheiro-verde. Sirva gelada."],
+["Salada de grão-de-bico","🥗","salada",15,4,1,1,"veg,fit,marmita","400 g grão-de-bico cozido #M; 2 un tomate #H; 1 un pepino #H; 1 un cebola roxa #H; 1 un limão #H; ag salsinha #H; ag azeite #M","Pique os legumes.|Misture com o grão-de-bico.|Tempere com limão, azeite, sal e salsinha."],
+["Salada caprese","🍅","salada",10,2,1,2,"veg","2 un tomate #H; 200 g muçarela de búfala #L; ag manjericão #H; ag azeite #M","Fatie o tomate e a muçarela.|Intercale num prato com folhas de manjericão.|Regue com azeite e uma pitada de sal."],
+["Salada de macarrão","🥗","salada",25,6,1,1,"marmita","300 g macarrão parafuso #M; 1 lata atum #M; 1 lata milho #M; 1 un cenoura #H; 150 g maionese #M","Cozinhe o macarrão e passe em água fria.|Misture com atum, milho, cenoura ralada e maionese.|Gele antes de servir."],
+["Tabule","🥗","salada",20,4,1,1,"veg,fit","1 xic trigo para quibe #M; 2 un tomate #H; 1 un pepino #H; 1 un cebola #H; ag hortelã #H; ag salsinha #H; 1 un limão #H; ag azeite #M","Hidrate o trigo em água por 30 minutos e esprema.|Pique bem o tomate, o pepino, a cebola e as ervas.|Misture com o trigo e tempere com limão, azeite e sal."],
+["Salada Caesar com frango","🥗","salada",20,2,1,2,"","1 un alface americana #H; 300 g peito de frango #A; 50 g queijo parmesão #L; 1 xic croutons #P; 3 csp maionese #M; 1 un limão #H","Grelhe o frango e corte em tiras.|Misture a maionese com limão e parmesão ralado para o molho.|Monte a alface com frango, croutons e molho."],
+["Salada de repolho com cenoura","🥗","salada",10,4,1,1,"veg,fit","0.5 un repolho #H; 2 un cenoura #H; 1 un limão #H; ag azeite #M","Fatie o repolho bem fino e rale a cenoura.|Tempere com limão, azeite e sal na hora de servir."],
+["Salada de feijão-fradinho","🫘","salada",15,4,1,1,"veg,fit,marmita","300 g feijão-fradinho #M; 1 un tomate #H; 1 un cebola #H; 1 un pimentão #H; ag cheiro-verde #H; ag azeite #M; 3 csp vinagre #M","Cozinhe o feijão até ficar macio sem desmanchar.|Misture com o vinagrete de tomate, cebola e pimentão.|Tempere com azeite, vinagre e sal."],
+["Canja de galinha","🍲","sopa",50,6,1,1,"congela","500 g peito de frango #A; 0.5 xic arroz #M; 2 un cenoura #H; 2 un batata #H; 1 un cebola #H; ag cheiro-verde #H","Cozinhe o frango em 2 litros de água com cebola e sal e desfie.|Volte o frango ao caldo com o arroz, a cenoura e a batata em cubos.|Cozinhe até o arroz ficar macio e finalize com cheiro-verde."],
+["Sopa de legumes com carne","🍲","sopa",60,6,1,1,"congela","300 g músculo #A; 2 un batata #H; 2 un cenoura #H; 1 un chuchu #H; 1 un abobrinha #H; 1 un cebola #H; 100 g macarrão argolinha #M","Cozinhe o músculo em cubos na pressão por 25 minutos.|Junte os legumes em cubos e cozinhe até amaciar.|Acrescente o macarrão e cozinhe mais 8 minutos."],
+["Caldo verde","🥬","sopa",40,6,1,1,"congela","1 kg batata #H; 1 maco couve #H; 200 g linguiça calabresa #A; 1 un cebola #H; 3 dente alho #H","Cozinhe a batata com cebola e alho e bata no liquidificador.|Doure a calabresa em rodelas.|Volte o creme ao fogo com a calabresa e a couve fatiada fininha por 3 minutos."],
+["Sopa de abóbora","🎃","sopa",40,4,1,1,"veg,fit,congela","1 kg abóbora cabotiá #H; 1 un cebola #H; 2 dente alho #H; ag gengibre #H","Refogue a cebola, o alho e o gengibre.|Junte a abóbora em cubos e cubra com água.|Cozinhe até amaciar e bata no liquidificador."],
+["Caldo de feijão","🫘","sopa",30,4,1,1,"congela","3 xic feijão cozido #M; 100 g bacon #A; 1 un cebola #H; 2 dente alho #H","Bata o feijão com o caldo no liquidificador.|Frite o bacon e refogue a cebola e o alho.|Junte o feijão batido e cozinhe 10 minutos."],
+["Sopa de ervilha","🍲","sopa",60,6,1,1,"congela","500 g ervilha seca #M; 200 g bacon #A; 1 un cebola #H; 2 un cenoura #H","Cozinhe a ervilha na pressão por 20 minutos.|Frite o bacon e refogue a cebola.|Junte a ervilha, a cenoura em cubos e cozinhe até engrossar."],
+["Creme de mandioquinha","🍲","sopa",40,4,1,2,"veg,congela","800 g mandioquinha #H; 1 un cebola #H; 1 l caldo de legumes #M; 2 csp manteiga #L","Refogue a cebola na manteiga.|Junte a mandioquinha e o caldo e cozinhe até amaciar.|Bata no liquidificador e acerte o sal."],
+["Sopa de lentilha","🍲","sopa",45,6,1,1,"veg,fit,congela","500 g lentilha #M; 2 un cenoura #H; 1 un cebola #H; 2 un tomate #H; ag cominho #T","Refogue a cebola, o tomate e o cominho.|Junte a lentilha, a cenoura e 2 litros de água.|Cozinhe por 30 minutos até a lentilha ficar macia."],
+["Caldo de mandioca com carne","🍲","sopa",60,6,1,1,"congela","1 kg mandioca #H; 400 g carne moída #A; 1 un cebola #H; 2 dente alho #H; ag cheiro-verde #H","Cozinhe a mandioca e bata com a água do cozimento.|Refogue a carne com cebola e alho.|Junte o creme de mandioca e cozinhe 10 minutos. Finalize com cheiro-verde."],
+["Sopa de macarrão com frango","🍲","sopa",35,4,1,1,"kids,congela","300 g peito de frango #A; 150 g macarrão letrinha #M; 1 un cenoura #H; 1 un batata #H; 1 un cebola #H","Cozinhe o frango em água com cebola e desfie.|Junte a cenoura e a batata em cubos ao caldo.|Acrescente o macarrão e cozinhe até ficar macio."],
+];
+</script>
+<script>
+(function(){
+"use strict";
+var KEY="cardapio-semana-v1";
+var CATS=[["cafe","Café da manhã","☕"],["prato","Pratos","🍛"],["massa","Massas","🍝"],["acomp","Acompanhamentos","🍚"],["salada","Saladas","🥗"],["sopa","Sopas","🍲"],["lanche","Lanches","🥪"],["doce","Sobremesas","🍮"]];
+var CATN={};CATS.forEach(function(c){CATN[c[0]]=c;});
+var TAGS=[["rapido","Rápidas"],["barato","Baratas"],["fit","Fit"],["marmita","Marmita"],["veg","Vegetarianas"],["forno","Forno"],["fds","Fim de semana"],["kids","Crianças"],["congela","Congela bem"]];
+var MEALS=[["cafe","Café"],["almoco","Almoço"],["lanche","Lanche"],["jantar","Jantar"]];
+var MEALN={};MEALS.forEach(function(m){MEALN[m[0]]=m[1];});
+var SECS=[["H","Hortifruti","🥬"],["A","Açougue e peixaria","🥩"],["L","Laticínios e ovos","🧀"],["P","Padaria","🍞"],["M","Mercearia","🛒"],["T","Temperos","🧂"],["X","Itens extras","📝"]];
+var SECN={};SECS.forEach(function(s){SECN[s[0]]=s;});
+var U={g:["g","g"],kg:["kg","kg"],ml:["ml","ml"],l:["l","l"],un:["",""],xic:["xícara","xícaras"],csp:["colher de sopa","colheres de sopa"],csc:["colher de chá","colheres de chá"],dente:["dente","dentes"],maco:["maço","maços"],lata:["lata","latas"],pct:["pacote","pacotes"],fatia:["fatia","fatias"],folha:["folha","folhas"]};
+var DIAS=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+var DIAC=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+var MES=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+var $=function(s,r){return (r||document).querySelector(s);};
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function norm(s){return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim();}
+function slug(s){return norm(s).replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");}
+var RE=/^(?:(\d+(?:[.,]\d+)?)\s+(g|kg|ml|l|un|xic|csp|csc|dente|maco|lata|pct|fatia|folha)\s+|ag\s+)(.+?)\s*#([HALMPT])$/;
+function parseIng(s){var m=String(s).trim().match(RE);if(!m)return {q:0,u:"ag",n:String(s).replace(/#\w$/,"").trim(),s:"M"};return {q:m[1]?Number(m[1].replace(",",".")):0,u:m[1]?m[2]:"ag",n:m[3],s:m[4]};}
+var R=RAW.map(function(r){
+  var tags=String(r[7]||"").split(",").filter(Boolean);
+  if(r[3]<=30)tags.push("rapido");if(r[6]===1)tags.push("barato");
+  return {id:slug(r[0]),nome:r[0],e:r[1],cat:r[2],tempo:r[3],porc:r[4],dif:r[5],custo:r[6],tags:tags,ing:String(r[8]).split(";").map(parseIng).filter(function(i){return i.n;}),passos:String(r[9]).split("|").filter(Boolean),k:norm(r[0]+" "+r[8])};
+});
+var BY={};R.forEach(function(r){BY[r.id]=r;});
+var ARROZ=BY["arroz-branco"],FEIJAO=BY["feijao-carioca"];
+
+/* ---------- estado ---------- */
+var S={pessoas:2,refeicoes:{cafe:true,almoco:true,lanche:false,jantar:true},arrozFeijao:true,salada:true,planos:{},fav:[],compras:{}};
+var ui={tab:"semana",wk:null,q:"",cat:"",tag:"",sheet:null,confirm:"",sugHoje:0};
+function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(d&&typeof d==="object"){Object.keys(S).forEach(function(k){if(d[k]!=null)S[k]=d[k];});}}catch(e){}}
+var saveT=0;function save(){clearTimeout(saveT);saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast("Não consegui salvar neste navegador.");}},150);}
+
+/* ---------- datas ---------- */
+function pad(n){return String(n).padStart(2,"0");}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function parse(s){var p=s.split("-").map(Number);return new Date(p[0],p[1]-1,p[2]);}
+function addD(s,n){var d=parse(s);d.setDate(d.getDate()+n);return iso(d);}
+function monday(d){d=new Date(d.getFullYear(),d.getMonth(),d.getDate());var w=(d.getDay()+6)%7;d.setDate(d.getDate()-w);return iso(d);}
+function hoje(){return iso(new Date());}
+function curWk(){return monday(new Date());}
+function dm(s){var d=parse(s);return d.getDate()+"/"+(d.getMonth()+1);}
+function wkLabel(wk){var a=parse(wk),b=parse(addD(wk,6));return a.getMonth()===b.getMonth()?(a.getDate()+" a "+b.getDate()+" "+MES[b.getMonth()]):(a.getDate()+" "+MES[a.getMonth()]+" a "+b.getDate()+" "+MES[b.getMonth()]);}
+function hash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+
+/* ---------- plano ---------- */
+function plano(wk,make){if(!S.planos[wk]){if(!make)return null;S.planos[wk]={};}return S.planos[wk];}
+function slot(wk,d,m,make){var p=plano(wk,make);if(!p)return {r:[],x:""};if(!p[d]){if(!make)return {r:[],x:""};p[d]={};}if(!p[d][m]){if(!make)return {r:[],x:""};p[d][m]={r:[],x:""};}return p[d][m];}
+function vazioSlot(s){return !s||(!(s.r&&s.r.length)&&!s.x);}
+function mealsOn(){return MEALS.filter(function(m){return S.refeicoes[m[0]];});}
+function addReceita(wk,d,m,id){var s=slot(wk,d,m,true);if(s.r.indexOf(id)<0)s.r.push(id);s.x="";save();}
+function usadosSemana(wk){var u={},p=plano(wk);if(!p)return u;Object.keys(p).forEach(function(d){Object.keys(p[d]).forEach(function(m){(p[d][m].r||[]).forEach(function(id){u[id]=(u[id]||0)+1;});});});return u;}
+function pick(list,evitar){var pool=list.filter(function(r){return !evitar[r.id];});if(!pool.length)pool=list;return pool[Math.floor(Math.random()*pool.length)];}
+function porCat(cats,filtro){return R.filter(function(r){return cats.indexOf(r.cat)>=0&&(!filtro||filtro(r));});}
+function sugerirSemana(wk){
+  var usados=usadosSemana(wk),antes=usadosSemana(addD(wk,-7)),evitar={},n=0;
+  Object.keys(usados).forEach(function(k){evitar[k]=1;});Object.keys(antes).forEach(function(k){evitar[k]=1;});
+  for(var d=0;d<7;d++){
+    mealsOn().forEach(function(mm){
+      var m=mm[0],s=slot(wk,d,m,false);if(!vazioSlot(s))return;
+      var fds=d>=5,r;
+      if(m==="cafe")r=pick(porCat(["cafe"],function(x){return fds||x.tempo<=20;}),evitar);
+      else if(m==="lanche")r=pick(porCat(["lanche","cafe"],function(x){return x.tempo<=30||fds;}),evitar);
+      else if(m==="almoco")r=pick(porCat(Math.random()<.22?["massa"]:["prato"],function(x){return fds||!x.tags.includes("fds");}),evitar);
+      else r=pick(porCat(Math.random()<.3?["sopa","lanche","massa"]:["prato"],function(x){return x.tempo<=45||fds;}),evitar);
+      if(!r)return;
+      evitar[r.id]=1;addReceita(wk,d,m,r.id);n++;
+      if(m==="almoco"||m==="jantar"){
+        if(S.arrozFeijao&&r.tags.includes("arroz")&&ARROZ)addReceita(wk,d,m,ARROZ.id);
+        if(S.arrozFeijao&&r.tags.includes("feijao")&&FEIJAO)addReceita(wk,d,m,FEIJAO.id);
+        if(S.salada&&m==="almoco"&&(r.cat==="prato")&&Math.random()<.5){var sl=pick(porCat(["salada"],function(x){return x.tags.includes("veg")||x.tags.includes("fit");}),evitar);if(sl){addReceita(wk,d,m,sl.id);}}
+      }
+    });
+  }
+  save();return n;}
+function repetirAnterior(wk){
+  var prev=plano(addD(wk,-7));if(!prev)return -1;var n=0;
+  for(var d=0;d<7;d++)MEALS.forEach(function(mm){var m=mm[0],ps=prev[d]&&prev[d][m];if(vazioSlot(ps))return;var s=slot(wk,d,m,false);if(!vazioSlot(s))return;var t=slot(wk,d,m,true);t.r=ps.r.slice();t.x=ps.x||"";n++;});
+  save();return n;}
+
+/* ---------- quantidades ---------- */
+var nf=new Intl.NumberFormat("pt-BR",{maximumFractionDigits:1});
+function frac(q){var i=Math.floor(q),f=Math.round((q-i)*4)/4;if(f===1){i++;f=0;}var fs=f===.25?"¼":f===.5?"½":f===.75?"¾":"";return (i?String(i):"")+(fs?(i?" ":"")+fs:"")||"0";}
+function fmtQ(q,u,compra){
+  if(u==="ag")return "a gosto";
+  if(u==="g"||u==="kg"){var g=u==="kg"?q*1000:q;g=g>=200?Math.round(g/50)*50:Math.max(10,Math.round(g/10)*10);return g>=1000?nf.format(g/1000)+" kg":g+" g";}
+  if(u==="ml"||u==="l"){var ml=u==="l"?q*1000:q;ml=ml>=200?Math.round(ml/50)*50:Math.max(10,Math.round(ml/10)*10);return ml>=1000?nf.format(ml/1000)+" l":ml+" ml";}
+  var v;
+  if(compra&&["un","lata","pct","maco","dente","fatia","folha"].indexOf(u)>=0)v=Math.max(1,Math.ceil(q-0.01));
+  else if(u==="dente"||u==="fatia"||u==="folha")v=Math.max(1,Math.round(q));
+  else v=Math.max(.25,Math.round(q*4)/4);
+  var w=U[u]||["",""],txt=frac(v);
+  return w[0]?(txt+" "+(v>1?w[1]:w[0])):txt;}
+function fator(r,pessoas){var f=pessoas/r.porc;return r.porc>=8?Math.max(1,f):f;}
+
+/* ---------- compras ---------- */
+function listaCompras(wk){
+  var p=plano(wk),itens={},ordem=[];
+  if(!p)return [];
+  var seq=[];for(var d=0;d<7;d++)MEALS.forEach(function(mm){if(S.refeicoes[mm[0]])seq.push([d,mm[0]]);});
+  var extra={};
+  seq.forEach(function(dm,i){var s=p[dm[0]]&&p[dm[0]][dm[1]];if(s&&s.x==="sobra"){for(var j=i-1;j>=0;j--){var ps=p[seq[j][0]]&&p[seq[j][0]][seq[j][1]];if(ps&&ps.r&&ps.r.length){var k=seq[j][0]+"|"+seq[j][1];extra[k]=(extra[k]||0)+1;break;}}}});
+  seq.forEach(function(dm){
+    var s=p[dm[0]]&&p[dm[0]][dm[1]];if(!s||!s.r)return;var mult=1+(extra[dm[0]+"|"+dm[1]]||0);
+    s.r.forEach(function(id){var r=BY[id];if(!r)return;var f=fator(r,S.pessoas)*mult;
+      r.ing.forEach(function(g){
+        var fam=g.u==="kg"?"g":g.u==="l"?"ml":g.u,q=g.u==="kg"||g.u==="l"?g.q*1000:g.q;
+        var key=norm(g.n)+"|"+(g.u==="ag"?"ag":fam);
+        var keyQ=norm(g.n)+"|"+fam;
+        if(g.u==="ag"){var qk=Object.keys(itens).filter(function(k){return k.split("|")[0]===norm(g.n)&&itens[k].u!=="ag";})[0];if(qk){add(itens[qk],r);return;}}
+        else{var ak=norm(g.n)+"|ag";if(itens[ak]){itens[keyQ]=itens[ak];delete itens[ak];itens[keyQ].u=fam;itens[keyQ].q=0;itens[keyQ].key=keyQ;}}
+        if(!itens[key]){itens[key]={key:key,n:g.n,u:g.u==="ag"?"ag":fam,q:0,s:g.s,src:[]};ordem.push(key);}
+        itens[key].q+=q*f;add(itens[key],r);
+      });});
+  });
+  function add(it,r){if(it.src.indexOf(r.nome)<0)it.src.push(r.nome);}
+  var out={};
+  Object.keys(itens).forEach(function(k){var it=itens[k],nk=norm(it.n);
+    if(!out[nk])out[nk]={key:nk,n:it.n,s:it.s,parts:[],src:[]};
+    if(it.u!=="ag")out[nk].parts.push({q:it.q,u:it.u});
+    it.src.forEach(function(s){if(out[nk].src.indexOf(s)<0)out[nk].src.push(s);});});
+  return Object.keys(out).map(function(k){return out[k];});}
+function qtdTxt(i){return i.parts.map(function(p){return fmtQ(p.q,p.u,true);}).join(" + ");}
+function comp(wk){if(!S.compras[wk])S.compras[wk]={ok:{},extras:[]};return S.compras[wk];}
+
+/* ---------- desenho ---------- */
+function dishHTML(wk,d,m,id){var r=BY[id];if(!r)return "";return '<span class="dish"><button class="dn" data-open="'+id+'"><span class="e">'+r.e+'</span><span class="n">'+esc(r.nome)+'</span></button><button class="x" data-rm="'+wk+'|'+d+'|'+m+'|'+id+'" aria-label="Tirar '+esc(r.nome)+'">×</button></span>';}
+function vSemana(){
+  var wk=ui.wk,td=hoje(),h='';
+  h+='<div class="row"><h1 class="h1">Cardápio<small>'+(wk===curWk()?'Esta semana':wk<curWk()?'Semana passada':'Próxima semana')+' · '+S.pessoas+(S.pessoas===1?' pessoa':' pessoas')+'</small></h1>'+
+     '<div class="weeknav"><button data-wk="-1" aria-label="Semana anterior">‹</button><b>'+wkLabel(wk)+'</b><button data-wk="1" aria-label="Próxima semana">›</button></div></div>';
+  if(wk===curWk()){
+    var usados=usadosSemana(wk),pool=R.filter(function(r){return (r.cat==="prato"||r.cat==="massa")&&!usados[r.id];});
+    if(pool.length){var r=pool[(hash(td)+ui.sugHoje*31)%pool.length];
+      h+='<section class="banner"><div><h2>Que tal '+esc(r.nome.toLowerCase())+' hoje?</h2><p>'+r.tempo+' min · '+(r.dif===1?'fácil':r.dif===2?'médio':'trabalhoso')+'</p><div class="btns"><button class="btn dark" data-act="hoje" data-id="'+r.id+'">Bora!</button><button class="btn line" data-act="outrahoje" style="min-height:46px">Outra</button></div></div><button class="big" data-open="'+r.id+'" style="border:0;background:none;padding:0" aria-label="Ver receita de '+esc(r.nome)+'">'+r.e+'</button></section>';}
+  }
+  h+='<div class="btns"><button class="btn green" data-act="sugerir"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>Sugerir a semana</button>'+
+     '<button class="btn" data-act="repetir">Repetir a anterior</button>'+
+     '<button class="btn line danger" data-act="limpar">'+(ui.confirm==="limpar"?'Toque de novo para limpar':'Limpar')+'</button></div>';
+  for(var d=0;d<7;d++){
+    var dia=addD(wk,d),cls=dia===td?' today':(dia<td?' past':'');
+    h+='<section class="day'+cls+'"><div class="day-h"><b>'+DIAS[d]+'</b><span>'+dm(dia)+'</span>'+(dia===td?'<span class="pill">Hoje</span>':'')+'</div>';
+    mealsOn().forEach(function(mm){
+      var m=mm[0],s=slot(wk,d,m,false),inner='';
+      (s.r||[]).forEach(function(id){inner+=dishHTML(wk,d,m,id);});
+      if(s.x)inner+='<span class="dish tag"><span class="n">'+(s.x==="sobra"?'♻️ Sobras':'🍽️ Comer fora')+'</span><button class="x" data-rmx="'+wk+'|'+d+'|'+m+'" aria-label="Tirar">×</button></span>';
+      inner+=vazioSlot(s)?'<button class="add wide" data-pick="'+d+'|'+m+'">+ Escolher</button>':'<button class="add" data-pick="'+d+'|'+m+'" aria-label="Adicionar no '+MEALN[m]+' de '+DIAS[d]+'">+</button>';
+      h+='<div class="meal"><span>'+MEALN[m]+'</span><div class="slot">'+inner+'</div></div>';
+    });
+    h+='</section>';
+  }
+  h+='<p class="note">"Sugerir a semana" só preenche o que está vazio. Marque "Sobras" para a refeição anterior entrar em dobro na lista de compras.</p>';
+  return h;}
+function rcHTML(r){var fav=S.fav.indexOf(r.id)>=0;
+  return '<div class="rc" style="cursor:pointer" data-open="'+r.id+'" role="button" tabindex="0"><span class="plate">'+r.e+'</span><b>'+esc(r.nome)+'</b><small>'+r.tempo+' min · '+r.porc+(r.porc===1?' porção':' porções')+'</small>'+
+    '<button class="heart'+(fav?' on':'')+'" data-fav="'+r.id+'" aria-label="'+(fav?'Tirar dos favoritos':'Favoritar')+'" aria-pressed="'+fav+'"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9-8.6C1.6 8.3 3.6 5 7 5c2 0 3.3 1.1 5 3 1.7-1.9 3-3 5-3 3.4 0 5.4 3.3 4 6.4C19 15.6 12 20 12 20z"/></svg></button></div>';}
+function filtrarR(){
+  var q=norm(ui.q),ws=q?q.split(/\s+/):[];
+  return R.filter(function(r){
+    if(ui.cat==="fav"){if(S.fav.indexOf(r.id)<0)return false;}else if(ui.cat&&r.cat!==ui.cat)return false;
+    if(ui.tag&&r.tags.indexOf(ui.tag)<0)return false;
+    for(var i=0;i<ws.length;i++)if(r.k.indexOf(ws[i])<0)return false;return true;});}
+function vReceitas(){
+  var h='<h1 class="h1">Descobrir<small>'+R.length+' receitas do dia a dia</small></h1>';
+  h+='<div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Busque por prato ou ingrediente" autocomplete="off" aria-label="Buscar receita" value="'+esc(ui.q)+'"></div>';
+  h+='<div class="cats">'+[["","Todas","🍽️",R.length],["fav","Favoritas","❤️",S.fav.length]].concat(CATS.map(function(c){return [c[0],c[1],c[2],R.filter(function(r){return r.cat===c[0];}).length];})).map(function(c){
+    return '<button class="cat" data-cat="'+c[0]+'" aria-pressed="'+(ui.cat===c[0])+'"><span class="e">'+c[2]+'</span><b>'+c[1]+'</b><small>'+c[3]+'</small></button>';}).join("")+'</div>';
+  h+='<div class="chips">'+TAGS.map(function(t){return '<button class="chip" data-tag="'+t[0]+'" aria-pressed="'+(ui.tag===t[0])+'">'+t[1]+'</button>';}).join("")+'</div>';
+  h+='<div id="rres"></div>';
+  return h;}
+function drawRres(){var el=$("#rres");if(!el)return;var r=filtrarR();
+  el.innerHTML=r.length?'<div class="grid">'+r.map(rcHTML).join("")+'</div>':(ui.cat==="fav"&&!ui.q&&!ui.tag?'<div class="empty"><b>Nenhuma favorita ainda</b>Toque no coração das receitas que vocês gostam.</div>':'<div class="empty"><b>Nada encontrado</b>Tente outra palavra ou tire um filtro.</div>');}
+function vCompras(){
+  var wk=ui.wk,itens=listaCompras(wk),c=comp(wk),h='';
+  h+='<div class="row"><h1 class="h1">Compras<small>Para o cardápio de '+wkLabel(wk)+'</small></h1><div class="weeknav"><button data-wk="-1" aria-label="Semana anterior">‹</button><b>'+wkLabel(wk)+'</b><button data-wk="1" aria-label="Próxima semana">›</button></div></div>';
+  var tot=itens.length+c.extras.length,ok=itens.filter(function(i){return c.ok[i.key];}).length+c.extras.filter(function(e){return e.ok;}).length;
+  h+='<div class="sum"><div><b>'+tot+'</b><span>ITENS</span></div><div><b>'+ok+'</b><span>NO CARRINHO</span></div><div><b>'+(tot-ok)+'</b><span>FALTAM</span></div></div>';
+  h+='<div class="btns"><button class="btn green" data-act="copiar"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></svg>Copiar lista</button>'+(ok?'<button class="btn" data-act="desmarcar">Desmarcar tudo</button>':'')+'</div>';
+  h+='<div class="addline"><input id="extra" placeholder="Adicionar item (ex.: papel-toalha)" autocomplete="off" aria-label="Novo item da lista"><button class="btn green" data-act="extra" aria-label="Adicionar item">+</button></div>';
+  if(!itens.length&&!c.extras.length)return h+'<div class="empty"><b>A lista está vazia</b>Monte o cardápio da semana e os ingredientes aparecem aqui, já somados.</div>';
+  SECS.forEach(function(sc){
+    var arr=sc[0]==="X"?[]:itens.filter(function(i){return i.s===sc[0];}).sort(function(a,b){return a.n.localeCompare(b.n,"pt-BR");});
+    var ex=sc[0]==="X"?c.extras:[];
+    if(!arr.length&&!ex.length)return;
+    h+='<section class="group"><div class="group-h"><span class="e">'+sc[2]+'</span>'+sc[1]+'<small>'+(arr.length+ex.length)+'</small></div>';
+    arr.forEach(function(i){var on=!!c.ok[i.key];
+      h+='<button class="item'+(on?' ok':'')+'" data-ck="'+esc(i.key)+'" aria-pressed="'+on+'"><span class="ck">✓</span><span><span class="t">'+(i.parts.length?'<b>'+qtdTxt(i)+'</b>':'')+esc(i.n)+(!i.parts.length?' <span style="color:var(--ink-3);font-weight:400">(a gosto)</span>':'')+'</span><small>'+esc(i.src.join(", "))+'</small></span></button>';});
+    ex.forEach(function(e,ix){h+='<button class="item'+(e.ok?' ok':'')+'" data-ckx="'+ix+'" aria-pressed="'+!!e.ok+'"><span class="ck">✓</span><span><span class="t">'+esc(e.t)+'</span><small>Item seu · <span data-delx="'+ix+'" style="text-decoration:underline">apagar</span></small></span></button>';});
+    h+='</section>';});
+  h+='<p class="note">Quantidades para '+S.pessoas+(S.pessoas===1?' pessoa':' pessoas')+', arredondadas para cima no que se compra por unidade. Temperos e itens "a gosto" aparecem sem quantidade.</p>';
+  return h;}
+function vAjustes(){
+  var h='<h1 class="h1">Ajustes<small>Tudo fica salvo neste celular</small></h1>';
+  h+='<div class="card"><div class="set"><span>Pessoas em casa<small>As receitas e a lista se ajustam</small></span><div class="step"><button data-pes="-1" aria-label="Menos uma pessoa">−</button><b>'+S.pessoas+'</b><button data-pes="1" aria-label="Mais uma pessoa">+</button></div></div></div>';
+  h+='<div class="sec"><span class="sec-t">Refeições no cardápio</span><div class="card">'+MEALS.map(function(m){return '<div class="set"><span>'+m[1]+'</span><button class="tog" role="switch" data-ref="'+m[0]+'" aria-checked="'+!!S.refeicoes[m[0]]+'" aria-label="'+m[1]+'"></button></div>';}).join("")+'</div></div>';
+  h+='<div class="sec"><span class="sec-t">Sugestões automáticas</span><div class="card">'+
+    '<div class="set"><span>Arroz e feijão junto<small>Nos pratos que costumam ir com eles</small></span><button class="tog" role="switch" data-opt="arrozFeijao" aria-checked="'+S.arrozFeijao+'" aria-label="Arroz e feijão junto"></button></div>'+
+    '<div class="set"><span>Salada no almoço<small>Em cerca de metade dos dias</small></span><button class="tog" role="switch" data-opt="salada" aria-checked="'+S.salada+'" aria-label="Salada no almoço"></button></div></div></div>';
+  h+='<div class="sec"><span class="sec-t">Cópia de segurança</span><p class="note" style="margin:0">Os dados ficam só neste navegador. Baixe uma cópia de vez em quando ou para passar para outro celular.</p><div class="btns"><button class="btn" data-act="backup">Baixar cópia</button><button class="btn" data-act="restaurar">Restaurar cópia</button><input type="file" id="arq" accept="application/json,.json" hidden></div></div>';
+  h+='<div class="sec"><button class="btn line danger" data-act="apagar">'+(ui.confirm==="apagar"?'Toque de novo para apagar tudo':'Apagar todos os dados')+'</button></div>';
+  return h;}
+
+/* ---------- folhas ---------- */
+function bitsFor(r){var map={A:"🥩",H:"🥬",L:"🧀",M:"🌾",P:"🍞",T:"🧂"},seen={},out=[];r.ing.forEach(function(i){if(!seen[i.s]&&map[i.s]){seen[i.s]=1;out.push(map[i.s]);}});return out.slice(0,4);}
+function receitaHTML(r){
+  var sh=ui.sheet,porc=sh.porc||S.pessoas,f=porc/r.porc,fav=S.fav.indexOf(r.id)>=0;
+  var pos=[["8%","12%"],["78%","4%"],["86%","62%"],["0%","70%"]];
+  var h='<div class="grab"></div><div class="sh"><button class="ibtn" data-close aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2>'+esc(CATN[r.cat][1])+'</h2><span style="width:40px"></span></div>';
+  h+='<div class="hero"><div class="bigplate">'+r.e+bitsFor(r).map(function(b,i){return '<i style="left:'+pos[i][0]+';top:'+pos[i][1]+'">'+b+'</i>';}).join("")+'</div><h3>'+esc(r.nome)+'</h3>'+
+     '<div class="facts"><span>Preparo · <b>'+r.tempo+' min</b></span><span>'+(r.dif===1?'Fácil':r.dif===2?'Médio':'Trabalhoso')+'</span><span>'+["","$","$$","$$$"][r.custo]+'</span>'+(r.tags.indexOf("veg")>=0?'<span>Vegetariana</span>':'')+(r.tags.indexOf("congela")>=0?'<span>Congela bem</span>':'')+'</div></div>';
+  h+='<div class="row"><span class="sec-t">Ingredientes</span><div class="step"><button data-porc="-1" aria-label="Menos porções">−</button><b>'+porc+'</b><button data-porc="1" aria-label="Mais porções">+</button><span class="note">'+(porc===1?'porção':'porções')+'</span></div></div>';
+  h+='<div class="ing">'+r.ing.map(function(i){return '<div><b>'+(i.u==="ag"?'a gosto':fmtQ(i.q*f,i.u,false))+'</b><span>'+esc(i.n)+'</span></div>';}).join("")+'</div>';
+  h+='<div class="sec"><span class="sec-t">Modo de preparo</span><ol class="steps">'+r.passos.map(function(p){return '<li><span>'+esc(p)+'</span></li>';}).join("")+'</ol></div>';
+  if(sh.add){
+    var wk=ui.wk;
+    h+='<div class="pick" id="pick"><span class="sec-t">Quando?</span><div class="chips">'+[0,1,2,3,4,5,6].map(function(d){return '<button class="chip" data-pd="'+d+'" aria-pressed="'+(sh.d===d)+'">'+DIAC[d]+' '+dm(addD(wk,d))+'</button>';}).join("")+'</div>'+
+       '<div class="chips">'+mealsOn().map(function(m){return '<button class="chip" data-pm="'+m[0]+'" aria-pressed="'+(sh.m===m[0])+'">'+m[1]+'</button>';}).join("")+'</div>'+
+       '<p class="note" style="margin:0">Semana de '+wkLabel(wk)+'.</p></div>';
+  }
+  h+='<div class="foot"><button class="btn green" data-act="'+(sh.add?'confirmar':'pornocardapio')+'">'+(sh.add?'Adicionar em '+DIAC[sh.d]+' · '+MEALN[sh.m]:'Pôr no cardápio')+'</button><button class="heart'+(fav?' on':'')+'" data-fav="'+r.id+'" aria-label="'+(fav?'Tirar dos favoritos':'Favoritar')+'" aria-pressed="'+fav+'"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9-8.6C1.6 8.3 3.6 5 7 5c2 0 3.3 1.1 5 3 1.7-1.9 3-3 5-3 3.4 0 5.4 3.3 4 6.4C19 15.6 12 20 12 20z"/></svg></button></div>';
+  return h;}
+function pickerHTML(){
+  var sh=ui.sheet,s=slot(ui.wk,sh.d,sh.m,false),q=norm(sh.q||""),ws=q?q.split(/\s+/):[];
+  var def={cafe:["cafe"],lanche:["lanche","cafe","doce"],almoco:["prato","massa","acomp","salada","sopa"],jantar:["prato","massa","sopa","lanche","acomp","salada"]}[sh.m];
+  var cats=sh.cat?[sh.cat]:def;
+  var lista=R.filter(function(r){if(cats.indexOf(r.cat)<0)return false;for(var i=0;i<ws.length;i++)if(r.k.indexOf(ws[i])<0)return false;return true;});
+  if(!q)lista.sort(function(a,b){var fa=S.fav.indexOf(a.id)>=0?0:1,fb=S.fav.indexOf(b.id)>=0?0:1;return (fa-fb)||(cats.indexOf(a.cat)-cats.indexOf(b.cat))||a.nome.localeCompare(b.nome,"pt-BR");});
+  var h='<div class="grab"></div><div class="sh"><button class="ibtn" data-close aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button><h2>'+MEALN[sh.m]+' de '+DIAS[sh.d].toLowerCase()+'</h2><span style="width:40px"></span></div>';
+  h+='<div class="btns"><button class="btn'+(s.x==="sobra"?' soft':'')+'" data-x="sobra">♻️ Sobras</button><button class="btn'+(s.x==="fora"?' soft':'')+'" data-x="fora">🍽️ Comer fora</button></div>';
+  h+='<div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="pq" type="search" placeholder="Buscar receita" autocomplete="off" aria-label="Buscar receita" value="'+esc(sh.q||"")+'"></div>';
+  h+='<div class="chips"><button class="chip" data-pc="" aria-pressed="'+!sh.cat+'">Sugeridas</button>'+CATS.map(function(c){return '<button class="chip" data-pc="'+c[0]+'" aria-pressed="'+(sh.cat===c[0])+'">'+c[1]+'</button>';}).join("")+'</div>';
+  h+='<div id="plist">'+plistHTML(lista,s)+'</div>';
+  h+='<div class="foot"><button class="btn green" data-close>Pronto'+(s.r&&s.r.length?' · '+s.r.length+(s.r.length===1?' prato':' pratos'):'')+'</button></div>';
+  return h;}
+function plistHTML(lista,s){if(!lista.length)return '<div class="empty"><b>Nada encontrado</b>Tente outra palavra.</div>';
+  return '<div class="plist">'+lista.map(function(r){var on=(s.r||[]).indexOf(r.id)>=0;return '<button class="prow'+(on?' on':'')+'" data-tg="'+r.id+'" aria-pressed="'+on+'"><span class="e">'+r.e+'</span><span><b>'+esc(r.nome)+(S.fav.indexOf(r.id)>=0?' <span style="color:var(--heart)">♥</span>':'')+'</b><small>'+esc(CATN[r.cat][1])+' · '+r.tempo+' min</small></span><span class="ck">✓</span></button>';}).join("")+'</div>';}
+function openSheet(o){ui.sheet=o;drawSheet(true);}
+function closeSheet(){ui.sheet=null;$("#sheet").hidden=true;document.body.style.overflow="";render();}
+function drawSheet(reset){
+  var p=$("#panel"),top=p.scrollTop,sh=ui.sheet;if(!sh)return closeSheet();
+  p.innerHTML=sh.type==="receita"?receitaHTML(BY[sh.id]):pickerHTML();
+  var el=$("#sheet");if(el.hidden){el.hidden=false;document.body.style.overflow="hidden";}
+  p.scrollTop=reset?0:top;}
+
+/* ---------- geral ---------- */
+var raf=0;function render(){if(raf)return;raf=requestAnimationFrame(function(){raf=0;draw();});}
+function draw(){
+  var main=$("#main"),act=document.activeElement,aid=act&&act.id&&main.contains(act)?act.id:null;
+  document.querySelectorAll(".tab").forEach(function(b){if(b.getAttribute("data-go")===ui.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
+  main.innerHTML='<div class="view">'+(ui.tab==="receitas"?vReceitas():ui.tab==="compras"?vCompras():ui.tab==="ajustes"?vAjustes():vSemana())+'</div>';
+  if(ui.tab==="receitas")drawRres();
+  if(aid){var e=document.getElementById(aid);if(e){e.focus({preventScroll:true});try{var v=e.value.length;e.setSelectionRange(v,v);}catch(x){}}}
+}
+function go(t){if(["semana","receitas","compras","ajustes"].indexOf(t)<0)t="semana";ui.confirm="";if(ui.tab!==t){ui.tab=t;window.scrollTo(0,0);}render();if(location.hash.slice(1)!==t){try{history.replaceState(null,"","#"+t);}catch(e){}}}
+var tt=0;function toast(m){var t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(function(){t.hidden=true;},2600);}
+var ct=0;function pedirConfirma(k){ui.confirm=k;clearTimeout(ct);ct=setTimeout(function(){ui.confirm="";render();},3500);render();}
+function textoLista(){
+  var wk=ui.wk,itens=listaCompras(wk),c=comp(wk),out=["Lista de compras · "+wkLabel(wk)];
+  SECS.forEach(function(sc){var arr=itens.filter(function(i){return i.s===sc[0]&&!c.ok[i.key];}).sort(function(a,b){return a.n.localeCompare(b.n,"pt-BR");});
+    var ex=sc[0]==="X"?c.extras.filter(function(e){return !e.ok;}):[];if(!arr.length&&!ex.length)return;
+    out.push("");out.push(sc[1]+":");arr.forEach(function(i){out.push("- "+(i.parts.length?qtdTxt(i)+" ":"")+i.n);});ex.forEach(function(e){out.push("- "+e.t);});});
+  return out.join("\n");}
+function copiar(txt){
+  function fallback(){var ta=document.createElement("textarea");ta.value=txt;ta.setAttribute("readonly","");ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand("copy");}catch(e){}document.body.removeChild(ta);toast(ok?"Lista copiada. Cole no WhatsApp ou nas notas.":"Não consegui copiar neste navegador.");}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast("Lista copiada. Cole no WhatsApp ou nas notas.");},fallback);}else fallback();}
+function baixar(){
+  var blob=new Blob([JSON.stringify({app:"cardapio-semana",versao:1,data:new Date().toISOString(),dados:S},null,1)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="cardapio-backup-"+hoje()+".json";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);toast("Cópia baixada");}
+function restaurar(file){var fr=new FileReader();fr.onload=function(){try{var d=JSON.parse(fr.result);var x=d&&d.dados;if(!x||!x.planos)throw 0;Object.keys(S).forEach(function(k){if(x[k]!=null)S[k]=x[k];});save();render();toast("Cópia restaurada");}catch(e){toast("Esse arquivo não é uma cópia do Cardápio.");}};fr.readAsText(file);}
+
+document.addEventListener("click",function(e){
+  var el=e.target.closest("[data-delx],button,[data-open],[data-close]");if(!el)return;var d=el.dataset,wk=ui.wk;
+  if(d.close!==undefined){closeSheet();return;}
+  if(d.fav){e.stopPropagation();var i=S.fav.indexOf(d.fav);if(i>=0)S.fav.splice(i,1);else S.fav.push(d.fav);save();toast(i>=0?"Tirada das favoritas":"Nas favoritas");render();if(ui.sheet)drawSheet();return;}
+  if(d.rm){var p=d.rm.split("|"),s=slot(p[0],+p[1],p[2],true);s.r=s.r.filter(function(x){return x!==p[3];});save();render();return;}
+  if(d.rmx){var q=d.rmx.split("|");slot(q[0],+q[1],q[2],true).x="";save();render();return;}
+  if(d.open){openSheet({type:"receita",id:d.open,porc:S.pessoas});return;}
+  if(d.go){go(d.go);return;}
+  if(d.wk){ui.wk=addD(ui.wk,7*Number(d.wk));render();return;}
+  if(d.pick){var pp=d.pick.split("|");openSheet({type:"pick",d:+pp[0],m:pp[1],q:"",cat:""});return;}
+  if(d.cat!==undefined){ui.cat=ui.cat===d.cat?"":d.cat;render();return;}
+  if(d.tag){ui.tag=ui.tag===d.tag?"":d.tag;render();return;}
+  if(d.ck){var c=comp(wk);if(c.ok[d.ck])delete c.ok[d.ck];else c.ok[d.ck]=true;save();render();return;}
+  if(d.delx!==undefined){e.stopPropagation();comp(wk).extras.splice(+d.delx,1);save();render();return;}
+  if(d.ckx!==undefined){var ex=comp(wk).extras[+d.ckx];if(ex){ex.ok=!ex.ok;save();render();}return;}
+  if(d.pes){S.pessoas=Math.min(12,Math.max(1,S.pessoas+Number(d.pes)));save();render();return;}
+  if(d.ref){S.refeicoes[d.ref]=!S.refeicoes[d.ref];if(!mealsOn().length)S.refeicoes[d.ref]=true;save();render();return;}
+  if(d.opt){S[d.opt]=!S[d.opt];save();render();return;}
+  if(d.porc&&ui.sheet){ui.sheet.porc=Math.min(20,Math.max(1,(ui.sheet.porc||S.pessoas)+Number(d.porc)));drawSheet();return;}
+  if(d.pd!==undefined&&ui.sheet){ui.sheet.d=+d.pd;drawSheet();return;}
+  if(d.pm&&ui.sheet){ui.sheet.m=d.pm;drawSheet();return;}
+  if(d.x&&ui.sheet){var sl=slot(wk,ui.sheet.d,ui.sheet.m,true);sl.x=sl.x===d.x?"":d.x;if(sl.x)sl.r=[];save();closeSheet();return;}
+  if(d.pc!==undefined&&ui.sheet){ui.sheet.cat=d.pc;drawSheet();return;}
+  if(d.tg&&ui.sheet){var st=slot(wk,ui.sheet.d,ui.sheet.m,true),ix=st.r.indexOf(d.tg);if(ix>=0)st.r.splice(ix,1);else{st.r.push(d.tg);st.x="";}save();drawSheet();render();return;}
+  switch(d.act){
+    case "buscar":go("receitas");setTimeout(function(){var q=$("#q");if(q)q.focus();},50);break;
+    case "sugerir":var n=sugerirSemana(wk);render();toast(n?"Semana sugerida. Troque o que quiser.":"A semana já está cheia.");break;
+    case "repetir":var r2=repetirAnterior(wk);render();toast(r2<0?"A semana anterior está vazia.":r2?"Copiado da semana anterior":"Nada para copiar: os espaços já estão preenchidos.");break;
+    case "limpar":if(ui.confirm!=="limpar"){pedirConfirma("limpar");break;}delete S.planos[wk];ui.confirm="";save();render();toast("Semana limpa");break;
+    case "hoje":var di=(parse(hoje()).getDay()+6)%7,m=S.refeicoes.jantar?"jantar":"almoco",rr=BY[d.id];addReceita(curWk(),di,m,d.id);
+      if(S.arrozFeijao&&rr&&rr.tags.indexOf("arroz")>=0&&ARROZ)addReceita(curWk(),di,m,ARROZ.id);
+      render();toast("No "+MEALN[m].toLowerCase()+" de hoje");break;
+    case "outrahoje":ui.sugHoje++;render();break;
+    case "copiar":copiar(textoLista());break;
+    case "desmarcar":comp(wk).ok={};comp(wk).extras.forEach(function(x){x.ok=false;});save();render();break;
+    case "extra":var inp=$("#extra"),t=inp&&inp.value.trim();if(t){comp(wk).extras.push({t:t.slice(0,80),ok:false});save();render();setTimeout(function(){var i2=$("#extra");if(i2)i2.focus();},30);}break;
+    case "pornocardapio":var r=BY[ui.sheet.id],td=(parse(hoje()).getDay()+6)%7;
+      ui.sheet.add=true;ui.sheet.d=ui.wk===curWk()?td:0;
+      var guess=r.cat==="cafe"?"cafe":r.cat==="lanche"?"lanche":"jantar";if(!S.refeicoes[guess])guess=mealsOn()[0][0];ui.sheet.m=guess;
+      drawSheet();setTimeout(function(){var pk=$("#pick");if(pk)pk.scrollIntoView({block:"center",behavior:"smooth"});},30);break;
+    case "confirmar":var sh=ui.sheet,rc=BY[sh.id];addReceita(wk,sh.d,sh.m,sh.id);
+      if(S.arrozFeijao&&(sh.m==="almoco"||sh.m==="jantar")&&rc.tags.indexOf("arroz")>=0&&ARROZ&&rc.id!==ARROZ.id)addReceita(wk,sh.d,sh.m,ARROZ.id);
+      if(S.arrozFeijao&&(sh.m==="almoco"||sh.m==="jantar")&&rc.tags.indexOf("feijao")>=0&&FEIJAO)addReceita(wk,sh.d,sh.m,FEIJAO.id);
+      toast("No "+MEALN[sh.m].toLowerCase()+" de "+DIAS[sh.d].toLowerCase());closeSheet();break;
+    case "backup":baixar();break;
+    case "restaurar":$("#arq").click();break;
+    case "apagar":if(ui.confirm!=="apagar"){pedirConfirma("apagar");break;}try{localStorage.removeItem(KEY);}catch(x){}location.reload();break;
+  }
+});
+document.addEventListener("input",function(e){
+  if(e.target.id==="q"){ui.q=e.target.value;drawRres();}
+  else if(e.target.id==="pq"&&ui.sheet){ui.sheet.q=e.target.value;var sh=ui.sheet,s=slot(ui.wk,sh.d,sh.m,false);
+    var q=norm(sh.q),ws=q?q.split(/\s+/):[],def={cafe:["cafe"],lanche:["lanche","cafe","doce"],almoco:["prato","massa","acomp","salada","sopa"],jantar:["prato","massa","sopa","lanche","acomp","salada"]}[sh.m],cats=sh.cat?[sh.cat]:(q?CATS.map(function(c){return c[0];}):def);
+    var lista=R.filter(function(r){if(cats.indexOf(r.cat)<0)return false;for(var i=0;i<ws.length;i++)if(r.k.indexOf(ws[i])<0)return false;return true;});
+    $("#plist").innerHTML=plistHTML(lista,s);}
+});
+document.addEventListener("change",function(e){if(e.target.id==="arq"&&e.target.files[0])restaurar(e.target.files[0]);});
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape"&&ui.sheet){closeSheet();return;}
+  if(e.key==="Enter"&&e.target.id==="extra"){e.preventDefault();var b=document.querySelector('[data-act="extra"]');if(b)b.click();return;}
+  if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("rc")&&e.target===document.activeElement){e.preventDefault();openSheet({type:"receita",id:e.target.getAttribute("data-open"),porc:S.pessoas});}
+});
+window.addEventListener("hashchange",function(){go(location.hash.slice(1));});
+load();
+ui.wk=curWk();
+ui.tab=["semana","receitas","compras","ajustes"].indexOf(location.hash.slice(1))>=0?location.hash.slice(1):"semana";
+draw();
+})();
+</script>
+</body></html>
