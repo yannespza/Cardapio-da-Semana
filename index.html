@@ -223,6 +223,8 @@ ol.steps li::before{content:counter(s);width:30px;height:30px;border-radius:10px
 .dlista.on{border-style:solid;border-color:transparent;background:var(--accent-soft)}
 .dlista span{font-weight:600;font-size:12.5px;color:var(--ink-3);text-decoration:underline}
 .dlista.todos{justify-content:center;margin-top:0}
+.hero-s{text-align:center;padding:8px 4px 4px}.hero-s .e{font-size:54px;line-height:1}.hero-s h1{font:800 28px/1.15 var(--head);margin:10px 0 6px}.hero-s p{color:var(--ink-2);margin:0 auto;max-width:420px;line-height:1.5}
+.liga{background:var(--accent-soft);border-radius:20px;padding:16px;margin:14px 0}.liga b{font:700 16px var(--head)}.liga p{margin:6px 0 12px;color:var(--ink-2);font-size:14px;line-height:1.5}
 .nov{display:flex;gap:12px;align-items:flex-start;background:var(--surface-2);border-radius:18px;padding:14px;margin-bottom:10px}
 .nov .e{font-size:24px;line-height:1}
 .nov b{font:700 15px var(--head)}
@@ -246,7 +248,9 @@ ol.steps li::before{content:counter(s);width:30px;height:30px;border-radius:10px
 </head><body><div class="wrap">
   <header class="top">
     <button class="brand" data-go="semana" aria-label="Ir para a semana">Cardápio <span>da Semana</span></button>
-    <button class="ibtn" data-act="buscar" aria-label="Buscar receita"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <span style="display:flex;gap:2px;margin-left:auto"><button class="ibtn" data-act="compartilhar" aria-label="Compartilhar o app"><svg viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
+    <button class="ibtn" data-go="sobre" aria-label="Sobre o app"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg></button>
+    <button class="ibtn" data-act="buscar" aria-label="Buscar receita"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></span>
   </header>
   <main id="main"></main>
 </div>
@@ -892,6 +896,30 @@ function abrirMM(dados,msg){
   var w=window.open(MEU_MERCADO+"#importar="+b64,"_blank");
   if(!w)location.href=MEU_MERCADO+"#importar="+b64;
   toast("Abrindo o Meu Mercado · "+msg);render();}
+var FEATS=[
+ ["📅","Cardápio da semana pronto","Toque em Sugerir a semana e o app monta café, almoço, lanche e jantar, variando as carnes e com pratos rápidos nos dias úteis. Prefere ir aos poucos? Use Montar dia a dia. Qualquer refeição pode ser trocada com um toque."],
+ ["📖",R.length+" receitas do dia a dia","Pratos, massas, sopas, saladas, lanches, cafés e sobremesas, com ingredientes e modo de preparo. Busque por prato ou ingrediente (ex.: “peito de frango”), filtre por rápidas, baratas, fit, vegetarianas e marque suas favoritas."],
+ ["🍽️","Porções na medida","Diga quantas pessoas moram na casa e as quantidades se ajustam. Em cada receita dá para mudar as porções no − / +."],
+ ["🛒","Lista de compras automática","Escolha os dias e os ingredientes vão para a lista já somados, separados por seção do mercado ou por receita. Também dá para mandar uma receita solta para a lista, marcar o que já pegou e copiar para o WhatsApp."],
+ ["⚙️","Do jeito da sua casa","Arroz e feijão junto, salada no almoço, variar a proteína, pratos rápidos na semana e o jantar que vira marmita do dia seguinte. Liga e desliga em Ajustes."]
+];
+function vSobre(){
+  var podeInstalar=typeof window.mostrarAjudaInstalacao==="function",instalado=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true;
+  var h='<div class="hero-s"><div class="e">🍽️</div><h1>Cardápio da Semana</h1><p>Planeje as refeições da semana sem quebrar a cabeça todo dia com “o que vamos comer?”, e saia de casa com a lista de compras pronta.</p></div>';
+  h+='<div class="btns" style="justify-content:center;margin:16px 0 6px"><button class="btn green" data-go="semana">Começar</button>'+(podeInstalar&&!instalado?'<button class="btn line" data-act="instalar">📲 Instalar no celular</button>':'')+'</div>';
+  h+='<div class="sec"><span class="sec-t">O que ele faz</span>'+FEATS.map(function(f){return '<div class="nov"><span class="e">'+f[0]+'</span><div><b>'+esc(f[1])+'</b><p style="margin-bottom:0">'+esc(f[2])+'</p></div></div>';}).join("")+'</div>';
+  h+='<div class="liga"><b>🔗 Funciona junto com o Meu Mercado</b><p>Se você também usa o <b>Meu Mercado</b> (app de gastos de mercado), em Compras toque em <b>Enviar para o Meu Mercado</b>: a lista vai pronta para lá, com o nome da receita de cada item, e ele compara os preços nos mercados. Não precisa de conta nem de configurar nada. Cada app também funciona sozinho.</p><a class="btn line" href="'+MEU_MERCADO+'#sobre" target="_blank" rel="noopener" style="text-decoration:none">Conhecer o Meu Mercado →</a></div>';
+  h+='<div class="sec"><span class="sec-t">Seus dados</span><p class="note" style="margin:0">Sem cadastro e sem senha. Tudo fica salvo só neste celular, e cada pessoa que abre o link tem o próprio cardápio, começando do zero. Para passar para outro aparelho, use Baixar cópia em Ajustes.</p></div>';
+  h+='<div class="sec"><span class="sec-t">Instalar</span><p class="note" style="margin:0">'+(instalado?'Você já está usando o app instalado. ':'')+'No iPhone: abra o link no Safari, toque em Compartilhar e depois em “Adicionar à Tela de Início”. No Android: abra no Chrome e toque em “Instalar app” (ou ⋮ › Adicionar à tela inicial). Ele abre como um app e funciona até sem internet.</p></div>';
+  h+='<button class="btn green" data-act="compartilhar" style="width:100%;margin-top:16px">📤 Compartilhar com alguém</button>';
+  return h;}
+function compartilhar(){
+  var url=location.origin+location.pathname+"#sobre",txt="Cardápio da Semana: monta o cardápio da semana e a lista de compras sozinho. É grátis, sem cadastro, e dá para instalar no celular.";
+  if(navigator.share){navigator.share({title:"Cardápio da Semana",text:txt,url:url}).catch(function(){});return;}
+  copiarTxt(txt+"\n"+url,"Link copiado. Cole no WhatsApp ou onde quiser.");}
+function copiarTxt(t,msg){
+  function fb(){var ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();var ok=false;try{ok=document.execCommand("copy");}catch(e){}ta.remove();toast(ok?msg:"Não consegui copiar. O link é: "+t.split("\n").pop());}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){toast(msg);},fb);else fb();}
 function vAjustes(){
   var h='<h1 class="h1">Ajustes<small>Tudo fica salvo neste celular</small></h1>';
   h+='<div class="card"><div class="set"><span>Pessoas em casa<small>As receitas e a lista se ajustam</small></span><div class="step"><button data-pes="-1" aria-label="Menos uma pessoa">−</button><b>'+S.pessoas+'</b><button data-pes="1" aria-label="Mais uma pessoa">+</button></div></div></div>';
@@ -903,7 +931,7 @@ function vAjustes(){
     '<div class="set"><span>Pratos rápidos na semana<small>De segunda a sexta, jantar até 45 min e almoço até 1h</small></span><button class="tog" role="switch" data-opt="rapidoSemana" aria-checked="'+S.rapidoSemana+'" aria-label="Pratos rápidos na semana"></button></div>'+
     '<div class="set"><span>Jantar vira almoço do dia seguinte<small>Quando o jantar rende marmita, o almoço seguinte fica como Sobras</small></span><button class="tog" role="switch" data-opt="sobraMarmita" aria-checked="'+S.sobraMarmita+'" aria-label="Jantar vira almoço do dia seguinte"></button></div></div>'+
     '<p class="note" style="margin:0">As favoritas aparecem com mais frequência nas sugestões, e o que vocês comeram na semana anterior aparece menos.</p></div>';
-  h+='<div class="sec"><button class="btn line" data-act="novidades" style="width:100%">✨ Novidades da versão</button></div>';
+  h+='<div class="sec"><div class="btns"><button class="btn green" data-act="compartilhar" style="flex:1">📤 Compartilhar o app</button><button class="btn line" data-go="sobre" style="flex:1">ℹ️ Sobre o app</button></div><button class="btn line" data-act="novidades" style="width:100%;margin-top:10px">✨ Novidades da versão</button></div>';
   h+='<div class="sec"><span class="sec-t">Cópia de segurança</span><p class="note" style="margin:0">Os dados ficam só neste navegador. Baixe uma cópia de vez em quando ou para passar para outro celular.</p><div class="btns"><button class="btn" data-act="backup">Baixar cópia</button><button class="btn" data-act="restaurar">Restaurar cópia</button><input type="file" id="arq" accept="application/json,.json" hidden></div></div>';
   h+='<div class="sec"><button class="btn line danger" data-act="apagar">'+(ui.confirm==="apagar"?'Toque de novo para apagar tudo':'Apagar todos os dados')+'</button></div>';
   return h;}
@@ -968,8 +996,9 @@ function diaHTML(){
 function abrirDia(d){var x=sugerirDia(ui.wk,d,false,null);ui.sheet={type:"dia",d:d,draft:x.res};drawSheet(true);}
 function openSheet(o){ui.sheet=o;drawSheet(true);}
 /* ---------- novidades da versão ---------- */
-var VERSAO=4;
+var VERSAO=5;
 var NOVIDADES=[
+ {e:"📤",t:"Compartilhe o app",d:"O botão de compartilhar no alto manda o link para quem você quiser. A pessoa recebe o app limpo, com o próprio cardápio, e uma tela explicando tudo (o ⓘ no alto).",tab:"semana",sel:"[data-act=compartilhar]",dica:"Toque para mandar o app para alguém"},
  {e:"🍽️",t:"Lista de compras por receita",d:"Em Compras, toque em “Por receita” para ver os ingredientes separados por prato. Cada receita tem o botão para mandar só ela ao Meu Mercado.",tab:"compras",sel:"[data-cmodo=receita]",dica:"Veja a lista separada por receita",precisa:"Ponha uma receita na lista para ver aqui"},
  {e:"🛒",t:"Mandar uma receita para a lista",d:"Abra qualquer receita e toque em 🛒 “Mandar os ingredientes para a lista de compras”, mesmo sem pôr no cardápio. As porções escolhidas valem.",tab:"receitas",sel:".grid .rc",dica:"Abra uma receita para ver o botão 🛒"},
  {e:"🛒",t:"Você escolhe os dias da lista",d:"Cada dia do cardápio tem o botão 🛒 “Pôr na lista”: todos os ingredientes das receitas daquele dia vão para Compras. Se quiser, ponha a semana toda de uma vez.",tab:"semana",sel:".dlista",dica:"Toque para mandar os ingredientes deste dia para a lista",precisa:"Monte o cardápio para ver o botão nos dias"},
@@ -1017,11 +1046,11 @@ var raf=0;function render(){if(raf)return;raf=requestAnimationFrame(function(){r
 function draw(){
   var main=$("#main"),act=document.activeElement,aid=act&&act.id&&main.contains(act)?act.id:null;
   document.querySelectorAll(".tab").forEach(function(b){if(b.getAttribute("data-go")===ui.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
-  main.innerHTML='<div class="view">'+(ui.tab==="receitas"?vReceitas():ui.tab==="compras"?vCompras():ui.tab==="ajustes"?vAjustes():vSemana())+'</div>';
+  main.innerHTML='<div class="view">'+(ui.tab==="sobre"?vSobre():ui.tab==="receitas"?vReceitas():ui.tab==="compras"?vCompras():ui.tab==="ajustes"?vAjustes():vSemana())+'</div>';
   if(ui.tab==="receitas")drawRres();
   if(aid){var e=document.getElementById(aid);if(e){e.focus({preventScroll:true});try{var v=e.value.length;e.setSelectionRange(v,v);}catch(x){}}}
 }
-function go(t){if(["semana","receitas","compras","ajustes"].indexOf(t)<0)t="semana";ui.confirm="";if(ui.tab!==t){ui.tab=t;window.scrollTo(0,0);}render();if(location.hash.slice(1)!==t){try{history.replaceState(null,"","#"+t);}catch(e){}}}
+function go(t){if(["semana","receitas","compras","ajustes","sobre"].indexOf(t)<0)t="semana";ui.confirm="";if(ui.tab!==t){ui.tab=t;window.scrollTo(0,0);}render();if(location.hash.slice(1)!==t){try{history.replaceState(null,"","#"+t);}catch(e){}}}
 var tt=0;function toast(m,undo){var t=$("#toast");t.innerHTML=esc(m)+(undo&&desfazerSnap?' <button class="undo" data-undo>Desfazer</button>':'');t.hidden=false;clearTimeout(tt);tt=setTimeout(function(){t.hidden=true;},undo?5000:2600);}
 var ct=0;function pedirConfirma(k){ui.confirm=k;clearTimeout(ct);ct=setTimeout(function(){ui.confirm="";render();},3500);render();}
 function textoLista(){
@@ -1137,6 +1166,8 @@ document.addEventListener("click",function(e){
       toast("No "+MEALN[sh.m].toLowerCase()+" de "+DIAS[sh.d].toLowerCase());closeSheet();break;
     case "backup":baixar();break;
     case "novidades":verNovidades();break;
+    case "compartilhar":compartilhar();break;
+    case "instalar":if(window.mostrarAjudaInstalacao)window.mostrarAjudaInstalacao();break;
     case "restaurar":$("#arq").click();break;
     case "apagar":if(ui.confirm!=="apagar"){pedirConfirma("apagar");break;}try{localStorage.removeItem(KEY);}catch(x){}location.reload();break;
   }
@@ -1153,10 +1184,12 @@ document.addEventListener("keydown",function(e){
   if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("rc")&&e.target===document.activeElement){e.preventDefault();openSheet({type:"receita",id:e.target.getAttribute("data-open"),porc:S.pessoas});}
 });
 window.addEventListener("hashchange",function(){go(location.hash.slice(1));});
+var novato=true;try{novato=localStorage.getItem(KEY)===null;}catch(e){}
 load();
 if(!S.listaPorDia){Object.keys(S.planos).forEach(function(wk){var c=comp(wk);for(var d=0;d<7;d++)c.dias[d]=true;});S.listaPorDia=true;save();}
 ui.wk=curWk();
-ui.tab=["semana","receitas","compras","ajustes"].indexOf(location.hash.slice(1))>=0?location.hash.slice(1):"semana";
+ui.tab=["semana","receitas","compras","ajustes","sobre"].indexOf(location.hash.slice(1))>=0?location.hash.slice(1):(novato?"sobre":"semana");
+if(novato){S.versaoVista=VERSAO;save();}
 draw();
 (function(){
   if((S.versaoVista||0)>=VERSAO)return;
