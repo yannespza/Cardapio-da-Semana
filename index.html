@@ -621,7 +621,7 @@ function buscar(q,lista){var ws=toks(q).filter(function(w){return w.length>=2;})
 var ARROZ=BY["arroz-branco"],FEIJAO=BY["feijao-carioca"];
 
 /* ---------- estado ---------- */
-var S={pessoas:2,refeicoes:{cafe:true,almoco:true,lanche:false,jantar:true},arrozFeijao:true,salada:true,variar:true,sobraMarmita:false,rapidoSemana:true,planos:{},fav:[],compras:{},vistoMM:false,versaoVista:0,listaPorDia:false};
+var S={pessoas:2,refeicoes:{cafe:true,almoco:true,lanche:false,jantar:true},arrozFeijao:true,salada:true,variar:true,sobraMarmita:false,rapidoSemana:true,planos:{},fav:[],compras:{},vistoMM:false,versaoVista:0,listaPorDia:false,cmodo:"secao"};
 var ui={tab:"semana",wk:null,q:"",cat:"",tag:"",sheet:null,confirm:"",sugHoje:0};
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(d&&typeof d==="object"){Object.keys(S).forEach(function(k){if(d[k]!=null)S[k]=d[k];});}}catch(e){}}
 var saveT=0;function save(){clearTimeout(saveT);saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast("Não consegui salvar neste navegador.");}},150);}
@@ -719,8 +719,7 @@ function porcDe(s,id){return (s&&s.p&&s.p[id])||S.pessoas;}
 
 /* ---------- compras ---------- */
 function listaCompras(wk){
-  var p=plano(wk),itens={},ordem=[];
-  if(!p)return [];
+  var p=plano(wk)||{},itens={},ordem=[];
   var seq=[];for(var d=0;d<7;d++)MEALS.forEach(function(mm){if(S.refeicoes[mm[0]])seq.push([d,mm[0]]);});
   var extra={};
   var dias=comp(wk).dias;
@@ -739,6 +738,15 @@ function listaCompras(wk){
         itens[key].q+=q*f;add(itens[key],r);
       });});
   });
+  /* receitas avulsas: as que não já vieram de um dia da lista */
+  receitasNaLista(wk).forEach(function(e){if(!e.av)return;var r=e.r,f=fator(r,e.porc);
+    r.ing.forEach(function(g){
+      var fam=g.u==="kg"?"g":g.u==="l"?"ml":g.u,q=g.u==="kg"||g.u==="l"?g.q*1000:g.q;
+      var key=norm(g.n)+"|"+(g.u==="ag"?"ag":fam);
+      if(g.u==="ag"){var qk=Object.keys(itens).filter(function(k){return k.split("|")[0]===norm(g.n);})[0];if(qk){add(itens[qk],r);return;}}
+      else{var ak=norm(g.n)+"|ag";if(itens[ak]&&!itens[key]){itens[key]=itens[ak];delete itens[ak];itens[key].u=fam;itens[key].q=0;itens[key].key=key;}}
+      if(!itens[key]){itens[key]={key:key,n:g.n,u:g.u==="ag"?"ag":fam,q:0,s:g.s,src:[]};ordem.push(key);}
+      itens[key].q+=q*f;add(itens[key],r);});});
   function add(it,r){if(it.src.indexOf(r.nome)<0)it.src.push(r.nome);}
   var out={};
   Object.keys(itens).forEach(function(k){var it=itens[k],nk=norm(it.n);
@@ -747,11 +755,26 @@ function listaCompras(wk){
     it.src.forEach(function(s){if(out[nk].src.indexOf(s)<0)out[nk].src.push(s);});});
   return Object.keys(out).map(function(k){return out[k];});}
 function qtdTxt(i){return i.parts.map(function(p){return fmtQ(p.q,p.u,true);}).join(" + ");}
-function comp(wk){if(!S.compras[wk])S.compras[wk]={ok:{},extras:[]};if(!S.compras[wk].rm)S.compras[wk].rm={};if(!S.compras[wk].dias)S.compras[wk].dias={};return S.compras[wk];}
+function comp(wk){if(!S.compras[wk])S.compras[wk]={ok:{},extras:[]};if(!S.compras[wk].rm)S.compras[wk].rm={};if(!S.compras[wk].dias)S.compras[wk].dias={};if(!S.compras[wk].av)S.compras[wk].av={};return S.compras[wk];}
 /* dias que entram na lista de compras (o usuário escolhe tocando em "Pôr na lista" no dia) */
 function diaNaLista(wk,d){return !!comp(wk).dias[d];}
 function diaTemPrato(wk,d){return mealsOn().some(function(mm){var sl=slot(wk,d,mm[0],false);return sl.r&&sl.r.length;});}
 function diasComPrato(wk){var o=[];for(var d=0;d<7;d++)if(diaTemPrato(wk,d))o.push(d);return o;}
+/* cada receita que está na lista de compras, com seus ingredientes já nas porções certas */
+function receitasNaLista(wk){
+  var p=plano(wk)||{},c=comp(wk),out=[],doDia={};
+  var seq=[];for(var d=0;d<7;d++)MEALS.forEach(function(mm){if(S.refeicoes[mm[0]])seq.push([d,mm[0]]);});
+  var extra={};
+  seq.forEach(function(dm,i){var s=p[dm[0]]&&p[dm[0]][dm[1]];if(s&&s.x==="sobra"&&c.dias[dm[0]]){for(var j=i-1;j>=0;j--){var ps=p[seq[j][0]]&&p[seq[j][0]][seq[j][1]];if(ps&&ps.r&&ps.r.length){var k=seq[j][0]+"|"+seq[j][1];extra[k]=(extra[k]||0)+1;break;}}}});
+  seq.forEach(function(dm){var s=p[dm[0]]&&p[dm[0]][dm[1]];if(!s||!s.r)return;var mult=1+(extra[dm[0]+"|"+dm[1]]||0);
+    if(!c.dias[dm[0]]&&mult===1)return;if(!c.dias[dm[0]])mult-=1;
+    s.r.forEach(function(id){var r=BY[id];if(!r)return;doDia[id]=1;
+      out.push({r:r,porc:porcDe(s,id)*mult,onde:DIAC[dm[0]]+" · "+MEALN[dm[1]]+(mult>1?" + sobras":""),av:false});});});
+  Object.keys(c.av).forEach(function(id){var r=BY[id];if(!r||doDia[id])return;out.push({r:r,porc:c.av[id],onde:"Avulsa",av:true});});
+  return out;}
+function ingDe(e){var f=fator(e.r,e.porc);
+  return e.r.ing.map(function(g){var ag=g.u==="ag";return {key:norm(g.n),n:g.n,s:g.s,qtd:ag?"":fmtQ(g.q*f,g.u,true),parts:ag?[]:[{q:Math.round(g.q*f*100)/100,u:g.u}]};});}
+function naLista(wk,id){return receitasNaLista(wk).some(function(e){return e.r.id===id;});}
 /* itens da lista que não foram tirados por "Limpar lista" */
 function itensLista(wk){var c=comp(wk);return listaCompras(wk).filter(function(i){return !c.rm[i.key];});}
 
@@ -825,7 +848,10 @@ function vCompras(){
   h+='<div class="ctop"><span><b>'+(tot-ok)+'</b> para comprar'+(ok?' · '+ok+' no carrinho':'')+'</span><span class="ctools">'+
      '<button data-act="copiar">Copiar</button>'+(ok?'<button data-act="desmarcar">Desmarcar</button>':'')+
      '<button class="danger" data-act="limparLista">'+(ui.confirm==="limparLista"?'Toque de novo':'Limpar')+'</button></span></div>';
-  SECS.forEach(function(sc){
+  var porRec=S.cmodo==="receita";
+  h+='<div class="chips" style="margin:0 0 12px"><button class="chip" data-cmodo="secao" aria-pressed="'+!porRec+'">🧺 Por seção do mercado</button><button class="chip" data-cmodo="receita" aria-pressed="'+porRec+'">🍽️ Por receita</button></div>';
+  if(porRec)h+=porReceitaHTML(wk,c);
+  else SECS.forEach(function(sc){
     var arr=sc[0]==="X"?[]:itens.filter(function(i){return i.s===sc[0];}).sort(function(a,b){return a.n.localeCompare(b.n,"pt-BR");});
     var ex=sc[0]==="X"?c.extras:[];
     if(!arr.length&&!ex.length)return;
@@ -835,9 +861,37 @@ function vCompras(){
     ex.forEach(function(e,ix){h+='<button class="item'+(e.ok?' ok':'')+'" data-ckx="'+ix+'" aria-pressed="'+!!e.ok+'"><span class="ck">✓</span><span><span class="t">'+esc(e.t)+'</span><small>Item seu · <span data-delx="'+ix+'" style="text-decoration:underline">apagar</span></small></span></button>';});
     h+='</section>';});
   var dl=[];for(var dx=0;dx<7;dx++)if(c.dias[dx]&&diaTemPrato(wk,dx))dl.push(DIAC[dx]);
+  var nav=receitasNaLista(wk).filter(function(e){return e.av;}).length;if(nav)dl.push(nav+(nav===1?' receita avulsa':' receitas avulsas'));
   h+='<p class="note">Dias na lista: <b>'+(dl.length?dl.join(", "):'nenhum')+'</b>. Para mudar, toque em 🛒 nos dias do cardápio. Quantidades para as porções de cada prato no cardápio ('+S.pessoas+(S.pessoas===1?' pessoa':' pessoas')+', se você não mudou), arredondadas para cima no que se compra por unidade.'+(tirados?' <button data-act="restaurarLista" style="border:0;background:none;color:var(--accent);font-weight:700;padding:0">Trazer de volta os itens tirados</button>':'')+'</p>';
   h+='<button class="fixmm" data-act="meumercado"><svg viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 11h10.6L20.5 7H7"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg>Enviar para o Meu Mercado</button>';
   return h;}
+function porReceitaHTML(wk,c){
+  var rs=receitasNaLista(wk),h='';
+  if(!rs.length)h+='<div class="empty"><b>Nenhuma receita na lista</b>Os itens abaixo foram adicionados por você.</div>';
+  rs.forEach(function(e,ix){var ings=ingDe(e).filter(function(i){return !c.rm[i.key];});
+    var falta=ings.filter(function(i){return !c.ok[i.key]&&i.parts.length;}).length;
+    h+='<section class="group"><div class="group-h"><span class="e">'+e.r.e+'</span><span style="min-width:0">'+esc(e.r.nome)+'<br><small style="margin:0;font-weight:500">'+esc(e.onde)+' · '+e.porc+(e.porc===1?' porção':' porções')+'</small></span>'+
+       (e.av?'<button class="add" data-avl="'+e.r.id+'" aria-label="Tirar '+esc(e.r.nome)+' da lista" style="margin-left:auto">×</button>':'')+'</div>';
+    ings.forEach(function(i){var on=!!c.ok[i.key];
+      h+='<button class="item'+(on?' ok':'')+'" data-ck="'+esc(i.key)+'" aria-pressed="'+on+'"><span class="ck">✓</span><span><span class="t">'+(i.qtd?'<b>'+esc(i.qtd)+'</b>':'')+esc(i.n)+(!i.qtd?' <span style="color:var(--ink-3);font-weight:400">(a gosto)</span>':'')+'</span><small>'+esc(SECN[i.s]?SECN[i.s][1]:"")+'</small></span></button>';});
+    h+='<div style="padding:8px 16px 14px;border-top:1px solid var(--line)"><button class="btn line" data-mmr="'+ix+'" style="width:100%;min-height:42px"'+(falta?'':' disabled')+'>🛒 Só esta ao Meu Mercado'+(falta?' · '+falta+(falta===1?' item':' itens'):'')+'</button></div></section>';});
+  if(c.extras.length){h+='<section class="group"><div class="group-h"><span class="e">📝</span>Itens extras<small>'+c.extras.length+'</small></div>';
+    c.extras.forEach(function(e,ix){h+='<button class="item'+(e.ok?' ok':'')+'" data-ckx="'+ix+'" aria-pressed="'+!!e.ok+'"><span class="ck">✓</span><span><span class="t">'+esc(e.t)+'</span><small>Item seu · <span data-delx="'+ix+'" style="text-decoration:underline">apagar</span></small></span></button>';});
+    h+='</section>';}
+  h+='<p class="note">O mesmo ingrediente pode aparecer em várias receitas. Marcar num lugar marca em todos. O botão verde de baixo manda a lista inteira, já somada.</p>';
+  return h;}
+function enviarReceitaMM(ix){
+  var wk=ui.wk,c=comp(wk),e=receitasNaLista(wk)[ix];if(!e)return;
+  var out=ingDe(e).filter(function(i){return !c.rm[i.key]&&!c.ok[i.key]&&i.parts.length;}).map(function(i){return {n:i.n,qtd:i.qtd,parts:i.parts,r:[e.r.nome]};});
+  if(!out.length){toast("Nada faltando nessa receita.");return;}
+  abrirMM({app:"cardapio-semana",v:1,semana:wkLabel(wk),receita:e.r.nome,itens:out},e.r.nome+": "+out.length+" itens");}
+function abrirMM(dados,msg){
+  var json=JSON.stringify(dados);
+  var b64=btoa(unescape(encodeURIComponent(json))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  S.vistoMM=true;save();
+  var w=window.open(MEU_MERCADO+"#importar="+b64,"_blank");
+  if(!w)location.href=MEU_MERCADO+"#importar="+b64;
+  toast("Abrindo o Meu Mercado · "+msg);render();}
 function vAjustes(){
   var h='<h1 class="h1">Ajustes<small>Tudo fica salvo neste celular</small></h1>';
   h+='<div class="card"><div class="set"><span>Pessoas em casa<small>As receitas e a lista se ajustam</small></span><div class="step"><button data-pes="-1" aria-label="Menos uma pessoa">−</button><b>'+S.pessoas+'</b><button data-pes="1" aria-label="Mais uma pessoa">+</button></div></div></div>';
@@ -866,6 +920,9 @@ function receitaHTML(r){
   if(sh.lig)h+='<p class="note" style="margin:-4px 0 10px">No cardápio de '+DIAS[sh.lig.d].toLowerCase()+' ('+MEALN[sh.lig.m].toLowerCase()+'). Mudar as porções aqui atualiza a lista de compras.</p>';
   else if(!sh.add)h+='<p class="note" style="margin:-4px 0 10px">Ao pôr no cardápio, a lista de compras usa essas porções.</p>';
   h+='<div class="ing">'+r.ing.map(function(i){return '<div><b>'+(i.u==="ag"?'a gosto':fmtQ(i.q*f,i.u,false))+'</b><span>'+esc(i.n)+'</span></div>';}).join("")+'</div>';
+  var cav=comp(ui.wk),ehAv=!!cav.av[r.id]&&!receitasNaLista(ui.wk).some(function(e){return e.r.id===r.id&&!e.av;}),peloDia=!ehAv&&naLista(ui.wk,r.id);
+  h+=peloDia?'<div class="dlista on" style="margin:0 0 4px">✓ Já está na lista de compras pelo cardápio</div>'
+    :'<button class="dlista'+(ehAv?' on':'')+'" data-avl="'+r.id+'" style="width:100%;margin:0 0 4px">'+(ehAv?'✓ Ingredientes na lista de compras · '+cav.av[r.id]+(cav.av[r.id]===1?' porção':' porções')+' <span>tirar</span>':'🛒 Mandar os ingredientes para a lista de compras')+'</button>';
   h+='<div class="sec"><span class="sec-t">Modo de preparo</span><ol class="steps">'+r.passos.map(function(p){return '<li><span>'+esc(p)+'</span></li>';}).join("")+'</ol></div>';
   if(sh.add){
     var wk=ui.wk;
@@ -878,7 +935,6 @@ function receitaHTML(r){
 function pickerHTML(){
   var sh=ui.sheet,s=slot(ui.wk,sh.d,sh.m,false),q=norm(sh.q||"");
   var lista=pickLista(sh);
-  if(!q)lista.sort(function(a,b){var fa=S.fav.indexOf(a.id)>=0?0:1,fb=S.fav.indexOf(b.id)>=0?0:1;return (fa-fb)||(cats.indexOf(a.cat)-cats.indexOf(b.cat))||a.nome.localeCompare(b.nome,"pt-BR");});
   var h='<div class="grab"></div><div class="sh"><button class="ibtn" data-close aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button><h2>'+MEALN[sh.m]+' de '+DIAS[sh.d].toLowerCase()+'</h2><span style="width:40px"></span></div>';
   h+='<div class="btns"><button class="btn'+(s.x==="sobra"?' soft':'')+'" data-x="sobra">♻️ Sobras</button><button class="btn'+(s.x==="fora"?' soft':'')+'" data-x="fora">🍽️ Comer fora</button></div>';
   h+='<div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="pq" type="search" placeholder="Buscar receita" autocomplete="off" aria-label="Buscar receita" value="'+esc(sh.q||"")+'"></div>';
@@ -889,7 +945,9 @@ function pickerHTML(){
 function pickLista(sh){
   var q=norm(sh.q||""),def={cafe:["cafe"],lanche:["lanche","cafe","doce"],almoco:["prato","massa","acomp","salada","sopa"],jantar:["prato","massa","sopa","lanche","acomp","salada"]}[sh.m];
   var cats=sh.cat?[sh.cat]:(q?CATS.map(function(c){return c[0];}):def);
-  return buscar(q,R.filter(function(r){return cats.indexOf(r.cat)>=0;})).r;}
+  var lista=buscar(q,R.filter(function(r){return cats.indexOf(r.cat)>=0;})).r;
+  if(!q)lista.sort(function(a,b){var fa=S.fav.indexOf(a.id)>=0?0:1,fb=S.fav.indexOf(b.id)>=0?0:1;return (fa-fb)||(cats.indexOf(a.cat)-cats.indexOf(b.cat))||a.nome.localeCompare(b.nome,"pt-BR");});
+  return lista;}
 function plistHTML(lista,s){if(!lista.length)return '<div class="empty"><b>Nada encontrado</b>Tente outra palavra.</div>';
   return '<div class="plist">'+lista.map(function(r){var on=(s.r||[]).indexOf(r.id)>=0;return '<button class="prow'+(on?' on':'')+'" data-tg="'+r.id+'" aria-pressed="'+on+'"><span class="e">'+r.e+'</span><span><b>'+esc(r.nome)+(S.fav.indexOf(r.id)>=0?' <span style="color:var(--heart)">♥</span>':'')+'</b><small>'+esc(CATN[r.cat][1])+' · '+r.tempo+' min</small></span><span class="ck">✓</span></button>';}).join("")+'</div>';}
 function diaHTML(){
@@ -910,8 +968,10 @@ function diaHTML(){
 function abrirDia(d){var x=sugerirDia(ui.wk,d,false,null);ui.sheet={type:"dia",d:d,draft:x.res};drawSheet(true);}
 function openSheet(o){ui.sheet=o;drawSheet(true);}
 /* ---------- novidades da versão ---------- */
-var VERSAO=3;
+var VERSAO=4;
 var NOVIDADES=[
+ {e:"🍽️",t:"Lista de compras por receita",d:"Em Compras, toque em “Por receita” para ver os ingredientes separados por prato. Cada receita tem o botão para mandar só ela ao Meu Mercado.",tab:"compras",sel:"[data-cmodo=receita]",dica:"Veja a lista separada por receita",precisa:"Ponha uma receita na lista para ver aqui"},
+ {e:"🛒",t:"Mandar uma receita para a lista",d:"Abra qualquer receita e toque em 🛒 “Mandar os ingredientes para a lista de compras”, mesmo sem pôr no cardápio. As porções escolhidas valem.",tab:"receitas",sel:".grid .rc",dica:"Abra uma receita para ver o botão 🛒"},
  {e:"🛒",t:"Você escolhe os dias da lista",d:"Cada dia do cardápio tem o botão 🛒 “Pôr na lista”: todos os ingredientes das receitas daquele dia vão para Compras. Se quiser, ponha a semana toda de uma vez.",tab:"semana",sel:".dlista",dica:"Toque para mandar os ingredientes deste dia para a lista",precisa:"Monte o cardápio para ver o botão nos dias"},
  {e:"📖",t:"116 receitas novas",d:"Agora são 256 receitas: mais pratos do dia a dia, massas, lanches, sopas, saladas, cafés e sobremesas.",tab:"receitas",sel:".cats",dica:"Escolha uma categoria para ver as novas"},
  {e:"🍽️",t:"Porções vão para a lista",d:"Toque num prato do cardápio e ajuste as porções no − / +. A lista de compras acompanha e o prato ganha uma etiqueta (ex.: 6p).",tab:"semana",sel:".dish .dn",dica:"Toque num prato para ajustar as porções",precisa:"Monte o cardápio para ver os pratos aqui"},
@@ -975,7 +1035,7 @@ var MEU_MERCADO="https://app-mercado-sand.vercel.app/";
 function paraMeuMercado(){
   var wk=ui.wk,itens=itensLista(wk),c=comp(wk),out=[];
   itens.filter(function(i){return !c.ok[i.key];}).sort(function(a,b){return a.n.localeCompare(b.n,"pt-BR");}).forEach(function(i){
-    out.push({n:i.n,qtd:i.parts.length?qtdTxt(i):"",parts:i.parts.map(function(p){return {q:Math.round(p.q*100)/100,u:p.u};})});});
+    out.push({n:i.n,qtd:i.parts.length?qtdTxt(i):"",parts:i.parts.map(function(p){return {q:Math.round(p.q*100)/100,u:p.u};}),r:i.src.slice(0,6)});});
   c.extras.filter(function(e){return !e.ok;}).forEach(function(e){out.push({n:e.t,qtd:"",parts:[]});});
   if(!out.length){toast("Não há itens faltando na lista.");return;}
   var json=JSON.stringify({app:"cardapio-semana",v:1,semana:wkLabel(wk),itens:out});
@@ -1030,7 +1090,15 @@ document.addEventListener("click",function(e){
   if(d.opt){S[d.opt]=!S[d.opt];save();render();return;}
   if(d.porc&&ui.sheet){ui.sheet.porc=Math.min(20,Math.max(1,(ui.sheet.porc||S.pessoas)+Number(d.porc)));
     var lg=ui.sheet.lig;if(lg){var sl2=slot(lg.wk,lg.d,lg.m,true);sl2.p=sl2.p||{};if(ui.sheet.porc!==S.pessoas)sl2.p[ui.sheet.id]=ui.sheet.porc;else delete sl2.p[ui.sheet.id];save();render();}
+    var cpv=comp(wk);if(cpv.av[ui.sheet.id]){cpv.av[ui.sheet.id]=ui.sheet.porc;save();render();}
     drawSheet();return;}
+  if(d.avl){var ca=comp(wk),rv=BY[d.avl];
+    if(ca.av[d.avl]){delete ca.av[d.avl];save();render();if(ui.sheet)drawSheet();toast(rv.nome+" saiu da lista");return;}
+    ca.av[d.avl]=(ui.sheet&&ui.sheet.id===d.avl&&ui.sheet.porc)||S.pessoas;
+    if(ca.rm){rv.ing.forEach(function(g){delete ca.rm[norm(g.n)];});}
+    save();render();if(ui.sheet)drawSheet();toast("Ingredientes de "+rv.nome.toLowerCase()+" na lista de compras");return;}
+  if(d.cmodo){S.cmodo=d.cmodo;save();render();return;}
+  if(d.mmr!==undefined){enviarReceitaMM(+d.mmr);return;}
   if(d.pd!==undefined&&ui.sheet){ui.sheet.d=+d.pd;drawSheet();return;}
   if(d.pm&&ui.sheet){ui.sheet.m=d.pm;drawSheet();return;}
   if(d.x&&ui.sheet){var sl=slot(wk,ui.sheet.d,ui.sheet.m,true);sl.x=sl.x===d.x?"":d.x;if(sl.x)sl.r=[];save();closeSheet();return;}
@@ -1056,8 +1124,8 @@ document.addEventListener("click",function(e){
     case "meumercado":paraMeuMercado();break;
     case "desmarcar":comp(wk).ok={};comp(wk).extras.forEach(function(x){x.ok=false;});save();render();break;
     case "limparLista":if(ui.confirm!=="limparLista"){pedirConfirma("limparLista");break;}
-      var cl=comp(wk);cl.diasAntes=cl.dias;cl.extrasAntes=cl.extras;cl.dias={};cl.rm={};cl.extras=[];cl.ok={};ui.confirm="";save();render();toast("Lista de compras limpa");break;
-    case "restaurarLista":var cr=comp(wk);cr.rm={};if(cr.diasAntes){cr.dias=cr.diasAntes;cr.extras=cr.extrasAntes||cr.extras;delete cr.diasAntes;delete cr.extrasAntes;}save();render();toast("Itens de volta na lista");break;
+      var cl=comp(wk);cl.diasAntes=cl.dias;cl.extrasAntes=cl.extras;cl.avAntes=cl.av;cl.av={};cl.dias={};cl.rm={};cl.extras=[];cl.ok={};ui.confirm="";save();render();toast("Lista de compras limpa");break;
+    case "restaurarLista":var cr=comp(wk);cr.rm={};if(cr.diasAntes){cr.dias=cr.diasAntes;cr.extras=cr.extrasAntes||cr.extras;cr.av=cr.avAntes||cr.av;delete cr.diasAntes;delete cr.extrasAntes;delete cr.avAntes;}save();render();toast("Itens de volta na lista");break;
     case "extra":var inp=$("#extra"),t=inp&&inp.value.trim();if(t){comp(wk).extras.push({t:t.slice(0,80),ok:false});save();render();setTimeout(function(){var i2=$("#extra");if(i2)i2.focus();},30);}break;
     case "pornocardapio":var r=BY[ui.sheet.id],td=(parse(hoje()).getDay()+6)%7;
       ui.sheet.add=true;ui.sheet.d=ui.wk===curWk()?td:0;
