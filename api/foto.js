@@ -10,7 +10,10 @@ function slug(s) { return norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g
 let receitasApp = null, quando = 0;
 async function receitaDoApp(id, host) {
   if (!receitasApp || Date.now() - quando > 10 * 60 * 1000) {
-    const html = await (await fetch('https://' + host + '/index.html')).text(); const m = {};
+    let html = '';
+    for (const f of [require('path').join(__dirname, '..', 'index.html'), require('path').join(process.cwd(), 'index.html')]) { try { html = require('fs').readFileSync(f, 'utf8'); break; } catch (e) {} }
+    if (!html) html = await (await fetch('https://' + host + '/index.html')).text();
+    const m = {};
     for (const ln of html.split('\n')) {
       if (!/^\["/.test(ln)) continue;
       try { const row = JSON.parse(ln.replace(/,\s*$/, '')); if (Array.isArray(row) && row.length === 10) m[slug(row[0])] = row; } catch (e) {}

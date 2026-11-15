@@ -1,6 +1,11 @@
 {
   "functions": {
-    "api/foto.js": { "maxDuration": 60 },
-    "api/importar.js": { "maxDuration": 30 }
+    "api/foto.js": {
+      "maxDuration": 30,
+      "includeFiles": "index.html"
+    },
+    "api/importar.js": {
+      "maxDuration": 30
+    }
   }
 }
