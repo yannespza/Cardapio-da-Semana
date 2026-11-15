@@ -85,8 +85,8 @@ async function commons(c) {
   const busca = async (extra) => {
     const r = await fetch('https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=20&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=1024&gsrsearch='
       + encodeURIComponent(c.q + ' filetype:bitmap' + extra), { headers: { 'User-Agent': 'CardapioDaSemana/1.0 (app pessoal)' } });
-    if (!r.ok) return [];
-    const j = await r.json(); const ps = j.query && j.query.pages ? Object.values(j.query.pages) : [];
+    if (!r.ok) { LOG.push('commons ' + r.status + ' ' + c.q); return []; }
+    const j = await r.json(); LOG.push('commons ok ' + c.q + extra + ' ' + (j.query ? Object.keys(j.query.pages).length : 0)); const ps = j.query && j.query.pages ? Object.values(j.query.pages) : [];
     return ps.sort((a, b) => (a.index || 0) - (b.index || 0)).map(p => {
       const ii = p.imageinfo && p.imageinfo[0]; if (!ii || !/jpe?g|png|webp/.test(ii.mime || '')) return null;
       if (ii.width < 800 || ii.height < 500 || ii.width / ii.height > 1.9 || ii.width / ii.height < 0.7 || RUIM.test(p.title)) return null;
@@ -99,8 +99,8 @@ async function commons(c) {
 }
 async function openverse(c) {
   const r = await fetch('https://api.openverse.org/v1/images/?page_size=20&mature=false&category=photograph&size=large&aspect_ratio=wide,square&q=' + encodeURIComponent(c.q));
-  if (!r.ok) return [];
-  const j = await r.json();
+  if (!r.ok) { LOG.push('openverse ' + r.status); return []; }
+  const j = await r.json(); LOG.push('openverse ok ' + (j.results || []).length);
   return (j.results || []).filter(x => !RUIM.test((x.title || '') + ' ' + (x.tags || []).map(t => t.name).join(' ')))
     .map(x => ({ u: x.url, s: pontos((x.title || '') + ' ' + (x.tags || []).map(t => t.name).join(' '), c.q), fonte: 'Openverse' })).filter(x => x.s >= 0.6);
 }
@@ -119,7 +119,9 @@ async function melhores(row) {
   return out;
 }
 
+let LOG = [];
 module.exports = async function (req, res) {
+  LOG = [];
   const q = new URL(req.url, 'http://x').searchParams;
   const id = String(q.get('id') || ''), v = Math.min(3, Math.max(1, parseInt(q.get('v'), 10) || 1));
   if (!/^[a-z0-9-]{2,90}$/.test(id)) { res.statusCode = 400; return res.end('id'); }
@@ -127,6 +129,7 @@ module.exports = async function (req, res) {
     const row = id.startsWith('m-') ? await receitaComunidade(id) : await receitaDoApp(id, req.headers.host);
     if (!row) { res.statusCode = 404; res.setHeader('Cache-Control', 'public, s-maxage=600'); return res.end('receita'); }
     const fotos = await melhores(row);
+    if (q.get('debug')) { res.setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store'); return res.end(JSON.stringify({ log: LOG, fotos }, null, 1)); }
     if (!fotos.length) { res.statusCode = 404; res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600'); return res.end('sem foto'); }
     const f = fotos[(v - 1) % fotos.length];
     res.statusCode = 302; res.setHeader('Location', f.u); res.setHeader('X-Fonte', f.fonte);
