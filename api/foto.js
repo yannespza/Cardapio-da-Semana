@@ -61,7 +61,6 @@ function consultas(row) {
   if (en) qs.push({ q: en + (veg && !/vegetarian/.test(en) ? ' vegetarian' : ''), lang: 'en-US' });
   qs.push({ q: pt, lang: 'pt-BR' });
   if (en && en.split(' ').length > 2) qs.push({ q: en.split(' ').slice(0, 2).join(' '), lang: 'en-US' });
-  if (en && en.split(' ').length > 1) qs.push({ q: en.split(' ')[0] + (/cake|pie|soup|salad|bread|pasta|rice|stew|curry|burger|pizza|risotto|lasagna/.test(en) ? '' : ' dish'), lang: 'en-US' });
   const pt2 = pt.split(' ').filter(w => !STOP.has(w)).slice(0, 2).join(' '); if (pt2 && pt2 !== pt) qs.push({ q: pt2, lang: 'pt-BR' });
   return qs;
 }
