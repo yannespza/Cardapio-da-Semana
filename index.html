@@ -38,6 +38,14 @@
 .linkb{border:0;background:none;padding:0;color:var(--heart);font:inherit;text-decoration:underline}
 .spin{display:inline-block;width:16px;height:16px;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:gira .8s linear infinite}
 @keyframes gira{to{transform:rotate(360deg)}}
+
+.btn.abre{width:100%;margin:12px 0 4px;text-decoration:none}
+.web-l .note{align-self:center;margin-right:2px}
+.fabimp{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;align-items:center;gap:4px;background:var(--dark);border-radius:999px;padding:5px 5px 5px 6px;box-shadow:0 10px 30px rgba(0,0,0,.3);animation:sobe .25s ease-out;max-width:calc(100% - 32px)}
+.fabimp[hidden]{display:none}
+.fabimp-b{border:0;background:var(--accent);color:var(--accent-ink);font:700 14px var(--head);padding:12px 18px;border-radius:999px;white-space:nowrap}
+.fabimp-x{border:0;background:transparent;color:var(--dark-ink);font-size:22px;width:38px;height:38px;border-radius:50%}
+@keyframes sobe{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
 </style><title>Cardápio da Semana</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
@@ -772,11 +780,19 @@ function sitesPara(q,r){var tp=tipoBusca(q,r);
   return ({veg:["pv","pn","tg"],doce:["ne","tg","am"],fit:["pn","gc","tg"],geral:["tg","pn","am","cc"]})[tp].map(function(k){return SITES[k];});}
 function linkSite(site,q){return "https://www.google.com/search?q="+encodeURIComponent(q+" receita site:"+site[1]);}
 var TIPON={veg:"vegetarianas",doce:"de doces",fit:"leves",geral:"do dia a dia"};
-function webHTML(q,r){q=String(q||"").trim();if(!q)return "";var tp=tipoBusca(q,r);
-  return '<div class="web"><div class="web-h"><b>Procurar "'+esc(q)+'" na internet</b><small>Sites bons para receitas '+TIPON[tp]+'. Achou uma? Copie o link e importe.</small></div>'+
-    '<div class="web-l">'+sitesPara(q,r).map(function(st){return '<a class="wsite" href="'+esc(linkSite(st,q))+'" target="_blank" rel="noopener">'+esc(st[0])+'<span>↗</span></a>';}).join("")+
-    '<a class="wsite" href="https://www.google.com/search?q='+encodeURIComponent(q+" receita")+'" target="_blank" rel="noopener">Google<span>↗</span></a></div>'+
+function linkDireto(site,q){return "https://duckduckgo.com/?q="+encodeURIComponent("\\ "+q+" receita site:"+site[1]);}
+function webHTML(q,r){q=String(q||"").trim();if(!q)return "";var tp=tipoBusca(q,r),ss=sitesPara(q,r),top=ss[0];
+  return '<div class="web"><div class="web-h"><b>'+(r?'Outras versões de "':'Procurar "')+esc(q)+'" na internet</b><small>Abre direto a melhor receita em sites bons para receitas '+TIPON[tp]+'.</small></div>'+
+    '<a class="btn green abre" data-act="abrirSite" href="'+esc(linkDireto(top,q))+'" target="_blank" rel="noopener">Abrir receita no '+esc(top[0])+' ↗</a>'+
+    '<div class="web-l"><span class="note">ou em</span>'+ss.slice(1).map(function(st){return '<a class="wsite" data-act="abrirSite" href="'+esc(linkDireto(st,q))+'" target="_blank" rel="noopener">'+esc(st[0])+'<span>↗</span></a>';}).join("")+
+    '<a class="wsite" data-act="abrirSite" href="https://www.google.com/search?q='+encodeURIComponent(q+" receita")+'" target="_blank" rel="noopener">Google<span>↗</span></a></div>'+
+    '<p class="note" style="margin:0 0 10px">Gostou da receita? No site, copie o link (Compartilhar → Copiar link) e volte para o app: o botão de importar já vai estar esperando.</p>'+
     '<button class="btn imp" data-act="importar"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Importar receita de um site</button></div>';}
+function mostrarFab(){var f=document.getElementById("fabImp");if(!f){f=document.createElement("div");f.id="fabImp";f.className="fabimp";
+    f.innerHTML='<button class="fabimp-b" data-act="fabImp">📥 Importar a receita copiada</button><button class="fabimp-x" data-act="fabX" aria-label="Fechar">×</button>';document.body.appendChild(f);}
+  f.hidden=false;}
+function esconderFab(){var f=document.getElementById("fabImp");if(f)f.hidden=true;}
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&ui.esperaAte&&Date.now()<ui.esperaAte&&!(ui.sheet&&ui.sheet.type==="importar"))mostrarFab();});
 
 /* ===================== Importar receita (link de qualquer site) ===================== */
 var FR={"½":.5,"¼":.25,"¾":.75,"⅓":1/3,"⅔":2/3};
@@ -865,75 +881,79 @@ function importarHTML(){
   h+='<div class="foot"><button class="btn line" data-act="impVoltar" style="min-height:56px">Outro link</button><button class="btn green" data-act="impSalvar">Salvar no app</button></div>';
   return h;}
 
-/* ===================== Fotos reais das receitas ===================== */
-var FKEY="cardapio-fotos-v1",MKEY="cardapio-minhas-fotos-v1",FC={},MF={};
+/* ===================== Fotos das receitas (criadas por IA, iguais para todos) ===================== */
+var FKEY="cardapio-fotos-v2",MKEY="cardapio-minhas-fotos-v1",FC={},MF={};
 try{FC=JSON.parse(localStorage.getItem(FKEY)||"{}")||{};}catch(e){}
 try{MF=JSON.parse(localStorage.getItem(MKEY)||"{}")||{};}catch(e){}
 function salvaFC(){try{localStorage.setItem(FKEY,JSON.stringify(FC));}catch(e){}}
-function fotoDe(r){if(!r)return "";if(MF[r.id])return MF[r.id];var c=FC[r.id];
-  if(c&&c.c&&c.c.length)return c.c[(c.i||0)%c.c.length];if(r.fotoOrig&&!(c&&c.semOrig))return r.fotoOrig;return "";}
-var EN={frango:"chicken",galinha:"chicken",carne:"beef",bife:"steak",porco:"pork",suino:"pork",lombo:"pork loin",peixe:"fish",camarao:"shrimp",salmao:"salmon",tilapia:"tilapia",bacalhau:"cod",atum:"tuna",
-  arroz:"rice",feijao:"beans",lentilha:"lentil",grao:"chickpea",macarrao:"pasta",espaguete:"spaghetti",lasanha:"lasagna",nhoque:"gnocchi",sopa:"soup",caldo:"soup",creme:"cream soup",salada:"salad",
-  bolo:"cake",torta:"pie",pudim:"pudding",pao:"bread",ovo:"egg",ovos:"eggs",omelete:"omelette",panqueca:"pancake",batata:"potato",mandioca:"cassava",abobora:"pumpkin",abobrinha:"zucchini",
-  berinjela:"eggplant",cogumelo:"mushroom",cogumelos:"mushrooms",brocolis:"broccoli","couve-flor":"cauliflower",espinafre:"spinach",cenoura:"carrot",tomate:"tomato",milho:"corn",queijo:"cheese",
-  legumes:"vegetables",risoto:"risotto",strogonoff:"stroganoff",hamburguer:"burger",pizza:"pizza",curry:"curry",moqueca:"moqueca",feijoada:"feijoada",quiche:"quiche",falafel:"falafel",homus:"hummus",
-  tofu:"tofu",chili:"chili",tacos:"tacos",burrito:"burrito",cuscuz:"couscous",assado:"roasted",assada:"roasted",grelhado:"grilled",frito:"fried",frita:"fried",recheada:"stuffed",recheado:"stuffed",
-  brigadeiro:"brigadeiro",mousse:"mousse",sorvete:"ice cream",chocolate:"chocolate",banana:"banana",limao:"lemon",coco:"coconut",palmito:"palm heart",polenta:"polenta",yakisoba:"yakisoba",vagem:"green beans",
-  pimentao:"bell pepper",ratatouille:"ratatouille",tortilha:"tortilla",esfiha:"sfiha",empadao:"pot pie",empada:"pie",coxinha:"coxinha",pastel:"pastel",farofa:"farofa",tapioca:"tapioca",mingau:"porridge"};
-var TIRA=/\b(caseir[oa]s?|de liquidificador|na airfryer|na air fryer|de panela de press[aã]o|r[aá]pid[oa]s?|f[aá]cil|fit|da vov[oó]|simples|cremos[oa]s?|light|de frigideira|de forno|no forno|ao forno|de latinha|de panela)\b/gi;
-function consultas(r){var n=r.nome.replace(/\([^)]*\)/g,"").replace(/\s+/g," ").trim(),limpo=n.replace(TIRA,"").replace(/\s+/g," ").trim(),qs=[n];
-  if(limpo&&limpo!==n)qs.push(limpo);
-  var ws=norm(limpo).split(/[\s]+/).filter(function(w){return w&&!STOP[w];});
-  var en=ws.map(function(w){return EN[w]||EN[w.replace(/s$/,"")]||"";}).filter(Boolean);
-  if(en.length)qs.push(en.join(" ")+" dish");
-  if(ws.length>2)qs.push(ws.slice(0,2).join(" "));
-  return qs.filter(function(q,i){return qs.indexOf(q)===i;});}
-var RUIM=/\b(map|mapa|logo|icon|diagram|flag|bandeira|coat of arms|svg|drawing|desenho|ilustra|illustration|poster|cartaz|stamp|selo|book|livro|plant|planta|tree|arvore|flower|flor|field|farm|plantation|seed|semente|leaf|folha|market|feira|mercado|menu|card[aá]pio|screenshot|chart|grafico|statue|church|street|rua|portrait|retrato|people|pessoa|festival|museum|label|r[oó]tulo|package|embalagem|can |lata|bottle|garrafa|restaurant|restaurante|kitchen|cozinha)\b/i;
-function pontosFoto(titulo,q){var t=norm(titulo.replace(/^File:/i,"").replace(/\.[a-z]+$/i,"").replace(/[_-]/g," ")),ws=norm(q).split(/\s+/).filter(function(w){return w.length>2&&!STOP[w]&&w!=="dish";});
-  if(!ws.length)return 0;var hit=ws.filter(function(w){return t.indexOf(w.slice(0,Math.max(4,w.length-2)))>=0;}).length;
-  if(t.indexOf(ws[0].slice(0,Math.max(4,ws[0].length-2)))<0)return 0;return hit/ws.length;}
-function jget(u){var ctrl=window.AbortController?new AbortController():null;if(ctrl)setTimeout(function(){ctrl.abort();},9000);
-  return fetch(u,ctrl?{signal:ctrl.signal}:{}).then(function(r){if(!r.ok)throw 0;return r.json();});}
-function commons(q){
-  return jget("https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=20&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=640&gsrsearch="+encodeURIComponent(q+" filetype:bitmap"))
-   .then(function(j){var ps=j&&j.query&&j.query.pages?Object.keys(j.query.pages).map(function(k){return j.query.pages[k];}):[];
-     return ps.sort(function(a,b){return (a.index||0)-(b.index||0);}).map(function(p){var ii=p.imageinfo&&p.imageinfo[0];if(!ii||!/jpe?g|png|webp/.test(ii.mime||""))return null;
-       if(ii.width<350||ii.height<250||ii.width/ii.height>2||ii.width/ii.height<.6||RUIM.test(p.title))return null;
-       return {u:ii.thumburl||ii.url,s:pontosFoto(p.title,q)};}).filter(function(x){return x&&x.s>=.5;});});}
-function openverse(q){
-  return jget("https://api.openverse.org/v1/images/?page_size=15&mature=false&q="+encodeURIComponent(q))
-   .then(function(j){return ((j&&j.results)||[]).map(function(x){if(RUIM.test(x.title||"")||(x.width&&x.height&&(x.width/x.height>2||x.width/x.height<.6)))return null;
-     return {u:x.thumbnail||x.url,s:pontosFoto(x.title||"",q)};}).filter(function(x){return x&&x.s>=.5;});});}
-function buscarFotos(r){
-  var qs=consultas(r),out=[],i=0;
-  function prox(){if(out.length>=6||i>=qs.length)return Promise.resolve(out);var q=qs[i++];
-    return commons(q).catch(function(){return [];}).then(function(a){a.sort(function(x,y){return y.s-x.s;});a.forEach(function(x){if(out.indexOf(x.u)<0)out.push(x.u);});return prox();});}
-  return prox().then(function(o){if(o.length>=2)return o;
-    return openverse(qs[0]).catch(function(){return [];}).then(function(a){a.forEach(function(x){if(o.indexOf(x.u)<0)o.push(x.u);});return o;});});}
-var filaF=[],emBusca=0,pend={};
-function pedirFoto(id){if(pend[id]||FC[id])return;pend[id]=1;filaF.push(id);rodaFila();}
-function rodaFila(){while(emBusca<2&&filaF.length){(function(id){emBusca++;var r=BY[id];
-  (r?buscarFotos(r):Promise.resolve([])).then(function(c){FC[id]={c:c.slice(0,8),i:0,t:Date.now()};salvaFC();},function(){})
-  .then(function(){emBusca--;delete pend[id];aplicaFoto(id);rodaFila();});})(filaF.shift());}}
-function aplicaFoto(id){var u=fotoDe(BY[id]);document.querySelectorAll('[data-foto="'+id+'"]').forEach(function(el){pinta(el,u);});}
+function fotoDe(r){if(!r)return "";if(MF[r.id])return MF[r.id];var c=FC[r.id]||{};
+  if(r.fotoOrig&&!c.semOrig)return r.fotoOrig;return "api/foto?id="+encodeURIComponent(r.id)+"&v="+(c.v||1);}
+var filaF=[],emBusca=0,falhou={};
 function pinta(el,u){if(!u){el.classList.remove("has");el.style.backgroundImage="";return;}
-  if(el.dataset.u===u&&el.classList.contains("has"))return;el.dataset.u=u;
-  var im=new Image();im.onload=function(){el.style.backgroundImage="url('"+u.replace(/'/g,"%27")+"')";el.classList.add("has");};im.onerror=function(){var c=FC[el.dataset.foto];if(c&&c.c){c.c=c.c.filter(function(x){return x!==u;});salvaFC();aplicaFoto(el.dataset.foto);}};im.src=u;}
-var obsF=window.IntersectionObserver?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){obsF.unobserve(e.target);pedirFoto(e.target.dataset.foto);}});},{rootMargin:"300px"}):null;
-function pintarFotos(root){(root||document).querySelectorAll("[data-foto]").forEach(function(el){var id=el.dataset.foto,r=BY[id];if(!r)return;var u=fotoDe(r);
-  if(u)pinta(el,u);else if(!FC[id]){if(obsF)obsF.observe(el);else pedirFoto(id);}});}
-function trocarFoto(id){var c=FC[id];if(MF[id]){delete MF[id];try{localStorage.setItem(MKEY,JSON.stringify(MF));}catch(e){}aplicaFoto(id);toast("Voltou para a foto da internet");return;}
-  var r=BY[id];if(r&&r.fotoOrig&&!(c&&c.semOrig)){FC[id]=c||{c:[],i:0};FC[id].semOrig=true;salvaFC();if(!FC[id].c.length){delete pend[id];pend[id]=0;buscarFotos(r).then(function(cc){FC[id].c=cc;salvaFC();aplicaFoto(id);});}else aplicaFoto(id);return;}
-  if(!c||!c.c||c.c.length<2){toast(c&&c.c&&c.c.length?"Não achei outra foto. Use uma foto sua.":"Buscando foto…");if(!c)pedirFoto(id);return;}
-  c.i=((c.i||0)+1)%c.c.length;salvaFC();aplicaFoto(id);}
+  if(el.dataset.u===u)return;el.dataset.u=u;
+  var pronto=function(){el.style.backgroundImage="url('"+u.replace(/'/g,"%27")+"')";el.classList.add("has");};
+  var im=new Image();im.onload=pronto;im.onerror=function(){el.dataset.u="";var r=BY[el.dataset.foto];
+    if(r&&r.fotoOrig&&u===r.fotoOrig){FC[r.id]=FC[r.id]||{};FC[r.id].semOrig=true;salvaFC();pintarUm(el);return;}
+    falhou[el.dataset.foto]=Date.now();};
+  im.src=u;if(im.complete&&im.naturalWidth)pronto();}
+/* fotos que ainda não existem demoram alguns segundos para ser criadas: no máximo 3 de cada vez */
+function pintarUm(el){var r=BY[el.dataset.foto];if(!r)return;var u=fotoDe(r);
+  if(u.indexOf("api/foto")!==0){pinta(el,u);return;}
+  if(falhou[r.id]&&Date.now()-falhou[r.id]<120000)return;
+  filaF.push([el,u]);rodaFila();}
+function rodaFila(){while(emBusca<3&&filaF.length){(function(x){var el=x[0],u=x[1];
+  if(!document.body.contains(el)||el.dataset.u===u){rodaFila();return;}
+  emBusca++;el.dataset.u=u;var im=new Image(),fim=function(){emBusca--;rodaFila();};
+  im.onload=function(){el.style.backgroundImage="url('"+u+"')";el.classList.add("has");document.querySelectorAll('[data-foto="'+el.dataset.foto+'"]').forEach(function(o){if(o!==el)pinta(o,u);});fim();};
+  im.onerror=function(){el.dataset.u="";falhou[el.dataset.foto]=Date.now();fim();};im.src=u;})(filaF.shift());}}
+var obsF=window.IntersectionObserver?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){obsF.unobserve(e.target);pintarUm(e.target);}});},{rootMargin:"200px"}):null;
+function pintarFotos(root){(root||document).querySelectorAll("[data-foto]").forEach(function(el){if(el.classList.contains("has")&&el.dataset.u)return;if(obsF)obsF.observe(el);else pintarUm(el);});}
+function aplicaFoto(id){document.querySelectorAll('[data-foto="'+id+'"]').forEach(function(el){el.dataset.u="";el.classList.remove("has");el.style.backgroundImage="";pintarUm(el);});}
+function trocarFoto(id){var r=BY[id];if(!r)return;
+  if(MF[id]){delete MF[id];try{localStorage.setItem(MKEY,JSON.stringify(MF));}catch(e){}aplicaFoto(id);toast("Voltou para a foto do app");return;}
+  var c=FC[id]=FC[id]||{};
+  if(r.fotoOrig&&!c.semOrig){c.semOrig=true;c.v=1;}else{c.v=((c.v||1)%3)+1;if(c.v===1&&r.fotoOrig)c.semOrig=false;}
+  salvaFC();delete falhou[id];aplicaFoto(id);toast("Preparando outra foto… pode levar alguns segundos");}
 function minhaFoto(id,f){if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){
     var mx=900,w=im.width,h=im.height,k=Math.min(1,mx/Math.max(w,h)),cv=document.createElement("canvas");cv.width=Math.round(w*k);cv.height=Math.round(h*k);
     cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);MF[id]=cv.toDataURL("image/jpeg",.78);
     try{localStorage.setItem(MKEY,JSON.stringify(MF));toast("Foto salva");}catch(e){delete MF[id];toast("Sem espaço no celular para mais fotos.");}
     aplicaFoto(id);if(ui.sheet)drawSheet();};im.src=rd.result;};rd.readAsDataURL(f);}
 
+/* ===================== Receitas da comunidade (importadas por qualquer pessoa, ficam para todos) ===================== */
+var SB="https://obqxbokptruohrgjohuy.supabase.co",SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9icXhib2twdHJ1b2hyZ2pvaHV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2NzUzNzEsImV4cCI6MjExMDI1MTM3MX0.mQllYqlGzQcdS2sRHPd1J1FM2K56w2q2h_gCzPoSb9Q";
+var CKEY="cardapio-comunidade-v1";
+function sbFetch(path,opt){opt=opt||{};opt.headers=Object.assign({apikey:SBK,Authorization:"Bearer "+SBK},opt.headers||{});
+  var ctrl=window.AbortController?new AbortController():null;if(ctrl){opt.signal=ctrl.signal;setTimeout(function(){ctrl.abort();},12000);}
+  return fetch(SB+"/rest/v1/"+path,opt);}
+function addComunidade(x){if(BY[x.rid]||(S.ocultas||[]).indexOf(x.rid)>=0)return null;
+  return addMinha({id:x.rid,row:x.dados,fonte:x.fonte||"",foto:x.foto||""});}
+function publicar(m){
+  return sbFetch("cd_receitas",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify({rid:m.id,dados:m.row,fonte:m.fonte||null,foto:m.foto||null})})
+    .then(function(r){if(r.ok||r.status===409)return true;throw 0;});}
+function sincronizar(){
+  /* 1) manda para todos as receitas importadas aqui que ainda não subiram */
+  var pend=(S.minhas||[]).slice();
+  Promise.all(pend.map(function(m){return publicar(m).then(function(){S.minhas=S.minhas.filter(function(x){return x.id!==m.id;});S.meus=(S.meus||[]);if(S.meus.indexOf(m.id)<0)S.meus.push(m.id);},function(){});}))
+  /* 2) baixa as receitas de todo mundo */
+  .then(function(){return sbFetch("cd_receitas?select=rid,dados,fonte,foto,created_at&order=created_at.asc&limit=5000");})
+  .then(function(r){if(!r.ok)throw 0;return r.json();})
+  .then(function(lista){
+    try{localStorage.setItem(CKEY,JSON.stringify(lista));}catch(e){}
+    var novas=[];lista.forEach(function(x){var r=addComunidade(x);if(r&&S.vistoCom&&x.created_at>S.vistoCom&&(S.meus||[]).indexOf(x.rid)<0)novas.push(r);});
+    var ult=lista.length?lista[lista.length-1].created_at:"";
+    var primeiraVez=!S.vistoCom;if(ult&&ult>(S.vistoCom||""))S.vistoCom=ult;else if(!S.vistoCom)S.vistoCom=new Date().toISOString();save();
+    if(novas.length&&!primeiraVez){render();if(!ui.sheet)openSheet({type:"novasCom",ids:novas.map(function(r){return r.id;})});}
+    else render();
+  }).catch(function(){});}
+function novasComHTML(){var ids=ui.sheet.ids.filter(function(id){return BY[id];});
+  return '<div class="grab"></div><div class="sh"><span style="width:40px"></span><h2>Receitas novas</h2><button class="ibtn" data-close aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>'+
+    '<div class="hero-s" style="padding-top:0"><div class="e">🎉</div><p>'+(ids.length===1?'1 receita foi adicionada':ids.length+' receitas foram adicionadas')+' por quem usa o app desde a última vez que você abriu.</p></div>'+
+    '<div class="grid" style="margin-top:14px">'+ids.map(function(id){return rcHTML(BY[id]);}).join("")+'</div>'+
+    '<div class="foot"><button class="btn green" data-act="verImportadas">Ver todas as importadas</button></div>';}
+
 /* ---------- estado ---------- */
-var S={pessoas:2,refeicoes:{cafe:true,almoco:true,lanche:false,jantar:true},arrozFeijao:true,salada:true,variar:true,sobraMarmita:false,rapidoSemana:true,planos:{},fav:[],compras:{},vistoMM:false,versaoVista:0,listaPorDia:false,cmodo:"secao",minhas:[]};
+var S={pessoas:2,refeicoes:{cafe:true,almoco:true,lanche:false,jantar:true},arrozFeijao:true,salada:true,variar:true,sobraMarmita:false,rapidoSemana:true,planos:{},fav:[],compras:{},vistoMM:false,versaoVista:0,listaPorDia:false,cmodo:"secao",minhas:[],meus:[],ocultas:[],vistoCom:""};
 var ui={tab:"semana",wk:null,q:"",cat:"",tag:"",modo:"nome",ings:[],sheet:null,confirm:"",sugHoje:0};
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(d&&typeof d==="object"){Object.keys(S).forEach(function(k){if(d[k]!=null)S[k]=d[k];});}}catch(e){}}
 var saveT=0;function save(){clearTimeout(saveT);saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast("Não consegui salvar neste navegador.");}},150);}
@@ -1280,8 +1300,8 @@ function receitaHTML(r){
   h+=peloDia?'<div class="dlista on" style="margin:0 0 4px">✓ Já está na lista de compras pelo cardápio</div>'
     :'<button class="dlista'+(ehAv?' on':'')+'" data-avl="'+r.id+'" style="width:100%;margin:0 0 4px">'+(ehAv?'✓ Ingredientes na lista de compras · '+cav.av[r.id]+(cav.av[r.id]===1?' porção':' porções')+' <span>tirar</span>':'🛒 Mandar os ingredientes para a lista de compras')+'</button>';
   h+='<div class="sec"><span class="sec-t">Modo de preparo</span><ol class="steps">'+r.passos.map(function(p){return '<li><span>'+esc(p)+'</span></li>';}).join("")+'</ol></div>';
-  if(r.minha)h+='<p class="note">Importada'+(r.fonte?' de <a href="'+esc(r.fonte)+'" target="_blank" rel="noopener">'+esc(hostDe(r.fonte))+'</a>':'')+' · <button class="linkb" data-act="apagarMinha">'+(ui.confirm==="apagarMinha"?'toque de novo para apagar':'apagar receita')+'</button></p>';
-  h+=webHTML(r.nome.replace(/\([^)]*\)/g,"").trim(),r).replace("Procurar \"","Outras versões de \"");
+  if(r.minha)h+='<p class="note">Importada'+(r.fonte?' de <a href="'+esc(r.fonte)+'" target="_blank" rel="noopener">'+esc(hostDe(r.fonte))+'</a>':'')+' · <button class="linkb" data-act="apagarMinha">'+(ui.confirm==="apagarMinha"?'toque de novo para esconder':'esconder do meu app')+'</button></p>';
+  h+=webHTML(r.nome.replace(/\([^)]*\)/g,"").trim(),r);
   if(sh.add){
     var wk=ui.wk;
     h+='<div class="pick" id="pick"><span class="sec-t">Quando?</span><div class="chips">'+[0,1,2,3,4,5,6].map(function(d){return '<button class="chip" data-pd="'+d+'" aria-pressed="'+(sh.d===d)+'">'+DIAC[d]+' '+dm(addD(wk,d))+'</button>';}).join("")+'</div>'+
@@ -1326,8 +1346,11 @@ function diaHTML(){
 function abrirDia(d){var x=sugerirDia(ui.wk,d,false,null);ui.sheet={type:"dia",d:d,draft:x.res};drawSheet(true);}
 function openSheet(o){ui.sheet=o;drawSheet(true);}
 /* ---------- novidades da versão ---------- */
-var VERSAO=7;
+var VERSAO=8;
 var NOVIDADES=[
+ {e:"🖼️",t:"Fotos novas, de livro de receitas",d:"Cada receita ganhou uma foto criada especialmente para ela, com cara de fotografia profissional. A primeira vez que uma foto aparece pode levar alguns segundos; depois fica pronta para todo mundo. Não gostou? Toque em Outra foto.",tab:"receitas",sel:".grid .rc",dica:"As fotos aparecem conforme você rola"},
+ {e:"🤝",t:"Receitas importadas valem para todos",d:"Toda receita importada por qualquer pessoa entra no app de todo mundo. Quando chegar receita nova, o app avisa ao abrir. Elas ficam no filtro Importadas.",tab:"receitas",sel:".cats",dica:"Veja o filtro Importadas"},
+ {e:"⚡",t:"Busca na internet mais direta",d:"O botão Abrir receita vai direto para a melhor receita no site certo. Copie o link lá e volte: o botão Importar a receita copiada já aparece na tela.",tab:"receitas",sel:"#q",dica:"Busque algo e role até o fim"},
  {e:"📸",t:"Fotos das receitas",d:"As receitas agora aparecem com fotos reais, buscadas na internet. Não gostou de uma? Abra a receita e toque em Outra foto ou Usar foto minha.",tab:"receitas",sel:".grid .rc",dica:"As fotos aparecem conforme você rola"},
  {e:"🥕",t:"Busca por ingredientes",d:"Em Descobrir, toque em Por ingredientes e diga o que tem em casa (ex.: ovo, tomate, queijo). Aparecem primeiro as receitas que usam tudo.",tab:"receitas",sel:".modos",dica:"Troque para Por ingredientes"},
  {e:"🌐",t:"Receitas da internet",d:"Busque e, embaixo dos resultados, veja sites escolhidos para o tipo de receita (vegetarianas, doces, leves…). Achou uma? Use Importar receita de um site e ela entra no app com ingredientes e preparo.",tab:"receitas",sel:"#q",dica:"Busque algo e role até o fim"},
@@ -1373,7 +1396,7 @@ function tirarDica(){var b=document.getElementById("dicaBalao");if(b)b.remove();
 function closeSheet(){ui.sheet=null;$("#sheet").hidden=true;document.body.style.overflow="";render();}
 function drawSheet(reset){
   var p=$("#panel"),top=p.scrollTop,sh=ui.sheet;if(!sh)return closeSheet();
-  p.innerHTML=sh.type==="importar"?importarHTML():sh.type==="receita"?receitaHTML(BY[sh.id]):sh.type==="dia"?diaHTML():sh.type==="novidades"?novidadesHTML():pickerHTML();
+  p.innerHTML=sh.type==="novasCom"?novasComHTML():sh.type==="importar"?importarHTML():sh.type==="receita"?receitaHTML(BY[sh.id]):sh.type==="dia"?diaHTML():sh.type==="novidades"?novidadesHTML():pickerHTML();
   var el=$("#sheet");if(el.hidden){el.hidden=false;document.body.style.overflow="hidden";}
   p.scrollTop=reset?0:top;pintarFotos(p);}
 
@@ -1423,6 +1446,7 @@ function restaurar(file){var fr=new FileReader();fr.onload=function(){try{var d=
 document.addEventListener("click",function(e){
   if(dicaEl&&!e.target.closest("#dicaBalao"))tirarDica();
   var ond=e.target.closest("[data-onde]");if(ond){mostrarOnde(+ond.getAttribute("data-onde"));return;}
+  var lk=e.target.closest('a[data-act="abrirSite"]');if(lk){ui.esperaAte=Date.now()+30*60000;setTimeout(mostrarFab,800);return;}
   var el=e.target.closest("[data-delx],button,[data-open],[data-close]");if(!el)return;var d=el.dataset,wk=ui.wk;
   if(d.close!==undefined){if(ui.sheet&&ui.sheet.volta){ui.sheet=ui.sheet.volta;drawSheet(true);return;}closeSheet();return;}
   if(d.undo!==undefined){desfazer();return;}
@@ -1482,9 +1506,18 @@ document.addEventListener("click",function(e){
     case "impSalvar":var im=ui.sheet.m,nm=($("#impNome").value||"").trim()||im.row[0];
       im.row[0]=nm.slice(0,80);im.row[2]=$("#impCat").value;im.row[1]=CATN[im.row[2]][2];im.row[4]=Math.max(1,Math.min(30,+$("#impPorc").value||4));im.row[3]=Math.max(1,+$("#impTempo").value||40);
       var tg=im.row[7].split(",").filter(function(x){return x&&x!=="veg";});if($("#impVeg").checked)tg.push("veg");im.row[7]=tg.join(",");
-      var nr=addMinha(im);S.minhas.push({id:im.id,row:im.row,fonte:im.fonte,foto:im.foto});save();
-      ui.cat="";ui.q="";ui.modo="nome";go("receitas");openSheet({type:"receita",id:nr.id,porc:S.pessoas});toast("Receita importada");break;
-    case "apagarMinha":if(ui.confirm!=="apagarMinha"){ui.confirm="apagarMinha";drawSheet();break;}ui.confirm="";var aid=ui.sheet.id;tirarMinha(aid);closeSheet();toast("Receita apagada");break;
+      var ja=im.fonte&&R.filter(function(x){return x.minha&&x.fonte===im.fonte;})[0];
+      if(ja){go("receitas");openSheet({type:"receita",id:ja.id,porc:S.pessoas});toast("Essa receita já estava no app");break;}
+      im.id="";var nr=addMinha(im),pm={id:im.id,row:im.row,fonte:im.fonte,foto:im.foto};
+      S.meus=S.meus||[];S.meus.push(im.id);save();
+      publicar(pm).then(function(){toast("Receita importada e disponível para todos");},function(){S.minhas.push(pm);save();toast("Receita salva. Vai para todos quando tiver internet.");});
+      ui.cat="";ui.q="";ui.modo="nome";go("receitas");openSheet({type:"receita",id:nr.id,porc:S.pessoas});break;
+    case "apagarMinha":if(ui.confirm!=="apagarMinha"){ui.confirm="apagarMinha";drawSheet();break;}ui.confirm="";var aid=ui.sheet.id;S.ocultas=S.ocultas||[];S.ocultas.push(aid);tirarMinha(aid);closeSheet();toast("Receita escondida neste celular");break;
+    case "verImportadas":ui.cat="minhas";ui.q="";ui.modo="nome";closeSheet();go("receitas");break;
+    case "abrirSite":ui.esperaAte=Date.now()+30*60000;mostrarFab();break;
+    case "fabImp":esconderFab();var abre=function(t){var mm=String(t||"").match(/https?:\/\/\S+/);openSheet({type:"importar",url:mm?mm[0]:"",estado:"",erro:mm?"":"Não achei um link copiado. No site, copie o link da receita (Compartilhar → Copiar) e cole aqui."});if(mm)importarLink(mm[0]);};
+      if(navigator.clipboard&&navigator.clipboard.readText)navigator.clipboard.readText().then(abre,function(){abre("");});else abre("");break;
+    case "fabX":ui.esperaAte=0;esconderFab();break;
     case "outraFoto":trocarFoto(ui.sheet.id);break;
     case "fotoMinha":var fa=$("#fotoArq");if(fa)fa.click();break;
     case "semanaNaLista":var cw=comp(wk);diasComPrato(wk).forEach(function(x){cw.dias[x]=true;});save();render();toast("Semana na lista de compras");break;
@@ -1543,12 +1576,14 @@ window.addEventListener("hashchange",function(){go(location.hash.slice(1));});
 var novato=true;try{novato=localStorage.getItem(KEY)===null;}catch(e){}
 load();
 if(!Array.isArray(S.minhas))S.minhas=[];
-S.minhas.forEach(function(m){try{addMinha(m);}catch(x){}});
+if(!Array.isArray(S.ocultas))S.ocultas=[];if(!Array.isArray(S.meus))S.meus=[];
+try{(JSON.parse(localStorage.getItem(CKEY)||"[]")||[]).forEach(function(x){try{addComunidade(x);}catch(e){}});}catch(x){}
+S.minhas.forEach(function(m){try{if(!BY[m.id])addMinha(m);}catch(x){}});
 if(!S.listaPorDia){Object.keys(S.planos).forEach(function(wk){var c=comp(wk);for(var d=0;d<7;d++)c.dias[d]=true;});S.listaPorDia=true;save();}
 ui.wk=curWk();
 ui.tab=["semana","receitas","compras","ajustes","sobre"].indexOf(location.hash.slice(1))>=0?location.hash.slice(1):(novato?"sobre":"semana");
 if(novato){S.versaoVista=VERSAO;save();}
-draw();pintarFotos($("#main"));
+draw();pintarFotos($("#main"));setTimeout(sincronizar,600);
 (function(){var ps=new URLSearchParams(location.search),t=[ps.get("url"),ps.get("text"),ps.get("title")].join(" "),m=t.match(/https?:\/\/\S+/);
   if(!m)return;try{history.replaceState(null,"",location.pathname+location.hash);}catch(x){}
   openSheet({type:"importar",url:m[0],estado:"",erro:""});importarLink(m[0]);})();
