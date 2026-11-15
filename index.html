@@ -786,7 +786,7 @@ function webHTML(q,r){q=String(q||"").trim();if(!q)return "";var tp=tipoBusca(q,
     '<a class="btn green abre" data-act="abrirSite" href="'+esc(linkDireto(top,q))+'" target="_blank" rel="noopener">Abrir receita no '+esc(top[0])+' ↗</a>'+
     '<div class="web-l"><span class="note">ou em</span>'+ss.slice(1).map(function(st){return '<a class="wsite" data-act="abrirSite" href="'+esc(linkDireto(st,q))+'" target="_blank" rel="noopener">'+esc(st[0])+'<span>↗</span></a>';}).join("")+
     '<a class="wsite" data-act="abrirSite" href="https://www.google.com/search?q='+encodeURIComponent(q+" receita")+'" target="_blank" rel="noopener">Google<span>↗</span></a></div>'+
-    '<p class="note" style="margin:0 0 10px">Gostou da receita? No site, copie o link (Compartilhar → Copiar link) e volte para o app: o botão de importar já vai estar esperando.</p>'+
+    '<p class="note" style="margin:0 0 10px">Gostou da receita? '+(/android/i.test(navigator.userAgent)?'Na página dela, toque em <b>Compartilhar → Cardápio</b> e ela entra direto. Ou ':'')+'copie o link (Compartilhar → Copiar link) e volte para o app: o botão de importar já vai estar esperando.</p>'+
     '<button class="btn imp" data-act="importar"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Importar receita de um site</button></div>';}
 function mostrarFab(){var f=document.getElementById("fabImp");if(!f){f=document.createElement("div");f.id="fabImp";f.className="fabimp";
     f.innerHTML='<button class="fabimp-b" data-act="fabImp">📥 Importar a receita copiada</button><button class="fabimp-x" data-act="fabX" aria-label="Fechar">×</button>';document.body.appendChild(f);}
@@ -853,7 +853,7 @@ function hostDe(u){try{return new URL(u).hostname.replace(/^www\./,"");}catch(e)
 function importarLink(u){
   var sh=ui.sheet;if(!sh||sh.type!=="importar")return;
   u=String(u||"").trim();var mm=u.match(/https?:\/\/\S+/);if(!mm){sh.erro="Cole o link da receita (começa com https://).";drawSheet();return;}
-  sh.url=mm[0].replace(/[)\].,]+$/,"");sh.estado="busca";sh.erro="";drawSheet();
+  sh.url=mm[0].replace(/[)\].,]+$/,"");S.ultLink=sh.url;save();sh.estado="busca";sh.erro="";drawSheet();
   var ctrl=window.AbortController?new AbortController():null;if(ctrl)setTimeout(function(){ctrl.abort();},20000);
   fetch("api/importar?url="+encodeURIComponent(sh.url),ctrl?{signal:ctrl.signal}:{}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j&&j.erro||"falhou");return j;});})
    .then(function(j){if(ui.sheet!==sh)return;var m=montarMinha(j);m.fonte=sh.url;sh.dados=j;sh.m=m;sh.estado="ok";drawSheet(true);})
@@ -1516,7 +1516,10 @@ document.addEventListener("click",function(e){
     case "apagarMinha":if(ui.confirm!=="apagarMinha"){ui.confirm="apagarMinha";drawSheet();break;}ui.confirm="";var aid=ui.sheet.id;S.ocultas=S.ocultas||[];S.ocultas.push(aid);tirarMinha(aid);closeSheet();toast("Receita escondida neste celular");break;
     case "verImportadas":ui.cat="minhas";ui.q="";ui.modo="nome";closeSheet();go("receitas");break;
     case "abrirSite":ui.esperaAte=Date.now()+30*60000;mostrarFab();break;
-    case "fabImp":esconderFab();var abre=function(t){var mm=String(t||"").match(/https?:\/\/\S+/);openSheet({type:"importar",url:mm?mm[0]:"",estado:"",erro:mm?"":"Não achei um link copiado. No site, copie o link da receita (Compartilhar → Copiar) e cole aqui."});if(mm)importarLink(mm[0]);};
+    case "fabImp":esconderFab();var abre=function(t){var mm=String(t||"").match(/https?:\/\/\S+/),u=mm?mm[0].replace(/[)\].,]+$/,""):"";
+        var velho=u&&(u===S.ultLink||R.some(function(x){return x.minha&&x.fonte===u;}));
+        if(!u||velho){openSheet({type:"importar",url:"",estado:"",erro:velho?"O link copiado ainda é o da receita anterior. Na página da receita nova, toque em Compartilhar → Copiar link e volte aqui.":"Não achei um link copiado. Na página da receita, toque em Compartilhar → Copiar link e volte aqui."});return;}
+        S.ultLink=u;save();openSheet({type:"importar",url:u,estado:"",erro:""});importarLink(u);};
       if(navigator.clipboard&&navigator.clipboard.readText)navigator.clipboard.readText().then(abre,function(){abre("");});else abre("");break;
     case "fabX":ui.esperaAte=0;esconderFab();break;
     case "outraFoto":trocarFoto(ui.sheet.id);break;
