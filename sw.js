@@ -1,5 +1,5 @@
 // Guarda o app no celular para abrir rápido e funcionar sem internet.
-const CACHE = "cardapio-semana-v10";
+const CACHE = "cardapio-semana-v11";
 const ARQUIVOS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
@@ -11,6 +11,10 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
+  const u = new URL(req.url);
+  // Fotos e buscas de outros sites e a importação de receitas vão direto para a internet (o navegador guarda as fotos sozinho).
+  if (u.pathname.indexOf("/api/") >= 0) return;
+  if (u.origin !== self.location.origin && !/fonts\.(googleapis|gstatic)\.com$/.test(u.hostname)) return;
   // Páginas: tenta a internet primeiro (pega atualizações) e usa a cópia guardada se estiver sem sinal.
   if (req.mode === "navigate") {
     e.respondWith(fetch(req).then(r => { const cp = r.clone(); caches.open(CACHE).then(c => c.put("./index.html", cp)); return r; })

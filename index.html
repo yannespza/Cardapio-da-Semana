@@ -1,4 +1,44 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#F3F6F4"><meta name="description" content="Cardápio da semana com receitas do dia a dia e lista de compras automática."><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Cardápio"><meta name="apple-mobile-web-app-status-bar-style" content="default"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style><title>Cardápio da Semana</title>
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#F3F6F4"><meta name="description" content="Cardápio da semana com receitas do dia a dia e lista de compras automática."><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Cardápio"><meta name="apple-mobile-web-app-status-bar-style" content="default"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}
+/* fotos nos cartões */
+.rc{padding:8px 8px 14px;gap:4px}
+.rc .plate{width:100%;height:auto;aspect-ratio:4/3;border-radius:18px;font-size:48px;margin-bottom:6px;background:var(--accent-soft) center/cover no-repeat;transition:filter .2s}
+.rc .heart{top:14px;right:14px;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(6px)}
+[data-foto].has{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
+[data-foto].has>*{visibility:hidden}
+.dline .e.has{font-size:0}
+.dish .e.has{display:inline-block;width:24px;height:24px;border-radius:7px;font-size:0;vertical-align:middle}
+.bigfoto{width:100%;display:grid;place-items:center;border-radius:26px;background:transparent center/cover no-repeat}
+.bigfoto.has{aspect-ratio:16/11;box-shadow:var(--shadow)}
+.bigfoto.has .bigplate{display:none}
+.fotobar{display:flex;gap:8px;justify-content:center;margin:8px 0 4px}
+.mini{border:0;background:var(--surface-2);color:var(--ink-2);font:600 12.5px var(--head);padding:7px 12px;border-radius:999px}
+/* modos de busca */
+.modos{display:flex;gap:6px;background:var(--surface-2);padding:4px;border-radius:16px;margin:14px 0 10px}
+.modos button{flex:1;border:0;background:transparent;padding:10px 8px;border-radius:12px;font:700 13.5px var(--head);color:var(--ink-2)}
+.modos button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.search .addi{min-height:36px;padding:0 14px;border-radius:12px;flex:none}
+.chips.ings{margin-top:10px}
+.chip.on{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+/* busca na internet e importar */
+.web{margin-top:18px;padding:16px;border-radius:22px;background:var(--surface);box-shadow:var(--shadow)}
+.web-h b{display:block;font:700 15px var(--head)}
+.web-h small{display:block;color:var(--ink-3);font-size:12.5px;margin-top:2px}
+.web-l{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.wsite{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border-radius:999px;background:var(--surface-2);color:var(--ink);font:600 13px var(--head);text-decoration:none}
+.wsite span{color:var(--ink-3);font-size:12px}
+.btn.imp{width:100%;background:transparent;border:1.5px dashed var(--accent);color:var(--accent);box-shadow:none}
+.sheet .web{box-shadow:none;border:1.5px solid var(--line);background:transparent}
+.stackb{display:flex;gap:10px;margin-top:12px}.stackb .btn{flex:1}
+.lbl{display:flex;flex-direction:column;gap:6px;font:600 12.5px var(--head);color:var(--ink-2);margin-top:12px}
+.lbl input,.lbl select{min-height:44px;border:1.5px solid var(--line);border-radius:14px;padding:0 12px;background:var(--surface);color:var(--ink);font:500 15px var(--body)}
+.lbl.chk{flex-direction:row;align-items:center;gap:8px;align-self:end;min-height:44px}
+.lbl.chk input{min-height:0;width:20px;height:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.impfoto{aspect-ratio:16/9;border-radius:22px;background:var(--accent-soft) center/cover no-repeat;display:grid;place-items:center;font-size:64px}
+.linkb{border:0;background:none;padding:0;color:var(--heart);font:inherit;text-decoration:underline}
+.spin{display:inline-block;width:16px;height:16px;border:2.5px solid currentColor;border-right-color:transparent;border-radius:50%;animation:gira .8s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+</style><title>Cardápio da Semana</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap">
 <style>
@@ -541,6 +581,66 @@ var RAW=[
 ["Grão-de-bico ao forno com batata e páprica","🥔","prato",45,4,1,1,"veg,forno,fit,marmita","2 lata grão-de-bico #M; 4 un batata #H; 1 un cebola roxa #H; 2 csp páprica defumada #T; 3 csp azeite #M; 1 un limão #H; ag salsinha #H","Escorra e seque o grão-de-bico.|Misture com batatas em cubos, cebola, páprica, azeite e sal.|Asse a 220 °C por 35 minutos, mexendo na metade.|Finalize com limão e salsinha."],
 ["Polenta cremosa com cogumelos","🍄","prato",30,4,1,2,"veg,rapido","1 xic fubá #M; 4 xic caldo de legumes #M; 2 csp manteiga #L; 50 g queijo parmesão #L; 300 g cogumelo paris #H; 2 dente alho #H; ag salsinha #H","Cozinhe o fubá no caldo mexendo sempre por 15 minutos.|Desligue e misture manteiga e parmesão.|Salteie os cogumelos fatiados com alho em fogo alto.|Sirva a polenta com os cogumelos e salsinha."],
 ["Omelete de espinafre com queijo","🍳","prato",15,2,1,1,"veg,fit,rapido","4 un ovo #L; 1 maco espinafre #H; 50 g queijo minas frescal #L; ag sal #T","Bata os ovos com sal.|Murche o espinafre na frigideira.|Despeje os ovos, espalhe o queijo e dobre quando firmar."],
+["Strogonoff de grão-de-bico","🫘","prato",30,4,1,1,"veg,arroz,marmita","2 lata grão-de-bico #M; 200 g cogumelo paris #H; 1 un cebola #H; 2 dente alho #H; 340 g molho de tomate #M; 1 csp mostarda #M; 200 g creme de leite #L; ag batata palha #M","Refogue a cebola e o alho, junte os cogumelos fatiados e deixe dourar.|Acrescente o grão-de-bico escorrido, o molho de tomate e a mostarda e cozinhe 10 minutos.|Desligue, misture o creme de leite e sirva com arroz e batata palha."],
+["Moqueca de ovos","🥚","prato",30,4,1,1,"veg,arroz,barato","8 un ovo #L; 1 un cebola #H; 2 un tomate #H; 1 un pimentão #H; 2 dente alho #H; 200 ml leite de coco #M; 1 csp azeite de dendê #M; 1 maco coentro #H","Faça camadas de cebola, tomate e pimentão em rodelas com o alho na panela.|Junte o leite de coco e o dendê e cozinhe 10 minutos.|Quebre os ovos por cima, tampe e cozinhe até as claras firmarem.|Finalize com coentro."],
+["Escondidinho de cogumelos","🍄","prato",60,6,2,2,"veg,forno,congela","1 kg mandioca #H; 400 g cogumelo shimeji #H; 200 g cogumelo paris #H; 1 un cebola #H; 3 dente alho #H; 3 csp shoyu #M; 2 csp manteiga #L; 1 xic leite #L; 150 g queijo muçarela #L","Cozinhe a mandioca e amasse com a manteiga e o leite até virar purê.|Refogue cebola e alho, junte os cogumelos e o shoyu e deixe secar.|Monte os cogumelos embaixo e o purê por cima, cubra com queijo e gratine a 200 °C por 20 minutos."],
+["Lasanha de abobrinha","🥒","prato",60,6,2,2,"veg,forno,fit","3 un abobrinha #H; 500 g ricota #L; 1 maco espinafre #H; 680 g molho de tomate #M; 200 g queijo muçarela #L; 50 g queijo parmesão #L; ag orégano #T","Fatie as abobrinhas no comprimento e grelhe rapidamente.|Misture a ricota com o espinafre refogado e sal.|Monte camadas de molho, abobrinha, ricota e muçarela.|Termine com parmesão e asse a 200 °C por 30 minutos."],
+["Berinjela recheada","🍆","prato",50,4,2,1,"veg,forno","2 un berinjela #H; 1 un cebola #H; 2 un tomate #H; 2 dente alho #H; 0.5 xic farinha de rosca #M; 100 g queijo muçarela #L; ag salsinha #H","Corte as berinjelas ao meio e retire a polpa.|Refogue a cebola, o alho, o tomate e a polpa picada; misture a farinha de rosca e a salsinha.|Recheie as berinjelas, cubra com queijo e asse a 200 °C por 30 minutos."],
+["Pimentão recheado com arroz e queijo","🫑","prato",50,4,2,1,"veg,forno","4 un pimentão #H; 2 xic arroz cozido #M; 1 un tomate #H; 1 un cebola #H; 1 lata milho #M; 150 g queijo muçarela #L; ag cheiro-verde #H","Corte a tampa dos pimentões e tire as sementes.|Refogue cebola e tomate, junte o arroz, o milho, metade do queijo e o cheiro-verde.|Recheie, cubra com o resto do queijo e asse a 200 °C por 30 minutos."],
+["Berinjela à milanesa","🍆","prato",40,4,1,1,"veg,arroz","2 un berinjela #H; 2 un ovo #L; 1 xic farinha de trigo #M; 2 xic farinha de rosca #M; 1 csc alho em pó #T; 3 csp azeite #M","Corte a berinjela em rodelas de 1 cm e tempere com sal e alho.|Passe na farinha de trigo, no ovo batido e na farinha de rosca.|Arrume numa assadeira untada, regue com azeite e asse a 220 °C por 25 minutos, virando na metade."],
+["Couve-flor empanada assada","🥦","prato",40,4,1,1,"veg,forno,kids","1 un couve-flor #H; 2 un ovo #L; 1 xic farinha de rosca #M; 50 g queijo parmesão #L; 1 csc páprica doce #T; 2 csp azeite #M","Separe a couve-flor em buquês e cozinhe 4 minutos em água com sal.|Passe no ovo batido e depois na farinha de rosca misturada com parmesão e páprica.|Regue com azeite e asse a 220 °C por 25 minutos até dourar."],
+["Arroz de forno vegetariano","🍚","prato",45,6,1,1,"veg,forno,marmita","4 xic arroz cozido #M; 1 un cenoura #H; 1 lata milho #M; 1 lata ervilha #M; 1 un tomate #H; 340 g molho de tomate #M; 200 g creme de leite #L; 200 g queijo muçarela #L","Refogue a cenoura ralada e o tomate e junte milho e ervilha.|Misture o arroz, o molho e o creme de leite.|Espalhe na travessa, cubra com o queijo e asse a 200 °C por 20 minutos."],
+["Risoto de abóbora","🎃","prato",40,4,2,2,"veg,fds","1.5 xic arroz arbóreo #M; 500 g abóbora cabotiá #H; 1 un cebola #H; 0.5 xic vinho branco #M; 1 l caldo de legumes #M; 2 csp manteiga #L; 60 g queijo parmesão #L","Asse ou cozinhe a abóbora e amasse metade; corte o resto em cubos.|Refogue a cebola na manteiga, junte o arroz e o vinho.|Vá colocando o caldo quente aos poucos, mexendo, por 18 minutos.|Junte o purê e os cubos de abóbora, a manteiga e o parmesão."],
+["Risoto de alho-poró","🧅","prato",35,4,2,2,"veg,fds","1.5 xic arroz arbóreo #M; 2 un alho-poró #H; 0.5 xic vinho branco #M; 1 l caldo de legumes #M; 2 csp manteiga #L; 60 g queijo parmesão #L","Refogue o alho-poró fatiado na manteiga até murchar.|Junte o arroz, mexa e regue com o vinho.|Acrescente o caldo quente aos poucos, mexendo, por 18 minutos.|Finalize com manteiga e parmesão."],
+["Feijão-branco ensopado com legumes","🫘","prato",45,4,1,1,"veg,marmita,congela","500 g feijão-branco cozido #M; 1 un cenoura #H; 1 un abobrinha #H; 1 un cebola #H; 3 dente alho #H; 2 un tomate #H; 1 csc páprica defumada #T; ag salsinha #H","Refogue cebola, alho e tomate com a páprica.|Junte a cenoura e a abobrinha em cubos e um copo de água.|Acrescente o feijão e cozinhe 15 minutos até encorpar.|Finalize com salsinha."],
+["Arroz com cogumelos e ervilha","🍄","prato",35,4,1,2,"veg,marmita","2 xic arroz #M; 300 g cogumelo shimeji #H; 1 lata ervilha #M; 1 un cebola #H; 2 dente alho #H; 2 csp shoyu #M; 1 csp manteiga #L","Doure os cogumelos na manteiga com o shoyu e reserve.|Refogue cebola e alho, junte o arroz e 4 xícaras de água quente e cozinhe.|Misture os cogumelos e a ervilha no fim."],
+["Torta de palmito","🥧","prato",60,8,2,2,"veg,forno,fds","2 xic farinha de trigo #M; 150 g manteiga #L; 1 un ovo #L; 2 lata palmito #M; 1 un cebola #H; 2 un tomate #H; 1 csp farinha de trigo #M; 1 xic leite #L; ag cheiro-verde #H","Misture a farinha, a manteiga, o ovo e sal até formar massa; forre a forma.|Refogue cebola e tomate, junte o palmito picado e engrosse com farinha e leite.|Recheie, cubra com o resto da massa e asse a 180 °C por 40 minutos."],
+["Empadão de legumes","🥧","prato",70,8,2,1,"veg,forno,marmita","2 xic farinha de trigo #M; 150 g manteiga #L; 1 un ovo #L; 1 un cenoura #H; 1 un chuchu #H; 1 lata milho #M; 1 lata ervilha #M; 1 un cebola #H; 1 xic leite #L; 1 csp amido de milho #M","Faça a massa com farinha, manteiga, ovo e sal e forre a forma.|Refogue a cebola com a cenoura e o chuchu em cubos até ficarem macios.|Junte milho, ervilha e o leite com o amido e mexa até engrossar.|Recheie, cubra com massa e asse a 180 °C por 40 minutos."],
+["Quiche de tomate e queijo","🥧","prato",60,6,2,2,"veg,forno","1.5 xic farinha de trigo #M; 100 g manteiga #L; 3 un ovo #L; 200 g creme de leite #L; 150 g queijo muçarela #L; 250 g tomate-cereja #H; ag manjericão #H","Misture farinha, manteiga, 1 ovo e sal; forre a forma e asse 10 minutos.|Bata os outros ovos com o creme de leite e sal.|Espalhe o queijo e os tomates cortados na massa e cubra com o creme.|Asse a 180 °C por 30 minutos e finalize com manjericão."],
+["Almôndegas de lentilha ao sugo","🧆","prato",50,4,2,1,"veg,arroz,congela","1.5 xic lentilha #M; 1 un cebola #H; 2 dente alho #H; 0.5 xic farinha de rosca #M; 1 un ovo #L; 50 g queijo parmesão #L; 680 g molho de tomate #M; ag salsinha #H","Cozinhe a lentilha até ficar macia e escorra bem.|Amasse e misture a cebola ralada, o alho, o ovo, o parmesão, a farinha de rosca e a salsinha.|Modele bolinhas e asse a 200 °C por 20 minutos.|Cozinhe 5 minutos no molho de tomate."],
+["Chili vegetariano","🌶️","prato",40,6,1,1,"veg,arroz,congela,marmita","500 g feijão vermelho cozido #M; 1 lata milho #M; 1 un cebola #H; 1 un pimentão #H; 3 dente alho #H; 680 g molho de tomate #M; 2 csc cominho #T; 1 csp páprica defumada #T","Refogue cebola, pimentão e alho com o cominho e a páprica.|Junte o feijão, o milho e o molho de tomate.|Cozinhe 20 minutos em fogo baixo até encorpar."],
+["Tofu xadrez","🥡","prato",30,4,1,2,"veg,arroz,fit","400 g tofu firme #L; 1 un pimentão #H; 1 un pimentão amarelo #H; 1 un cebola #H; 4 csp shoyu #M; 1 csp amido de milho #M; 0.5 xic amendoim #M; 1 csc gengibre #H","Corte o tofu em cubos e doure na frigideira.|Salteie a cebola e os pimentões em cubos com o gengibre.|Junte o shoyu com o amido dissolvido em meio copo de água e deixe engrossar.|Volte o tofu e finalize com amendoim."],
+["Tortilha espanhola de batata","🥔","prato",40,4,2,1,"veg,barato","4 un batata #H; 1 un cebola #H; 6 un ovo #L; 4 csp azeite #M","Fatie as batatas e a cebola bem finas e cozinhe no azeite em fogo baixo até ficarem macias.|Misture com os ovos batidos e sal.|Volte à frigideira, cozinhe tampado até firmar e vire com ajuda de um prato para dourar o outro lado."],
+["Couve-flor assada com grão-de-bico e tahine","🥦","prato",40,4,1,2,"veg,forno,fit","1 un couve-flor #H; 1 lata grão-de-bico #M; 2 csp azeite #M; 1 csc cúrcuma #T; 1 csc cominho #T; 3 csp tahine #M; 1 un limão #H","Misture a couve-flor em buquês e o grão-de-bico com azeite, cúrcuma, cominho e sal.|Asse a 220 °C por 30 minutos.|Misture o tahine com limão e água até virar molho e regue por cima."],
+["Panqueca de cogumelos com queijo","🥞","prato",50,4,2,2,"veg,forno","1.5 xic farinha de trigo #M; 2 xic leite #L; 2 un ovo #L; 400 g cogumelo paris #H; 1 un cebola #H; 340 g molho de tomate #M; 150 g queijo muçarela #L","Bata farinha, leite, ovos e sal e faça discos finos na frigideira.|Refogue a cebola e os cogumelos fatiados até secar.|Recheie e enrole as panquecas.|Cubra com molho e queijo e leve ao forno até derreter."],
+["Mandioca gratinada com queijo","🧀","prato",45,4,1,1,"veg,forno","1 kg mandioca #H; 1 un cebola #H; 2 csp manteiga #L; 1 xic leite #L; 200 g creme de leite #L; 150 g queijo muçarela #L","Cozinhe a mandioca e corte em pedaços.|Refogue a cebola na manteiga, junte o leite e o creme de leite e tempere.|Misture com a mandioca, cubra com queijo e gratine a 200 °C por 20 minutos."],
+["Abóbora recheada com queijo","🎃","prato",80,6,2,2,"veg,forno,fds","1 un abóbora cabotiá #H; 300 g queijo minas frescal #L; 200 g requeijão #L; 1 un cebola #H; 2 dente alho #H; ag cheiro-verde #H","Corte uma tampa na abóbora, tire as sementes e asse a 200 °C por 40 minutos.|Refogue cebola e alho e misture com o queijo em cubos, o requeijão e o cheiro-verde.|Recheie a abóbora e volte ao forno por 20 minutos."],
+["Baião de dois vegetariano","🍚","prato",45,6,1,1,"veg,marmita","2 xic arroz #M; 500 g feijão-de-corda cozido #M; 200 g queijo coalho #L; 1 un cebola #H; 3 dente alho #H; 1 un pimentão #H; 1 maco coentro #H; 2 csp manteiga de garrafa #L","Doure o queijo coalho em cubos na manteiga e reserve.|Refogue cebola, alho e pimentão, junte o arroz e 4 xícaras de água e cozinhe.|Misture o feijão, o queijo e o coentro."],
+["Batata-doce recheada com grão-de-bico","🍠","prato",50,4,1,1,"veg,forno,fit","4 un batata-doce #H; 1 lata grão-de-bico #M; 1 un tomate #H; 1 un cebola roxa #H; 1 csc páprica defumada #T; 4 csp iogurte natural #L; ag salsinha #H","Asse as batatas-doces inteiras a 200 °C por 40 minutos.|Refogue o grão-de-bico com a cebola, o tomate e a páprica.|Abra as batatas, recheie e finalize com iogurte e salsinha."],
+["Arroz frito com legumes e ovo","🍳","prato",25,4,1,1,"veg,barato,rapido","3 xic arroz cozido #M; 3 un ovo #L; 1 un cenoura #H; 1 lata ervilha #M; 1 un cebola #H; 4 csp shoyu #M; ag cebolinha #H","Mexa os ovos numa frigideira grande e reserve.|Salteie a cebola e a cenoura em cubinhos.|Junte o arroz frio e a ervilha e frite em fogo alto.|Volte os ovos, regue com shoyu e finalize com cebolinha."],
+["Espaguete ao sugo com ricota","🍝","massa",25,4,1,1,"veg,rapido,barato","500 g macarrão espaguete #M; 680 g molho de tomate #M; 3 dente alho #H; 2 csp azeite #M; 200 g ricota #L; ag manjericão #H","Cozinhe o macarrão.|Doure o alho no azeite e junte o molho por 10 minutos.|Misture o macarrão e sirva com a ricota esfarelada e manjericão."],
+["Macarrão com molho de abóbora","🎃","massa",30,4,1,1,"veg,kids","500 g macarrão penne #M; 500 g abóbora cabotiá #H; 1 un cebola #H; 2 dente alho #H; 1 xic leite #L; 50 g queijo parmesão #L; ag noz-moscada #T","Cozinhe a abóbora com a cebola e o alho até ficar macia.|Bata com o leite, o parmesão e a noz-moscada até virar creme.|Misture o macarrão cozido ao molho."],
+["Talharim com cogumelos ao molho branco","🍄","massa",30,4,1,2,"veg","500 g macarrão talharim #M; 300 g cogumelo paris #H; 200 g cogumelo shimeji #H; 2 dente alho #H; 2 csp manteiga #L; 200 g creme de leite #L; 50 g queijo parmesão #L","Cozinhe o macarrão.|Doure os cogumelos e o alho na manteiga.|Junte o creme de leite e o parmesão e misture o macarrão."],
+["Fusilli com espinafre e ricota","🥬","massa",25,4,1,1,"veg,rapido","500 g macarrão parafuso #M; 2 maco espinafre #H; 250 g ricota #L; 3 dente alho #H; 2 csp azeite #M; 0.5 xic leite #L; 50 g queijo parmesão #L","Cozinhe o macarrão.|Murche o espinafre no azeite com o alho.|Junte a ricota amassada com o leite até virar creme.|Misture o macarrão e o parmesão."],
+["Nhoque de mandioquinha ao sugo","🥔","massa",60,4,2,2,"veg,fds","1 kg mandioquinha #H; 1.5 xic farinha de trigo #M; 1 un ovo #L; 680 g molho de tomate #M; 50 g queijo parmesão #L","Cozinhe a mandioquinha e amasse ainda quente.|Misture o ovo, sal e a farinha aos poucos até soltar das mãos.|Faça rolinhos, corte e cozinhe em água fervente até subirem.|Sirva com o molho e parmesão."],
+["Macarrão à bolonhesa de lentilha","🍝","massa",40,6,1,1,"veg,congela,marmita","500 g macarrão espaguete #M; 1 xic lentilha #M; 1 un cebola #H; 1 un cenoura #H; 3 dente alho #H; 680 g molho de tomate #M; ag orégano #T","Cozinhe a lentilha por 15 minutos e escorra.|Refogue a cebola, a cenoura ralada e o alho.|Junte a lentilha e o molho e cozinhe 15 minutos.|Sirva sobre o macarrão."],
+["Pad thai vegetariano","🥢","massa",30,4,2,2,"veg","300 g macarrão de arroz #M; 200 g tofu firme #L; 2 un ovo #L; 200 g broto de feijão #H; 4 csp shoyu #M; 2 csp açúcar mascavo #M; 1 un limão #H; 0.5 xic amendoim #M; ag cebolinha #H","Hidrate o macarrão em água quente por 10 minutos.|Doure o tofu em cubos e mexa os ovos na mesma frigideira.|Junte o macarrão, o shoyu, o açúcar e o limão.|Finalize com broto de feijão, amendoim e cebolinha."],
+["Macarrão ao molho de queijos","🧀","massa",25,4,1,2,"veg,rapido,kids","500 g macarrão penne #M; 2 csp manteiga #L; 1 csp farinha de trigo #M; 2 xic leite #L; 100 g queijo muçarela #L; 100 g queijo gorgonzola #L; 50 g queijo parmesão #L","Cozinhe o macarrão.|Derreta a manteiga, junte a farinha e o leite e mexa até engrossar.|Acrescente os queijos até derreterem e misture o macarrão."],
+["Sopa de grão-de-bico com espinafre","🥣","sopa",35,4,1,1,"veg,fit,congela","2 lata grão-de-bico #M; 1 maco espinafre #H; 1 un cebola #H; 3 dente alho #H; 2 un tomate #H; 1 csc cominho #T; 1 l caldo de legumes #M","Refogue cebola, alho e tomate com o cominho.|Junte o grão-de-bico e o caldo e cozinhe 15 minutos.|Amasse um pouco do grão para engrossar e acrescente o espinafre no fim."],
+["Creme de couve-flor","🥣","sopa",35,4,1,1,"veg,fit","1 un couve-flor #H; 1 un batata #H; 1 un cebola #H; 2 dente alho #H; 1 l caldo de legumes #M; 0.5 xic leite #L; ag noz-moscada #T","Refogue cebola e alho.|Junte a couve-flor, a batata e o caldo e cozinhe até ficar macia.|Bata com o leite e tempere com noz-moscada."],
+["Sopa de feijão-branco com couve","🥣","sopa",40,4,1,1,"veg,congela","500 g feijão-branco cozido #M; 1 maco couve #H; 1 un cebola #H; 3 dente alho #H; 1 un cenoura #H; 1 l caldo de legumes #M; 2 csp azeite #M","Refogue cebola, alho e cenoura no azeite.|Junte o feijão e o caldo e cozinhe 15 minutos.|Bata metade e volte à panela; acrescente a couve fatiada fina."],
+["Caldo verde vegetariano","🥣","sopa",40,4,1,1,"veg,barato","1 kg batata #H; 1 maco couve #H; 1 un cebola #H; 3 dente alho #H; 1 csc páprica defumada #T; 3 csp azeite #M","Cozinhe a batata com a cebola e o alho em 1,5 litro de água.|Bata até virar creme.|Junte a couve fatiada bem fina e cozinhe 3 minutos.|Sirva com azeite e páprica por cima."],
+["Creme de brócolis","🥦","sopa",30,4,1,1,"veg,fit,rapido","1 un brócolis #H; 1 un batata #H; 1 un cebola #H; 2 dente alho #H; 1 l caldo de legumes #M; 100 g requeijão #L","Refogue cebola e alho.|Junte o brócolis, a batata e o caldo e cozinhe 15 minutos.|Bata com o requeijão até ficar cremoso."],
+["Sopa de legumes com macarrão","🍜","sopa",35,6,1,1,"veg,barato,kids","1 un batata #H; 1 un cenoura #H; 1 un abobrinha #H; 1 un chuchu #H; 1 un cebola #H; 2 un tomate #H; 100 g macarrão argolinha #M; 1.5 l caldo de legumes #M","Refogue cebola e tomate.|Junte os legumes em cubos e o caldo e cozinhe 15 minutos.|Acrescente o macarrão e cozinhe até ficar macio."],
+["Creme de cogumelos","🍄","sopa",30,4,1,2,"veg","400 g cogumelo paris #H; 1 un cebola #H; 2 dente alho #H; 2 csp manteiga #L; 1 csp farinha de trigo #M; 700 ml caldo de legumes #M; 200 g creme de leite #L","Doure os cogumelos fatiados com a cebola e o alho na manteiga.|Polvilhe a farinha, mexa e junte o caldo aos poucos.|Cozinhe 10 minutos, bata metade e misture o creme de leite."],
+["Salada de feijão-preto com milho","🥗","salada",15,4,1,1,"veg,fit,rapido,marmita","500 g feijão preto cozido #M; 1 lata milho #M; 1 un tomate #H; 1 un cebola roxa #H; 1 un pimentão #H; 1 un limão #H; 2 csp azeite #M; ag coentro #H","Escorra e lave o feijão.|Pique tomate, cebola e pimentão.|Misture tudo com o milho e tempere com limão, azeite, sal e coentro."],
+["Salada grega","🥗","salada",15,4,1,2,"veg,fit,rapido","2 un tomate #H; 1 un pepino #H; 1 un cebola roxa #H; 1 un pimentão #H; 150 g queijo feta #L; 0.5 xic azeitona preta #M; 3 csp azeite #M; ag orégano #T","Corte os legumes em pedaços grandes.|Junte a azeitona e o queijo em cubos.|Tempere com azeite, orégano e sal."],
+["Salada de brócolis com ovo","🥦","salada",20,4,1,1,"veg,fit,rapido","1 un brócolis #H; 4 un ovo #L; 1 un cebola roxa #H; 2 csp azeite #M; 1 un limão #H; 1 csp mostarda #M","Cozinhe o brócolis 4 minutos e os ovos 10 minutos.|Corte os ovos em quartos e a cebola em fatias finas.|Tempere com azeite, limão, mostarda e sal."],
+["Salada de abobrinha com hortelã","🥒","salada",15,4,1,1,"veg,fit,rapido","2 un abobrinha #H; 1 maco hortelã #H; 1 un limão #H; 3 csp azeite #M; 50 g queijo parmesão #L","Fatie a abobrinha bem fina, em fitas.|Tempere com limão, azeite e sal e deixe 5 minutos.|Finalize com hortelã e lascas de parmesão."],
+["Salada de batata com vagem e ovo","🥔","salada",30,4,1,1,"veg,marmita","500 g batata #H; 200 g vagem #H; 3 un ovo #L; 1 un cebola roxa #H; 3 csp azeite #M; 1 csp vinagre #M; ag cheiro-verde #H","Cozinhe a batata em cubos, a vagem e os ovos.|Corte os ovos e misture com a cebola fatiada.|Tempere com azeite, vinagre, sal e cheiro-verde."],
+["Falafel","🧆","lanche",50,4,2,1,"veg,congela","500 g grão-de-bico #M; 1 un cebola #H; 4 dente alho #H; 1 maco salsinha #H; 1 maco coentro #H; 2 csc cominho #T; 3 csp farinha de trigo #M; 4 un pão sírio #P; 4 csp tahine #M","Deixe o grão-de-bico cru de molho por 12 horas e escorra.|Bata com cebola, alho, ervas, cominho e sal até virar massa grossa; junte a farinha.|Modele bolinhos e asse a 200 °C por 25 minutos ou frite.|Sirva no pão sírio com molho de tahine."],
+["Tacos de feijão","🌮","lanche",25,4,1,1,"veg,rapido,kids","8 un tortilha #P; 500 g feijão preto cozido #M; 1 un cebola #H; 1 csc cominho #T; 1 un tomate #H; 1 un alface #H; 1 un abacate #H; 100 g queijo muçarela #L","Refogue a cebola com o cominho, junte o feijão e amasse levemente.|Aqueça as tortilhas.|Recheie com o feijão, alface, tomate, abacate e queijo."],
+["Burrito de feijão com arroz","🌯","lanche",30,4,1,1,"veg,marmita,congela","4 un tortilha #P; 2 xic arroz cozido #M; 500 g feijão preto cozido #M; 1 lata milho #M; 1 un pimentão #H; 150 g queijo muçarela #L; 1 csc páprica defumada #T","Refogue o pimentão com a páprica e junte o feijão e o milho.|Recheie as tortilhas com arroz, feijão e queijo.|Enrole fechando as pontas e doure na frigideira."],
+["Hambúrguer de cogumelos","🍔","lanche",35,4,2,2,"veg","400 g cogumelo paris #H; 1 un cebola #H; 2 dente alho #H; 1 xic farinha de rosca #M; 1 un ovo #L; 4 un pão de hambúrguer #P; 4 fatia queijo prato #L; 1 un tomate #H; 1 un alface #H","Pique os cogumelos e refogue com cebola e alho até secar.|Misture o ovo e a farinha de rosca e modele 4 hambúrgueres.|Doure dos dois lados e monte no pão com queijo, alface e tomate."],
+["Pizza margherita","🍕","lanche",90,6,2,2,"veg,forno,fds,kids","3 xic farinha de trigo #M; 10 g fermento biológico seco #M; 1 xic água morna #M; 2 csp azeite #M; 340 g molho de tomate #M; 300 g queijo muçarela #L; 2 un tomate #H; 1 maco manjericão #H","Misture farinha, fermento, água, azeite e sal e sove 10 minutos; deixe crescer 1 hora.|Abra a massa em discos e espalhe o molho.|Cubra com muçarela e rodelas de tomate e asse a 250 °C por 12 minutos.|Finalize com manjericão."],
+["Esfiha de queijo","🫓","lanche",90,12,2,1,"veg,forno,congela","3 xic farinha de trigo #M; 10 g fermento biológico seco #M; 1 xic leite #L; 0.5 xic óleo #M; 300 g queijo muçarela #L; 200 g requeijão #L; ag orégano #T","Misture farinha, fermento, leite morno, óleo e sal e deixe crescer 40 minutos.|Misture o queijo ralado com o requeijão e o orégano.|Abra discos, recheie, feche em triângulo e asse a 200 °C por 20 minutos."],
+["Sanduíche de homus com legumes","🥪","lanche",15,2,1,1,"veg,rapido,fit","4 fatia pão integral #P; 6 csp homus #M; 1 un cenoura #H; 1 un pepino #H; 1 un tomate #H; 1 un alface #H","Espalhe o homus nas fatias de pão.|Monte com cenoura ralada, pepino, tomate e alface."],
+["Quesadilla de feijão e queijo","🫓","lanche",20,2,1,1,"veg,rapido,kids","4 un tortilha #P; 1 xic feijão preto cozido #M; 150 g queijo muçarela #L; 1 un tomate #H; ag coentro #H","Amasse o feijão com sal.|Espalhe sobre uma tortilha, cubra com queijo, tomate e coentro e feche com outra.|Doure dos dois lados na frigideira e corte em triângulos."],
+["Torta de liquidificador de milho e queijo","🌽","lanche",50,8,1,1,"veg,forno,kids","2 xic leite #L; 3 un ovo #L; 0.5 xic óleo #M; 2 xic farinha de trigo #M; 1 csp fermento em pó #M; 2 lata milho #M; 200 g queijo muçarela #L","Bata no liquidificador o leite, os ovos, o óleo, a farinha e sal; misture o fermento.|Despeje metade na forma, espalhe o milho e o queijo e cubra com o resto.|Asse a 180 °C por 40 minutos."],
+["Cuscuz marroquino com legumes","🍲","acomp",20,4,1,2,"veg,rapido,fit","1 xic cuscuz marroquino #M; 1 un abobrinha #H; 1 un cenoura #H; 1 un cebola roxa #H; 0.5 xic uva-passa #M; 2 csp azeite #M; ag hortelã #H","Hidrate o cuscuz com 1 xícara de água fervente e sal por 5 minutos.|Salteie os legumes em cubinhos no azeite.|Solte o cuscuz com um garfo e misture os legumes, a uva-passa e a hortelã."],
+["Batata gratinada","🥔","acomp",50,6,1,1,"veg,forno,fds","1 kg batata #H; 200 g creme de leite #L; 1 xic leite #L; 2 dente alho #H; 150 g queijo muçarela #L; 50 g queijo parmesão #L; ag noz-moscada #T","Fatie as batatas bem finas.|Misture creme de leite, leite, alho, sal e noz-moscada.|Monte camadas de batata e creme, cubra com os queijos e asse a 200 °C por 40 minutos."],
+["Vagem refogada com alho","🫛","acomp",15,4,1,1,"veg,rapido,fit","500 g vagem #H; 3 dente alho #H; 2 csp azeite #M","Cozinhe a vagem 4 minutos em água com sal.|Doure o alho no azeite e salteie a vagem por 2 minutos."],
+["Homus","🫘","acomp",15,6,1,1,"veg,rapido,fit","2 lata grão-de-bico #M; 3 csp tahine #M; 1 un limão #H; 1 dente alho #H; 3 csp azeite #M; ag páprica doce #T","Escorra o grão-de-bico, guardando um pouco da água.|Bata com tahine, limão, alho e sal, juntando a água aos poucos até ficar cremoso.|Sirva com azeite e páprica."]
 ];
 </script>
 <script>
@@ -564,11 +664,12 @@ function norm(s){return String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").to
 function slug(s){return norm(s).replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");}
 var RE=/^(?:(\d+(?:[.,]\d+)?)\s+(g|kg|ml|l|un|xic|csp|csc|dente|maco|lata|pct|fatia|folha)\s+|ag\s+)(.+?)\s*#([HALMPT])$/;
 function parseIng(s){var m=String(s).trim().match(RE);if(!m)return {q:0,u:"ag",n:String(s).replace(/#\w$/,"").trim(),s:"M"};return {q:m[1]?Number(m[1].replace(",",".")):0,u:m[1]?m[2]:"ag",n:m[3],s:m[4]};}
-var R=RAW.map(function(r){
+function mkR(r){
   var tags=String(r[7]||"").split(",").filter(Boolean);
   if(r[3]<=30)tags.push("rapido");if(r[6]===1)tags.push("barato");
   return {id:slug(r[0]),nome:r[0],e:r[1],cat:r[2],tempo:r[3],porc:r[4],dif:r[5],custo:r[6],tags:tags,ing:String(r[8]).split(";").map(parseIng).filter(function(i){return i.n;}),passos:String(r[9]).split("|").filter(Boolean)};
-});
+}
+var R=RAW.map(mkR);
 var BY={};R.forEach(function(r){BY[r.id]=r;});
 
 /* ---------- busca ---------- */
@@ -592,14 +693,15 @@ function protOf(r){
   if(/bacon|paio|presunto/.test(a))return "porco";
   return a?"outro":"veg";}
 var PROTW={frango:"frango ave galinha",peixe:"peixe frutos mar",porco:"porco suino",boi:"carne boi bovina",veg:"",outro:""};
-R.forEach(function(r){
+function enrich(r){
   r.prot=protOf(r);
   var c=CATN[r.cat]||["","",""],tg=r.tags.map(function(x){var l=TAGS.filter(function(z){return z[0]===x;})[0];return x+" "+(l?l[1]:"");}).join(" ");
   r.tn=toks(r.nome);
   r.ti=toks(r.ing.map(function(i){return i.n;}).join(" "));
   r.tg=r.ing.map(function(i){return toks(i.n);});
   r.tm=toks(r.cat+" "+c[1]+" "+tg+" "+PROTW[r.prot]+(r.tags.indexOf("veg")>=0?" vegetariano vegetariana":"")+(r.cat==="doce"?" sobremesa doce":"")+(r.dif===1?" facil":""));
-});
+}
+R.forEach(enrich);
 function lev(a,b,max){if(Math.abs(a.length-b.length)>max)return max+1;var p=[],i,j;for(j=0;j<=b.length;j++)p[j]=j;
   for(i=1;i<=a.length;i++){var c=[i],mn=i;for(j=1;j<=b.length;j++){c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));if(c[j]<mn)mn=c[j];}if(mn>max)return max+1;p=c;}return p[b.length];}
 /* ex = so aceita palavra inteira (quando ela existe em alguma receita: "coxa" nao pega "coxao") */
@@ -642,9 +744,197 @@ function buscar(q,lista){var ws=toks(q).filter(function(w){return w.length>=2;})
   return {r:sc.map(function(x){return x[1];}),parecido:parecido};}
 var ARROZ=BY["arroz-branco"],FEIJAO=BY["feijao-carioca"];
 
+
+/* ===================== Busca por ingredientes ===================== */
+function porIngredientes(lista,ings){
+  var grupos=ings.map(function(x){return toks(x).filter(function(w){return w.length>=2;});}).filter(function(g){return g.length;});
+  if(!grupos.length)return [];
+  var todas=[];grupos.forEach(function(g){todas=todas.concat(g);});
+  var ex=exatas(todas,lista);
+  return lista.map(function(r){var tem=[];
+      grupos.forEach(function(g,i){if(mesmoIng(r,g,ex)||g.every(function(w){return hitA(w,r.tn,0,ex);}))tem.push(i);});
+      return {r:r,n:tem.length,tem:tem};})
+    .filter(function(x){return x.n>0;})
+    .sort(function(a,b){return (b.n-a.n)||(a.r.ing.length-b.r.ing.length)||a.r.nome.localeCompare(b.r.nome,"pt-BR");});
+}
+function addIngs(txt){String(txt||"").split(/[,;\n]+| e (?=\S)/).map(function(x){return x.trim();}).filter(Boolean).forEach(function(x){
+  if(ui.ings.map(norm).indexOf(norm(x))<0)ui.ings.push(x.slice(0,40));});}
+
+/* ===================== Sites de receitas (escolhidos pelo tipo de receita) ===================== */
+var SITES={tg:["TudoGostoso","tudogostoso.com.br"],pn:["Panelinha","panelinha.com.br"],ne:["Receitas Nestlé","receitasnestle.com.br"],
+  am:["Ana Maria Braga","anamariabraga.globo.com"],cc:["Cybercook","cybercook.com.br"],pv:["Presunto Vegetariano","presuntovegetariano.com.br"],gc:["Guia da Cozinha","guiadacozinha.com.br"]};
+function tipoBusca(q,r){var t=norm(q);
+  if((r&&r.tags.indexOf("veg")>=0&&r.cat!=="doce")||/vegetari|vegan|sem carne|tofu|grao-de-bico|lentilha/.test(t))return "veg";
+  if((r&&r.cat==="doce")||/\b(bolo|doce|pudim|brigadeiro|mousse|sorvete|torta doce|cookie|biscoito|sobremesa|brownie|cocada|quindim)/.test(t))return "doce";
+  if((r&&r.tags.indexOf("fit")>=0)||/\b(fit|light|low ?carb|integral|saudavel|proteic)/.test(t))return "fit";
+  return "geral";}
+function sitesPara(q,r){var tp=tipoBusca(q,r);
+  return ({veg:["pv","pn","tg"],doce:["ne","tg","am"],fit:["pn","gc","tg"],geral:["tg","pn","am","cc"]})[tp].map(function(k){return SITES[k];});}
+function linkSite(site,q){return "https://www.google.com/search?q="+encodeURIComponent(q+" receita site:"+site[1]);}
+var TIPON={veg:"vegetarianas",doce:"de doces",fit:"leves",geral:"do dia a dia"};
+function webHTML(q,r){q=String(q||"").trim();if(!q)return "";var tp=tipoBusca(q,r);
+  return '<div class="web"><div class="web-h"><b>Procurar "'+esc(q)+'" na internet</b><small>Sites bons para receitas '+TIPON[tp]+'. Achou uma? Copie o link e importe.</small></div>'+
+    '<div class="web-l">'+sitesPara(q,r).map(function(st){return '<a class="wsite" href="'+esc(linkSite(st,q))+'" target="_blank" rel="noopener">'+esc(st[0])+'<span>↗</span></a>';}).join("")+
+    '<a class="wsite" href="https://www.google.com/search?q='+encodeURIComponent(q+" receita")+'" target="_blank" rel="noopener">Google<span>↗</span></a></div>'+
+    '<button class="btn imp" data-act="importar"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Importar receita de um site</button></div>';}
+
+/* ===================== Importar receita (link de qualquer site) ===================== */
+var FR={"½":.5,"¼":.25,"¾":.75,"⅓":1/3,"⅔":2/3};
+function numTxt(s){s=String(s).replace(/[½¼¾⅓⅔]/g,function(c){return " "+FR[c];}).trim();
+  var m=s.match(/^(\d+)\s+(\d+)\s*\/\s*(\d+)/);if(m)return +m[1]+m[2]/m[3];
+  m=s.match(/^(\d+)\s*\/\s*(\d+)/);if(m)return m[1]/m[2];
+  m=s.match(/^(\d+)\s+e\s+(?:meia|meio)/);if(m)return +m[1]+.5;
+  m=s.match(/^(\d+(?:[.,]\d+)?)(?:\s+(0?\.\d+))?/);if(m)return parseFloat(m[1].replace(",","."))+(m[2]?parseFloat(m[2]):0);return 0;}
+var UNL=[[/^x[ií]caras?(\s*\((de\s*)?(ch[aá]|caf[eé])\))?(\s*de\s*(ch[aá]))?/i,"xic"],[/^colher(es)?\s*(\((de\s*)?sopa\)|de\s*sopa|sopa)/i,"csp"],[/^colher(es)?\s*(\((de\s*)?(ch[aá]|caf[eé])\)|de\s*(ch[aá]|caf[eé]))/i,"csc"],
+  [/^(kg|quilos?|kilos?)\b/i,"kg"],[/^(g|gr|gramas?)\b/i,"g"],[/^(ml|mililitros?)\b/i,"ml"],[/^(l|litros?)\b/i,"l"],[/^dentes?\b/i,"dente"],[/^ma[cç]os?\b/i,"maco"],
+  [/^latas?\b/i,"lata"],[/^(pacotes?|pct|caixas?|caixinhas?|potes?|vidros?)\b/i,"pct"],[/^fatias?\b/i,"fatia"],[/^folhas?\b/i,"folha"],[/^(unidades?|un)\b/i,"un"],[/^(colher(es)?)\b/i,"csp"]];
+var SECK=[["A",/\b(carne|frango|peito|coxa|sobrecoxa|file|fil[eé]|bife|ac[eé]m|patinho|alcatra|picanha|lombo|costela|pernil|lingui[cç]a|bacon|calabresa|presunto|salsicha|peixe|til[aá]pia|salm[aã]o|merluza|bacalhau|camar[aã]o|atum|sardinha|paio|ma[mn]inha|cox[aã]o|m[uú]sculo|f[ií]gado)/i],
+  ["L",/\b(leite|queijo|manteiga|creme de leite|iogurte|ovos?|requeij[aã]o|ricota|muçarela|mussarela|parmes[aã]o|nata|cream cheese|tofu|chantilly)/i],
+  ["P",/\b(p[aã]o|p[aã]es|tortilha|torrada|bisnaguinha|massa de pastel)/i],
+  ["T",/\b(sal\b|pimenta-do-reino|pimenta do reino|or[eé]gano|cominho|p[aá]prica|canela|noz-moscada|curry|c[uú]rcuma|a[cç]afr[aã]o|louro|tempero|colorau|cravo|ervas finas|alecrim seco|tomilho)/i],
+  ["H",/\b(cebola|alho|tomate|batata|cenoura|abobrinha|ab[oó]bora|berinjela|piment[aã]o|br[oó]colis|couve|repolho|alface|r[uú]cula|agri[aã]o|espinafre|chuchu|mandioca|aipim|inhame|beterraba|pepino|quiabo|vagem|cogumelo|shimeji|champignon|lim[aã]o|laranja|banana|ma[cç][aã]|morango|abacaxi|manga|mam[aã]o|maracuj[aã]|uva|salsinha|cebolinha|coentro|cheiro-verde|manjeric[aã]o|hortel[aã]|gengibre|milho verde|alho-por[oó]|palmito pupunha|mandioquinha|batata-doce|abacate|couve-flor|ervas)/i]];
+function secDe(n){for(var i=0;i<SECK.length;i++)if(SECK[i][1].test(n))return SECK[i][0];return "M";}
+function ingLivre(raw){
+  var t=String(raw||"").replace(/\s+/g," ").replace(/[;#]/g,",").trim();if(!t)return "";
+  t=t.replace(/^[-•*·▪]\s*/,"");t=t.replace(/^(\d+)\s+e\s+(\d+\s*\/\s*\d+)/,"$1 $2");
+  var q=0,u="",resto=t,m=t.match(/^((?:\d+\s+)?\d+(?:[.,]\d+)?(?:\s*\/\s*\d+)?|[½¼¾⅓⅔]|\d+\s*[½¼¾⅓⅔])\s*(.*)$/);
+  if(m){q=numTxt(m[1]);resto=m[2];
+    for(var i=0;i<UNL.length;i++){var um=resto.match(UNL[i][0]);if(um){u=UNL[i][1];resto=resto.slice(um[0].length);break;}}
+    if(!u)u="un";}
+  else if(/^(meia|meio)\s/i.test(t)){q=.5;resto=t.replace(/^(meia|meio)\s+/i,"");for(var j=0;j<UNL.length;j++){var um2=resto.match(UNL[j][0]);if(um2){u=UNL[j][1];resto=resto.slice(um2[0].length);break;}}if(!u)u="un";}
+  else if(/^(uma?|um)\s/i.test(t)){q=1;resto=t.replace(/^(uma?|um)\s+/i,"");for(var k=0;k<UNL.length;k++){var um3=resto.match(UNL[k][0]);if(um3){u=UNL[k][1];resto=resto.slice(um3[0].length);break;}}if(!u)u="un";}
+  resto=resto.replace(/^\s*\([^)]*\)\s*/,"").replace(/^\s*de\s+/i,"").replace(/\s*\((?:opcional|a gosto)\)\s*/ig," ").replace(/\s+a gosto\.?$/i,"").replace(/[.,;:]+$/,"").trim();
+  if(!resto)resto=t;
+  resto=resto.charAt(0).toLowerCase()+resto.slice(1);
+  var sec=secDe(resto);
+  return (q>0?String(Math.round(q*100)/100)+" "+u+" ":"ag ")+resto+" #"+sec;}
+function catDe(nome,cat){var t=norm(nome+" "+(cat||""));
+  if(/\b(bolo|pudim|mousse|brigadeiro|sorvete|doce|sobremesa|cookie|biscoito|brownie|torta de limao|torta de banana|cocada|quindim|pave|beijinho|gelatina|cheesecake)/.test(t))return "doce";
+  if(/\b(sopa|caldo|creme de (abobora|mandioquinha|milho|cebola|ervilha|legumes|brocolis|cenoura|espinafre|couve|batata|cogumelo))/.test(t))return "sopa";
+  if(/\b(salada|vinagrete|salpicao|tabule)/.test(t))return "salada";
+  if(/\b(macarrao|lasanha|nhoque|espaguete|penne|talharim|fettuccine|canelone|rondelli|massa|parafuso|ravioli|fusilli)/.test(t))return "massa";
+  if(/\b(cafe da manha|panqueca americana|tapioca|crepioca|mingau|vitamina|smoothie|granola|overnight)/.test(t))return "cafe";
+  if(/\b(pao|sanduiche|lanche|pizza|esfiha|salgado|coxinha|empada|pastel|hamburguer|wrap|quiche|bolinho|croquete|torta salgada)/.test(t))return "lanche";
+  if(/\b(arroz|farofa|pure|acompanhamento|guarnicao|refogad|vagem|feijao)\b/.test(t))return "acomp";
+  return "prato";}
+function minutos(iso){if(!iso)return 0;if(typeof iso==="number")return iso;var m=String(iso).match(/P(?:\d+D)?T?(?:(\d+)H)?(?:(\d+)M)?/i);if(m&&(m[1]||m[2]))return (+m[1]||0)*60+(+m[2]||0);var n=parseInt(iso,10);return n>0?n:0;}
+function montarMinha(d){
+  var ing=(d.ingredientes||[]).map(ingLivre).filter(Boolean).slice(0,40);
+  var passos=(d.passos||[]).map(function(x){return String(x).replace(/\|/g,"/").replace(/\s+/g," ").trim();}).filter(Boolean).slice(0,30);
+  var cat=d.cat||catDe(d.nome,d.categoria);
+  var temCarne=ing.some(function(x){return / #A$/.test(x);});
+  var tags=[];if(d.veg!=null?d.veg:!temCarne)tags.push("veg");
+  var tempo=minutos(d.tempo)||40,porc=Math.max(1,Math.min(30,parseInt(d.porcoes,10)||4));
+  return {row:[String(d.nome||"Receita importada").slice(0,80),(CATN[cat]||CATN.prato)[2],cat,tempo,porc,passos.length>6||ing.length>12?2:1,2,tags.join(","),ing.join("; "),passos.join("|")],
+    fonte:d.fonte||"",foto:d.foto||""};}
+function addMinha(m){
+  var r=mkR(m.row);if(!m.id){var base="m-"+slug(m.row[0]),id=base,k=2;while(BY[id]){id=base+"-"+k;k++;}m.id=id;}
+  r.id=m.id;r.minha=true;r.fonte=m.fonte;r.fotoOrig=m.foto;enrich(r);
+  R.push(r);BY[r.id]=r;return r;}
+function tirarMinha(id){S.minhas=S.minhas.filter(function(m){return m.id!==id;});R=R.filter(function(r){return r.id!==id;});delete BY[id];
+  S.fav=S.fav.filter(function(f){return f!==id;});save();}
+function hostDe(u){try{return new URL(u).hostname.replace(/^www\./,"");}catch(e){return "";}}
+function importarLink(u){
+  var sh=ui.sheet;if(!sh||sh.type!=="importar")return;
+  u=String(u||"").trim();var mm=u.match(/https?:\/\/\S+/);if(!mm){sh.erro="Cole o link da receita (começa com https://).";drawSheet();return;}
+  sh.url=mm[0].replace(/[)\].,]+$/,"");sh.estado="busca";sh.erro="";drawSheet();
+  var ctrl=window.AbortController?new AbortController():null;if(ctrl)setTimeout(function(){ctrl.abort();},20000);
+  fetch("api/importar?url="+encodeURIComponent(sh.url),ctrl?{signal:ctrl.signal}:{}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j&&j.erro||"falhou");return j;});})
+   .then(function(j){if(ui.sheet!==sh)return;var m=montarMinha(j);m.fonte=sh.url;sh.dados=j;sh.m=m;sh.estado="ok";drawSheet(true);})
+   .catch(function(e){if(ui.sheet!==sh)return;sh.estado="";sh.erro=(e&&e.name==="AbortError")?"O site demorou demais para responder. Tente de novo.":(e&&e.message&&e.message!=="falhou"&&e.message.indexOf("fetch")<0?e.message:"Não consegui ler esse link. Confira se é a página da receita (não a busca) e se tem internet.");drawSheet();});}
+function importarHTML(){
+  var sh=ui.sheet,h='<div class="grab"></div><div class="sh"><button class="ibtn" data-close aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Importar receita</h2><span style="width:40px"></span></div>';
+  if(sh.estado!=="ok"){
+    h+='<div class="hero-s" style="padding-top:0"><div class="e">📥</div><p>Abra a receita no site (TudoGostoso, Panelinha, Nestlé…), toque em <b>Compartilhar → Copiar link</b> e cole aqui.</p></div>'+
+      '<div class="search" style="margin-top:14px"><input id="impUrl" type="url" inputmode="url" placeholder="https://… link da receita" autocomplete="off" value="'+esc(sh.url||"")+'"></div>'+
+      (sh.erro?'<p class="note" style="color:var(--heart);margin:8px 2px 0">'+esc(sh.erro)+'</p>':'')+
+      '<div class="stackb">'+(navigator.clipboard&&navigator.clipboard.readText?'<button class="btn line" data-act="colarLink">📋 Colar link</button>':'')+
+      '<button class="btn green" data-act="lerLink"'+(sh.estado==="busca"?' disabled':'')+'>'+(sh.estado==="busca"?'<span class="spin"></span> Lendo a receita…':'Importar')+'</button></div>'+
+      '<p class="note" style="margin-top:14px">No Android, com o app instalado, dá também para tocar em <b>Compartilhar</b> na página da receita e escolher <b>Cardápio</b>.</p>';
+    return h;}
+  var m=sh.m,r=mkR(m.row);
+  h+='<div class="impfoto" style="'+(m.foto?'background-image:url(\''+esc(m.foto)+'\')':'')+'">'+(m.foto?'':'<span>'+m.row[1]+'</span>')+'</div>';
+  h+='<label class="lbl">Nome<input id="impNome" value="'+esc(m.row[0])+'"></label>';
+  h+='<div class="grid2"><label class="lbl">Tipo<select id="impCat">'+CATS.map(function(c){return '<option value="'+c[0]+'"'+(c[0]===m.row[2]?' selected':'')+'>'+c[2]+' '+c[1]+'</option>';}).join("")+'</select></label>'+
+     '<label class="lbl">Porções<input id="impPorc" type="number" min="1" max="30" value="'+m.row[4]+'"></label>'+
+     '<label class="lbl">Tempo (min)<input id="impTempo" type="number" min="1" max="600" value="'+m.row[3]+'"></label>'+
+     '<label class="lbl chk"><input id="impVeg" type="checkbox"'+(m.row[7].indexOf("veg")>=0?' checked':'')+'> Vegetariana</label></div>';
+  h+='<div class="sec"><span class="sec-t">Ingredientes ('+r.ing.length+')</span><div class="ing">'+(r.ing.length?r.ing.map(function(i){return '<div><b>'+(i.u==="ag"?'a gosto':fmtQ(i.q,i.u,false))+'</b><span>'+esc(i.n)+'</span></div>';}).join(""):'<p class="note">O site não informou os ingredientes.</p>')+'</div></div>';
+  h+='<div class="sec"><span class="sec-t">Modo de preparo</span><ol class="steps">'+r.passos.map(function(p){return '<li><span>'+esc(p)+'</span></li>';}).join("")+'</ol></div>';
+  h+='<p class="note">De '+esc(hostDe(m.fonte))+'. Os ingredientes entram na lista de compras como os outros.</p>';
+  h+='<div class="foot"><button class="btn line" data-act="impVoltar" style="min-height:56px">Outro link</button><button class="btn green" data-act="impSalvar">Salvar no app</button></div>';
+  return h;}
+
+/* ===================== Fotos reais das receitas ===================== */
+var FKEY="cardapio-fotos-v1",MKEY="cardapio-minhas-fotos-v1",FC={},MF={};
+try{FC=JSON.parse(localStorage.getItem(FKEY)||"{}")||{};}catch(e){}
+try{MF=JSON.parse(localStorage.getItem(MKEY)||"{}")||{};}catch(e){}
+function salvaFC(){try{localStorage.setItem(FKEY,JSON.stringify(FC));}catch(e){}}
+function fotoDe(r){if(!r)return "";if(MF[r.id])return MF[r.id];var c=FC[r.id];
+  if(c&&c.c&&c.c.length)return c.c[(c.i||0)%c.c.length];if(r.fotoOrig&&!(c&&c.semOrig))return r.fotoOrig;return "";}
+var EN={frango:"chicken",galinha:"chicken",carne:"beef",bife:"steak",porco:"pork",suino:"pork",lombo:"pork loin",peixe:"fish",camarao:"shrimp",salmao:"salmon",tilapia:"tilapia",bacalhau:"cod",atum:"tuna",
+  arroz:"rice",feijao:"beans",lentilha:"lentil",grao:"chickpea",macarrao:"pasta",espaguete:"spaghetti",lasanha:"lasagna",nhoque:"gnocchi",sopa:"soup",caldo:"soup",creme:"cream soup",salada:"salad",
+  bolo:"cake",torta:"pie",pudim:"pudding",pao:"bread",ovo:"egg",ovos:"eggs",omelete:"omelette",panqueca:"pancake",batata:"potato",mandioca:"cassava",abobora:"pumpkin",abobrinha:"zucchini",
+  berinjela:"eggplant",cogumelo:"mushroom",cogumelos:"mushrooms",brocolis:"broccoli","couve-flor":"cauliflower",espinafre:"spinach",cenoura:"carrot",tomate:"tomato",milho:"corn",queijo:"cheese",
+  legumes:"vegetables",risoto:"risotto",strogonoff:"stroganoff",hamburguer:"burger",pizza:"pizza",curry:"curry",moqueca:"moqueca",feijoada:"feijoada",quiche:"quiche",falafel:"falafel",homus:"hummus",
+  tofu:"tofu",chili:"chili",tacos:"tacos",burrito:"burrito",cuscuz:"couscous",assado:"roasted",assada:"roasted",grelhado:"grilled",frito:"fried",frita:"fried",recheada:"stuffed",recheado:"stuffed",
+  brigadeiro:"brigadeiro",mousse:"mousse",sorvete:"ice cream",chocolate:"chocolate",banana:"banana",limao:"lemon",coco:"coconut",palmito:"palm heart",polenta:"polenta",yakisoba:"yakisoba",vagem:"green beans",
+  pimentao:"bell pepper",ratatouille:"ratatouille",tortilha:"tortilla",esfiha:"sfiha",empadao:"pot pie",empada:"pie",coxinha:"coxinha",pastel:"pastel",farofa:"farofa",tapioca:"tapioca",mingau:"porridge"};
+var TIRA=/\b(caseir[oa]s?|de liquidificador|na airfryer|na air fryer|de panela de press[aã]o|r[aá]pid[oa]s?|f[aá]cil|fit|da vov[oó]|simples|cremos[oa]s?|light|de frigideira|de forno|no forno|ao forno|de latinha|de panela)\b/gi;
+function consultas(r){var n=r.nome.replace(/\([^)]*\)/g,"").replace(/\s+/g," ").trim(),limpo=n.replace(TIRA,"").replace(/\s+/g," ").trim(),qs=[n];
+  if(limpo&&limpo!==n)qs.push(limpo);
+  var ws=norm(limpo).split(/[\s]+/).filter(function(w){return w&&!STOP[w];});
+  var en=ws.map(function(w){return EN[w]||EN[w.replace(/s$/,"")]||"";}).filter(Boolean);
+  if(en.length)qs.push(en.join(" ")+" dish");
+  if(ws.length>2)qs.push(ws.slice(0,2).join(" "));
+  return qs.filter(function(q,i){return qs.indexOf(q)===i;});}
+var RUIM=/\b(map|mapa|logo|icon|diagram|flag|bandeira|coat of arms|svg|drawing|desenho|ilustra|illustration|poster|cartaz|stamp|selo|book|livro|plant|planta|tree|arvore|flower|flor|field|farm|plantation|seed|semente|leaf|folha|market|feira|mercado|menu|card[aá]pio|screenshot|chart|grafico|statue|church|street|rua|portrait|retrato|people|pessoa|festival|museum|label|r[oó]tulo|package|embalagem|can |lata|bottle|garrafa|restaurant|restaurante|kitchen|cozinha)\b/i;
+function pontosFoto(titulo,q){var t=norm(titulo.replace(/^File:/i,"").replace(/\.[a-z]+$/i,"").replace(/[_-]/g," ")),ws=norm(q).split(/\s+/).filter(function(w){return w.length>2&&!STOP[w]&&w!=="dish";});
+  if(!ws.length)return 0;var hit=ws.filter(function(w){return t.indexOf(w.slice(0,Math.max(4,w.length-2)))>=0;}).length;
+  if(t.indexOf(ws[0].slice(0,Math.max(4,ws[0].length-2)))<0)return 0;return hit/ws.length;}
+function jget(u){var ctrl=window.AbortController?new AbortController():null;if(ctrl)setTimeout(function(){ctrl.abort();},9000);
+  return fetch(u,ctrl?{signal:ctrl.signal}:{}).then(function(r){if(!r.ok)throw 0;return r.json();});}
+function commons(q){
+  return jget("https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=20&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=640&gsrsearch="+encodeURIComponent(q+" filetype:bitmap"))
+   .then(function(j){var ps=j&&j.query&&j.query.pages?Object.keys(j.query.pages).map(function(k){return j.query.pages[k];}):[];
+     return ps.sort(function(a,b){return (a.index||0)-(b.index||0);}).map(function(p){var ii=p.imageinfo&&p.imageinfo[0];if(!ii||!/jpe?g|png|webp/.test(ii.mime||""))return null;
+       if(ii.width<350||ii.height<250||ii.width/ii.height>2||ii.width/ii.height<.6||RUIM.test(p.title))return null;
+       return {u:ii.thumburl||ii.url,s:pontosFoto(p.title,q)};}).filter(function(x){return x&&x.s>=.5;});});}
+function openverse(q){
+  return jget("https://api.openverse.org/v1/images/?page_size=15&mature=false&q="+encodeURIComponent(q))
+   .then(function(j){return ((j&&j.results)||[]).map(function(x){if(RUIM.test(x.title||"")||(x.width&&x.height&&(x.width/x.height>2||x.width/x.height<.6)))return null;
+     return {u:x.thumbnail||x.url,s:pontosFoto(x.title||"",q)};}).filter(function(x){return x&&x.s>=.5;});});}
+function buscarFotos(r){
+  var qs=consultas(r),out=[],i=0;
+  function prox(){if(out.length>=6||i>=qs.length)return Promise.resolve(out);var q=qs[i++];
+    return commons(q).catch(function(){return [];}).then(function(a){a.sort(function(x,y){return y.s-x.s;});a.forEach(function(x){if(out.indexOf(x.u)<0)out.push(x.u);});return prox();});}
+  return prox().then(function(o){if(o.length>=2)return o;
+    return openverse(qs[0]).catch(function(){return [];}).then(function(a){a.forEach(function(x){if(o.indexOf(x.u)<0)o.push(x.u);});return o;});});}
+var filaF=[],emBusca=0,pend={};
+function pedirFoto(id){if(pend[id]||FC[id])return;pend[id]=1;filaF.push(id);rodaFila();}
+function rodaFila(){while(emBusca<2&&filaF.length){(function(id){emBusca++;var r=BY[id];
+  (r?buscarFotos(r):Promise.resolve([])).then(function(c){FC[id]={c:c.slice(0,8),i:0,t:Date.now()};salvaFC();},function(){})
+  .then(function(){emBusca--;delete pend[id];aplicaFoto(id);rodaFila();});})(filaF.shift());}}
+function aplicaFoto(id){var u=fotoDe(BY[id]);document.querySelectorAll('[data-foto="'+id+'"]').forEach(function(el){pinta(el,u);});}
+function pinta(el,u){if(!u){el.classList.remove("has");el.style.backgroundImage="";return;}
+  if(el.dataset.u===u&&el.classList.contains("has"))return;el.dataset.u=u;
+  var im=new Image();im.onload=function(){el.style.backgroundImage="url('"+u.replace(/'/g,"%27")+"')";el.classList.add("has");};im.onerror=function(){var c=FC[el.dataset.foto];if(c&&c.c){c.c=c.c.filter(function(x){return x!==u;});salvaFC();aplicaFoto(el.dataset.foto);}};im.src=u;}
+var obsF=window.IntersectionObserver?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){obsF.unobserve(e.target);pedirFoto(e.target.dataset.foto);}});},{rootMargin:"300px"}):null;
+function pintarFotos(root){(root||document).querySelectorAll("[data-foto]").forEach(function(el){var id=el.dataset.foto,r=BY[id];if(!r)return;var u=fotoDe(r);
+  if(u)pinta(el,u);else if(!FC[id]){if(obsF)obsF.observe(el);else pedirFoto(id);}});}
+function trocarFoto(id){var c=FC[id];if(MF[id]){delete MF[id];try{localStorage.setItem(MKEY,JSON.stringify(MF));}catch(e){}aplicaFoto(id);toast("Voltou para a foto da internet");return;}
+  var r=BY[id];if(r&&r.fotoOrig&&!(c&&c.semOrig)){FC[id]=c||{c:[],i:0};FC[id].semOrig=true;salvaFC();if(!FC[id].c.length){delete pend[id];pend[id]=0;buscarFotos(r).then(function(cc){FC[id].c=cc;salvaFC();aplicaFoto(id);});}else aplicaFoto(id);return;}
+  if(!c||!c.c||c.c.length<2){toast(c&&c.c&&c.c.length?"Não achei outra foto. Use uma foto sua.":"Buscando foto…");if(!c)pedirFoto(id);return;}
+  c.i=((c.i||0)+1)%c.c.length;salvaFC();aplicaFoto(id);}
+function minhaFoto(id,f){if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){
+    var mx=900,w=im.width,h=im.height,k=Math.min(1,mx/Math.max(w,h)),cv=document.createElement("canvas");cv.width=Math.round(w*k);cv.height=Math.round(h*k);
+    cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);MF[id]=cv.toDataURL("image/jpeg",.78);
+    try{localStorage.setItem(MKEY,JSON.stringify(MF));toast("Foto salva");}catch(e){delete MF[id];toast("Sem espaço no celular para mais fotos.");}
+    aplicaFoto(id);if(ui.sheet)drawSheet();};im.src=rd.result;};rd.readAsDataURL(f);}
+
 /* ---------- estado ---------- */
-var S={pessoas:2,refeicoes:{cafe:true,almoco:true,lanche:false,jantar:true},arrozFeijao:true,salada:true,variar:true,sobraMarmita:false,rapidoSemana:true,planos:{},fav:[],compras:{},vistoMM:false,versaoVista:0,listaPorDia:false,cmodo:"secao"};
-var ui={tab:"semana",wk:null,q:"",cat:"",tag:"",sheet:null,confirm:"",sugHoje:0};
+var S={pessoas:2,refeicoes:{cafe:true,almoco:true,lanche:false,jantar:true},arrozFeijao:true,salada:true,variar:true,sobraMarmita:false,rapidoSemana:true,planos:{},fav:[],compras:{},vistoMM:false,versaoVista:0,listaPorDia:false,cmodo:"secao",minhas:[]};
+var ui={tab:"semana",wk:null,q:"",cat:"",tag:"",modo:"nome",ings:[],sheet:null,confirm:"",sugHoje:0};
 function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||"null");if(d&&typeof d==="object"){Object.keys(S).forEach(function(k){if(d[k]!=null)S[k]=d[k];});}}catch(e){}}
 var saveT=0;function save(){clearTimeout(saveT);saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast("Não consegui salvar neste navegador.");}},150);}
 
@@ -801,7 +1091,7 @@ function naLista(wk,id){return receitasNaLista(wk).some(function(e){return e.r.i
 function itensLista(wk){var c=comp(wk);return listaCompras(wk).filter(function(i){return !c.rm[i.key];});}
 
 /* ---------- desenho ---------- */
-function dishHTML(wk,d,m,id){var r=BY[id];if(!r)return "";var s=slot(wk,d,m,false),pc=s.p&&s.p[id];return '<span class="dish"><button class="dn" data-open="'+id+'" data-slot="'+wk+'|'+d+'|'+m+'"><span class="e">'+r.e+'</span><span class="n">'+esc(r.nome)+'</span>'+(pc?'<span class="pc">'+pc+'p</span>':'')+'</button><button class="x" data-rm="'+wk+'|'+d+'|'+m+'|'+id+'" aria-label="Tirar '+esc(r.nome)+'">×</button></span>';}
+function dishHTML(wk,d,m,id){var r=BY[id];if(!r)return "";var s=slot(wk,d,m,false),pc=s.p&&s.p[id];return '<span class="dish"><button class="dn" data-open="'+id+'" data-slot="'+wk+'|'+d+'|'+m+'"><span class="e" data-foto="'+id+'">'+r.e+'</span><span class="n">'+esc(r.nome)+'</span>'+(pc?'<span class="pc">'+pc+'p</span>':'')+'</button><button class="x" data-rm="'+wk+'|'+d+'|'+m+'|'+id+'" aria-label="Tirar '+esc(r.nome)+'">×</button></span>';}
 function vSemana(){
   var wk=ui.wk,td=hoje(),h='',atual=wk===curWk();
   h+='<div class="row"><h1 class="h1">Cardápio<small>'+(atual?'Esta semana':wk<curWk()?'Semana passada':'Próxima semana')+' · '+S.pessoas+(S.pessoas===1?' pessoa':' pessoas')+'</small></h1>'+
@@ -839,24 +1129,43 @@ function vSemana(){
   }
   h+='<p class="note">Toque num prato para ver a receita e ajustar as porções. Os dias com 🛒 ativado vão para a lista de compras, que acompanha as mudanças.</p>';
   return h;}
-function rcHTML(r){var fav=S.fav.indexOf(r.id)>=0;
-  return '<div class="rc" style="cursor:pointer" data-open="'+r.id+'" role="button" tabindex="0"><span class="plate">'+r.e+'</span><b>'+esc(r.nome)+'</b><small>'+r.tempo+' min · '+r.porc+(r.porc===1?' porção':' porções')+'</small>'+
+function rcHTML(r,extra){var fav=S.fav.indexOf(r.id)>=0;
+  return '<div class="rc" style="cursor:pointer" data-open="'+r.id+'" role="button" tabindex="0"><span class="plate" data-foto="'+r.id+'"><span>'+r.e+'</span></span><b>'+esc(r.nome)+'</b><small>'+(extra||(r.tempo+' min · '+r.porc+(r.porc===1?' porção':' porções')))+'</small>'+
     '<button class="heart'+(fav?' on':'')+'" data-fav="'+r.id+'" aria-label="'+(fav?'Tirar dos favoritos':'Favoritar')+'" aria-pressed="'+fav+'"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9-8.6C1.6 8.3 3.6 5 7 5c2 0 3.3 1.1 5 3 1.7-1.9 3-3 5-3 3.4 0 5.4 3.3 4 6.4C19 15.6 12 20 12 20z"/></svg></button></div>';}
 function filtrarR(){
   var base=R.filter(function(r){
-    if(ui.cat==="fav"){if(S.fav.indexOf(r.id)<0)return false;}else if(ui.cat&&r.cat!==ui.cat)return false;
+    if(ui.cat==="fav"){if(S.fav.indexOf(r.id)<0)return false;}else if(ui.cat==="minhas"){if(!r.minha)return false;}else if(ui.cat&&r.cat!==ui.cat)return false;
     if(ui.tag&&r.tags.indexOf(ui.tag)<0)return false;return true;});
   return buscar(ui.q,base);}
 function vReceitas(){
   var h='<h1 class="h1">Descobrir<small>'+R.length+' receitas do dia a dia</small></h1>';
+  h+='<div class="modos" role="tablist"><button data-act="modoNome" aria-pressed="'+(ui.modo!=="ing")+'">🔎 Por nome</button><button data-act="modoIng" aria-pressed="'+(ui.modo==="ing")+'">🥕 Por ingredientes</button></div>';
+  if(ui.modo==="ing"){
+    h+='<div class="search"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><input id="qi" placeholder="Digite o que tem em casa (ex.: ovo, tomate)" autocomplete="off" aria-label="Adicionar ingrediente" enterkeyhint="done"><button class="btn green addi" data-act="addIng">Adicionar</button></div>';
+    h+=ui.ings.length?'<div class="chips ings">'+ui.ings.map(function(x,i){return '<button class="chip on" data-rmi="'+i+'">'+esc(x)+' <span aria-hidden="true">×</span></button>';}).join("")+(ui.ings.length>1?'<button class="chip" data-act="limparIng">Limpar</button>':'')+'</div>':'<p class="note" style="margin:10px 2px 0">Coloque um ou mais ingredientes. Aparecem primeiro as receitas que usam todos.</p>';
+  }else
   h+='<div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Busque por prato ou ingrediente" autocomplete="off" aria-label="Buscar receita" value="'+esc(ui.q)+'"></div>';
-  h+='<div class="cats">'+[["","Todas","🍽️",R.length],["fav","Favoritas","❤️",S.fav.length]].concat(CATS.map(function(c){return [c[0],c[1],c[2],R.filter(function(r){return r.cat===c[0];}).length];})).map(function(c){
+  h+='<div class="cats">'+[["","Todas","🍽️",R.length],["fav","Favoritas","❤️",S.fav.length]].concat(S.minhas.length?[["minhas","Importadas","📥",S.minhas.length]]:[]).concat(CATS.map(function(c){return [c[0],c[1],c[2],R.filter(function(r){return r.cat===c[0];}).length];})).map(function(c){
     return '<button class="cat" data-cat="'+c[0]+'" aria-pressed="'+(ui.cat===c[0])+'"><span class="e">'+c[2]+'</span><b>'+c[1]+'</b><small>'+c[3]+'</small></button>';}).join("")+'</div>';
   h+='<div class="chips">'+TAGS.map(function(t){return '<button class="chip" data-tag="'+t[0]+'" aria-pressed="'+(ui.tag===t[0])+'">'+t[1]+'</button>';}).join("")+'</div>';
   h+='<div id="rres"></div>';
   return h;}
-function drawRres(){var el=$("#rres");if(!el)return;var res=filtrarR(),r=res.r;
-  el.innerHTML=r.length?(ui.q.trim()?'<p class="note" style="margin:0 0 10px">'+r.length+(r.length===1?' receita':' receitas')+(res.parecido?' parecidas (nenhuma tinha todas as palavras)':'')+'</p>':'')+'<div class="grid">'+r.map(rcHTML).join("")+'</div>':(ui.cat==="fav"&&!ui.q&&!ui.tag?'<div class="empty"><b>Nenhuma favorita ainda</b>Toque no coração das receitas que vocês gostam.</div>':'<div class="empty"><b>Nada encontrado</b>Tente outra palavra ou tire um filtro.</div>');}
+function baseR(){return R.filter(function(r){
+    if(ui.cat==="fav"){if(S.fav.indexOf(r.id)<0)return false;}else if(ui.cat==="minhas"){if(!r.minha)return false;}else if(ui.cat&&r.cat!==ui.cat)return false;
+    if(ui.tag&&r.tags.indexOf(ui.tag)<0)return false;return true;});}
+function drawRres(){var el=$("#rres");if(!el)return;
+  if(ui.modo==="ing"){
+    if(!ui.ings.length){el.innerHTML='<div class="empty"><b>O que tem na geladeira?</b>Adicione ingredientes acima para ver o que dá para fazer.</div>';pintarFotos(el);return;}
+    var li=porIngredientes(baseR(),ui.ings),tot=ui.ings.length,todos=li.filter(function(x){return x.n===tot;}).length;
+    el.innerHTML=(li.length?'<p class="note" style="margin:0 0 10px">'+(tot>1?(todos?todos+(todos===1?' receita usa':' receitas usam')+' todos · ':'Nenhuma usa todos · ')+li.length+' usam algum':li.length+(li.length===1?' receita':' receitas'))+'</p><div class="grid">'+
+      li.slice(0,120).map(function(x){return rcHTML(x.r,tot>1?(x.n===tot?'✓ usa todos':'usa '+x.tem.map(function(i){return ui.ings[i];}).join(", ")):null);}).join("")+'</div>':'<div class="empty"><b>Nenhuma receita com isso</b>Tente outro ingrediente ou procure na internet.</div>')+
+      webHTML(ui.ings.join(" "),null);
+    pintarFotos(el);return;}
+  var res=filtrarR(),r=res.r;
+  el.innerHTML=r.length?(ui.q.trim()?'<p class="note" style="margin:0 0 10px">'+r.length+(r.length===1?' receita':' receitas')+(res.parecido?' parecidas (nenhuma tinha todas as palavras)':'')+'</p>':'')+'<div class="grid">'+r.map(function(x){return rcHTML(x);}).join("")+'</div>':(ui.cat==="fav"&&!ui.q&&!ui.tag?'<div class="empty"><b>Nenhuma favorita ainda</b>Toque no coração das receitas que vocês gostam.</div>':'<div class="empty"><b>Nada encontrado no app</b>Tente outra palavra, tire um filtro ou procure na internet abaixo.</div>');
+  if(ui.q.trim())el.innerHTML+=webHTML(ui.q,null);
+  else el.innerHTML+='<div class="web"><div class="web-h"><b>Achou uma receita num site?</b><small>Traga para o app com ingredientes e modo de preparo.</small></div><button class="btn imp" data-act="importar"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Importar receita de um site</button></div>';
+  pintarFotos(el);}
 function vCompras(){
   var wk=ui.wk,itens=itensLista(wk),c=comp(wk),h='',tirados=Object.keys(c.rm).length||!!c.diasAntes;
   h+='<div class="row"><h1 class="h1">Compras</h1><div class="weeknav"><button data-wk="-1" aria-label="Semana anterior">‹</button><b>'+wkLabel(wk)+'</b><button data-wk="1" aria-label="Próxima semana">›</button></div></div>';
@@ -960,7 +1269,8 @@ function receitaHTML(r){
   var sh=ui.sheet,porc=sh.porc||S.pessoas,f=porc/r.porc,fav=S.fav.indexOf(r.id)>=0;
   var pos=[["8%","12%"],["78%","4%"],["86%","62%"],["0%","70%"]];
   var h='<div class="grab"></div><div class="sh"><button class="ibtn" data-close aria-label="Fechar"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h2>'+esc(CATN[r.cat][1])+'</h2><span style="width:40px"></span></div>';
-  h+='<div class="hero"><div class="bigplate">'+r.e+bitsFor(r).map(function(b,i){return '<i style="left:'+pos[i][0]+';top:'+pos[i][1]+'">'+b+'</i>';}).join("")+'</div><h3>'+esc(r.nome)+'</h3>'+
+  h+='<div class="hero"><div class="bigfoto" data-foto="'+r.id+'"><div class="bigplate">'+r.e+bitsFor(r).map(function(b,i){return '<i style="left:'+pos[i][0]+';top:'+pos[i][1]+'">'+b+'</i>';}).join("")+'</div></div>'+
+     '<div class="fotobar"><button class="mini" data-act="outraFoto">↻ Outra foto</button><button class="mini" data-act="fotoMinha">📷 Usar foto minha</button><input type="file" id="fotoArq" accept="image/*" hidden></div><h3>'+esc(r.nome)+'</h3>'+
      '<div class="facts"><span>Preparo · <b>'+r.tempo+' min</b></span><span>'+(r.dif===1?'Fácil':r.dif===2?'Médio':'Trabalhoso')+'</span><span>'+["","$","$$","$$$"][r.custo]+'</span>'+(r.tags.indexOf("veg")>=0?'<span>Vegetariana</span>':'')+(r.tags.indexOf("congela")>=0?'<span>Congela bem</span>':'')+'</div></div>';
   h+='<div class="row"><span class="sec-t">Ingredientes</span><div class="step"><button data-porc="-1" aria-label="Menos porções">−</button><b>'+porc+'</b><button data-porc="1" aria-label="Mais porções">+</button><span class="note">'+(porc===1?'porção':'porções')+'</span></div></div>';
   if(sh.lig)h+='<p class="note" style="margin:-4px 0 10px">No cardápio de '+DIAS[sh.lig.d].toLowerCase()+' ('+MEALN[sh.lig.m].toLowerCase()+'). Mudar as porções aqui atualiza a lista de compras.</p>';
@@ -970,6 +1280,8 @@ function receitaHTML(r){
   h+=peloDia?'<div class="dlista on" style="margin:0 0 4px">✓ Já está na lista de compras pelo cardápio</div>'
     :'<button class="dlista'+(ehAv?' on':'')+'" data-avl="'+r.id+'" style="width:100%;margin:0 0 4px">'+(ehAv?'✓ Ingredientes na lista de compras · '+cav.av[r.id]+(cav.av[r.id]===1?' porção':' porções')+' <span>tirar</span>':'🛒 Mandar os ingredientes para a lista de compras')+'</button>';
   h+='<div class="sec"><span class="sec-t">Modo de preparo</span><ol class="steps">'+r.passos.map(function(p){return '<li><span>'+esc(p)+'</span></li>';}).join("")+'</ol></div>';
+  if(r.minha)h+='<p class="note">Importada'+(r.fonte?' de <a href="'+esc(r.fonte)+'" target="_blank" rel="noopener">'+esc(hostDe(r.fonte))+'</a>':'')+' · <button class="linkb" data-act="apagarMinha">'+(ui.confirm==="apagarMinha"?'toque de novo para apagar':'apagar receita')+'</button></p>';
+  h+=webHTML(r.nome.replace(/\([^)]*\)/g,"").trim(),r).replace("Procurar \"","Outras versões de \"");
   if(sh.add){
     var wk=ui.wk;
     h+='<div class="pick" id="pick"><span class="sec-t">Quando?</span><div class="chips">'+[0,1,2,3,4,5,6].map(function(d){return '<button class="chip" data-pd="'+d+'" aria-pressed="'+(sh.d===d)+'">'+DIAC[d]+' '+dm(addD(wk,d))+'</button>';}).join("")+'</div>'+
@@ -1005,7 +1317,7 @@ function diaHTML(){
     if(novo)pend++;
     var body='';
     if(v.x)body='<div class="dline"><span class="e">'+(v.x==="sobra"?'♻️':'🍽️')+'</span><span><b>'+(v.x==="sobra"?'Sobras do jantar de ontem':'Comer fora')+'</b></span></div>';
-    else if(v.r&&v.r.length)body=v.r.map(function(id){var r=BY[id];if(!r)return "";return '<button class="dline" data-open="'+id+'"><span class="e">'+r.e+'</span><span><b>'+esc(r.nome)+'</b><small>'+r.tempo+' min · '+(r.dif===1?'fácil':r.dif===2?'médio':'trabalhoso')+'</small></span></button>';}).join("");
+    else if(v.r&&v.r.length)body=v.r.map(function(id){var r=BY[id];if(!r)return "";return '<button class="dline" data-open="'+id+'"><span class="e" data-foto="'+id+'">'+r.e+'</span><span><b>'+esc(r.nome)+'</b><small>'+r.tempo+' min · '+(r.dif===1?'fácil':r.dif===2?'médio':'trabalhoso')+'</small></span></button>';}).join("");
     else body='<p class="note" style="margin:4px 0">Sem sugestão para esta refeição.</p>';
     h+='<section class="dcard'+(novo?' novo':'')+'"><div class="dcard-h"><b>'+MEALN[m]+'</b><span class="tagp">'+(novo?'Sugestão':(vazioSlot(cur)?'Vazio':'Já no cardápio'))+'</span><button class="btn line" data-dtroca="'+m+'" style="min-height:36px;padding:0 12px;margin-left:auto">↻ '+(novo||vazioSlot(cur)?'Outra':'Trocar')+'</button>'+(novo?'<button class="add" data-dtira="'+m+'" aria-label="Não sugerir '+MEALN[m]+'">×</button>':'')+'</div>'+body+'</section>';});
   var ult=d>=6;
@@ -1014,8 +1326,12 @@ function diaHTML(){
 function abrirDia(d){var x=sugerirDia(ui.wk,d,false,null);ui.sheet={type:"dia",d:d,draft:x.res};drawSheet(true);}
 function openSheet(o){ui.sheet=o;drawSheet(true);}
 /* ---------- novidades da versão ---------- */
-var VERSAO=6;
+var VERSAO=7;
 var NOVIDADES=[
+ {e:"📸",t:"Fotos das receitas",d:"As receitas agora aparecem com fotos reais, buscadas na internet. Não gostou de uma? Abra a receita e toque em Outra foto ou Usar foto minha.",tab:"receitas",sel:".grid .rc",dica:"As fotos aparecem conforme você rola"},
+ {e:"🥕",t:"Busca por ingredientes",d:"Em Descobrir, toque em Por ingredientes e diga o que tem em casa (ex.: ovo, tomate, queijo). Aparecem primeiro as receitas que usam tudo.",tab:"receitas",sel:".modos",dica:"Troque para Por ingredientes"},
+ {e:"🌐",t:"Receitas da internet",d:"Busque e, embaixo dos resultados, veja sites escolhidos para o tipo de receita (vegetarianas, doces, leves…). Achou uma? Use Importar receita de um site e ela entra no app com ingredientes e preparo.",tab:"receitas",sel:"#q",dica:"Busque algo e role até o fim"},
+ {e:"🥦",t:"+60 receitas vegetarianas",d:"Strogonoff de grão-de-bico, risoto de abóbora, falafel, lasanha de abobrinha, chili, pad thai e muito mais.",tab:"receitas",sel:".chips",dica:"Use o filtro Vegetarianas"},
  {e:"🥬",t:"18 receitas vegetarianas novas",d:"Feijoada vegetariana, moqueca de palmito, escondidinho de lentilha, curry de legumes, ratatouille, tofu acebolado e mais. Use o filtro Vegetarianas para ver todas.",tab:"receitas",sel:".cats",dica:"Use o filtro Vegetarianas"},
  {e:"🥩",t:"Tipo da carne na receita",d:"As receitas agora dizem qual carne usar (ex.: alcatra bovina, lombo suíno). Assim o Meu Mercado não troca por outra carne mais barata.",tab:"receitas",sel:".grid .rc",dica:"Abra uma receita de carne para ver"},
  {e:"📤",t:"Compartilhe o app",d:"O botão de compartilhar no alto manda o link para quem você quiser. A pessoa recebe o app limpo, com o próprio cardápio, e uma tela explicando tudo (o ⓘ no alto).",tab:"semana",sel:"[data-act=compartilhar]",dica:"Toque para mandar o app para alguém"},
@@ -1057,12 +1373,12 @@ function tirarDica(){var b=document.getElementById("dicaBalao");if(b)b.remove();
 function closeSheet(){ui.sheet=null;$("#sheet").hidden=true;document.body.style.overflow="";render();}
 function drawSheet(reset){
   var p=$("#panel"),top=p.scrollTop,sh=ui.sheet;if(!sh)return closeSheet();
-  p.innerHTML=sh.type==="receita"?receitaHTML(BY[sh.id]):sh.type==="dia"?diaHTML():sh.type==="novidades"?novidadesHTML():pickerHTML();
+  p.innerHTML=sh.type==="importar"?importarHTML():sh.type==="receita"?receitaHTML(BY[sh.id]):sh.type==="dia"?diaHTML():sh.type==="novidades"?novidadesHTML():pickerHTML();
   var el=$("#sheet");if(el.hidden){el.hidden=false;document.body.style.overflow="hidden";}
-  p.scrollTop=reset?0:top;}
+  p.scrollTop=reset?0:top;pintarFotos(p);}
 
 /* ---------- geral ---------- */
-var raf=0;function render(){if(raf)return;raf=requestAnimationFrame(function(){raf=0;draw();});}
+var raf=0;function render(){if(raf)return;raf=requestAnimationFrame(function(){raf=0;draw();pintarFotos($("#main"));});}
 function draw(){
   var main=$("#main"),act=document.activeElement,aid=act&&act.id&&main.contains(act)?act.id:null;
   document.querySelectorAll(".tab").forEach(function(b){if(b.getAttribute("data-go")===ui.tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
@@ -1126,6 +1442,7 @@ document.addEventListener("click",function(e){
   if(d.open){var volta=ui.sheet&&ui.sheet.type==="dia"?ui.sheet:null,lig=null,pc0=S.pessoas;
     if(d.slot){var q=d.slot.split("|");lig={wk:q[0],d:+q[1],m:q[2]};pc0=porcDe(slot(lig.wk,lig.d,lig.m,false),d.open);}
     openSheet({type:"receita",id:d.open,porc:pc0,volta:volta,lig:lig});return;}
+  if(d.rmi!==undefined){ui.ings.splice(+d.rmi,1);render();return;}
   if(d.go){go(d.go);return;}
   if(d.wk){ui.wk=addD(ui.wk,7*Number(d.wk));render();return;}
   if(d.pick){var pp=d.pick.split("|");openSheet({type:"pick",d:+pp[0],m:pp[1],q:"",cat:""});return;}
@@ -1154,6 +1471,22 @@ document.addEventListener("click",function(e){
   if(d.pc!==undefined&&ui.sheet){ui.sheet.cat=d.pc;drawSheet();return;}
   if(d.tg&&ui.sheet){var st=slot(wk,ui.sheet.d,ui.sheet.m,true),ix=st.r.indexOf(d.tg);if(ix>=0)st.r.splice(ix,1);else{st.r.push(d.tg);st.x="";}save();drawSheet();render();return;}
   switch(d.act){
+    case "modoNome":ui.modo="nome";render();setTimeout(function(){var q=$("#q");if(q)q.focus();},60);break;
+    case "modoIng":ui.modo="ing";render();setTimeout(function(){var q=$("#qi");if(q)q.focus();},60);break;
+    case "addIng":var qi=$("#qi");if(qi&&qi.value.trim()){addIngs(qi.value);qi.value="";render();setTimeout(function(){var q2=$("#qi");if(q2)q2.focus();},60);}break;
+    case "limparIng":ui.ings=[];render();break;
+    case "importar":openSheet({type:"importar",url:"",estado:"",erro:""});setTimeout(function(){var iu=$("#impUrl");if(iu)iu.focus();},80);break;
+    case "colarLink":navigator.clipboard.readText().then(function(t){var iu=$("#impUrl");if(iu)iu.value=t;importarLink(t);},function(){toast("Não deu para colar. Segure no campo e escolha Colar.");});break;
+    case "lerLink":importarLink(($("#impUrl")||{}).value);break;
+    case "impVoltar":ui.sheet.estado="";ui.sheet.m=null;drawSheet(true);break;
+    case "impSalvar":var im=ui.sheet.m,nm=($("#impNome").value||"").trim()||im.row[0];
+      im.row[0]=nm.slice(0,80);im.row[2]=$("#impCat").value;im.row[1]=CATN[im.row[2]][2];im.row[4]=Math.max(1,Math.min(30,+$("#impPorc").value||4));im.row[3]=Math.max(1,+$("#impTempo").value||40);
+      var tg=im.row[7].split(",").filter(function(x){return x&&x!=="veg";});if($("#impVeg").checked)tg.push("veg");im.row[7]=tg.join(",");
+      var nr=addMinha(im);S.minhas.push({id:im.id,row:im.row,fonte:im.fonte,foto:im.foto});save();
+      ui.cat="";ui.q="";ui.modo="nome";go("receitas");openSheet({type:"receita",id:nr.id,porc:S.pessoas});toast("Receita importada");break;
+    case "apagarMinha":if(ui.confirm!=="apagarMinha"){ui.confirm="apagarMinha";drawSheet();break;}ui.confirm="";var aid=ui.sheet.id;tirarMinha(aid);closeSheet();toast("Receita apagada");break;
+    case "outraFoto":trocarFoto(ui.sheet.id);break;
+    case "fotoMinha":var fa=$("#fotoArq");if(fa)fa.click();break;
     case "semanaNaLista":var cw=comp(wk);diasComPrato(wk).forEach(function(x){cw.dias[x]=true;});save();render();toast("Semana na lista de compras");break;
     case "maisSemana":ui.maisSemana=!ui.maisSemana;render();break;
     case "verPassados":ui.verPassados=true;render();break;
@@ -1197,20 +1530,28 @@ document.addEventListener("input",function(e){
   else if(e.target.id==="pq"&&ui.sheet){ui.sheet.q=e.target.value;var sh=ui.sheet,s=slot(ui.wk,sh.d,sh.m,false);
     $("#plist").innerHTML=plistHTML(pickLista(sh),s);}
 });
-document.addEventListener("change",function(e){if(e.target.id==="arq"&&e.target.files[0])restaurar(e.target.files[0]);});
+document.addEventListener("change",function(e){if(e.target.id==="arq"&&e.target.files[0])restaurar(e.target.files[0]);
+  if(e.target.id==="fotoArq"&&e.target.files[0]&&ui.sheet)minhaFoto(ui.sheet.id,e.target.files[0]);});
 document.addEventListener("keydown",function(e){
   if(e.key==="Escape"&&ui.sheet){closeSheet();return;}
+  if(e.key==="Enter"&&e.target.id==="qi"){e.preventDefault();var ba=document.querySelector('[data-act="addIng"]');if(ba)ba.click();return;}
+  if(e.key==="Enter"&&e.target.id==="impUrl"){e.preventDefault();importarLink(e.target.value);return;}
   if(e.key==="Enter"&&e.target.id==="extra"){e.preventDefault();var b=document.querySelector('[data-act="extra"]');if(b)b.click();return;}
   if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("rc")&&e.target===document.activeElement){e.preventDefault();openSheet({type:"receita",id:e.target.getAttribute("data-open"),porc:S.pessoas});}
 });
 window.addEventListener("hashchange",function(){go(location.hash.slice(1));});
 var novato=true;try{novato=localStorage.getItem(KEY)===null;}catch(e){}
 load();
+if(!Array.isArray(S.minhas))S.minhas=[];
+S.minhas.forEach(function(m){try{addMinha(m);}catch(x){}});
 if(!S.listaPorDia){Object.keys(S.planos).forEach(function(wk){var c=comp(wk);for(var d=0;d<7;d++)c.dias[d]=true;});S.listaPorDia=true;save();}
 ui.wk=curWk();
 ui.tab=["semana","receitas","compras","ajustes","sobre"].indexOf(location.hash.slice(1))>=0?location.hash.slice(1):(novato?"sobre":"semana");
 if(novato){S.versaoVista=VERSAO;save();}
-draw();
+draw();pintarFotos($("#main"));
+(function(){var ps=new URLSearchParams(location.search),t=[ps.get("url"),ps.get("text"),ps.get("title")].join(" "),m=t.match(/https?:\/\/\S+/);
+  if(!m)return;try{history.replaceState(null,"",location.pathname+location.hash);}catch(x){}
+  openSheet({type:"importar",url:m[0],estado:"",erro:""});importarLink(m[0]);})();
 (function(){
   if((S.versaoVista||0)>=VERSAO)return;
   var usava=Object.keys(S.planos).length||S.fav.length||Object.keys(S.compras).length;
