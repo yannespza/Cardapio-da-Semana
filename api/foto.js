@@ -60,12 +60,14 @@ function consultas(row) {
   const qs = [];
   if (en) qs.push({ q: en + (veg && !/vegetarian/.test(en) ? ' vegetarian' : ''), lang: 'en-US' });
   qs.push({ q: pt, lang: 'pt-BR' });
-  if (en) qs.push({ q: en.split(' ').slice(0, 2).join(' ') + ' food', lang: 'en-US' });
+  if (en && en.split(' ').length > 2) qs.push({ q: en.split(' ').slice(0, 2).join(' '), lang: 'en-US' });
+  if (en && en.split(' ').length > 1) qs.push({ q: en.split(' ')[0] + (/cake|pie|soup|salad|bread|pasta|rice|stew|curry|burger|pizza|risotto|lasagna/.test(en) ? '' : ' dish'), lang: 'en-US' });
+  const pt2 = pt.split(' ').filter(w => !STOP.has(w)).slice(0, 2).join(' '); if (pt2 && pt2 !== pt) qs.push({ q: pt2, lang: 'pt-BR' });
   return qs;
 }
 // pontua pelo texto da foto: precisa ter a palavra principal do prato
 function pontos(desc, q) {
-  const d = ' ' + norm(desc) + ' ', ws = norm(q).split(/\s+/).filter(w => w.length > 2 && !STOP.has(w) && !['food', 'vegetarian', 'with'].includes(w));
+  const d = ' ' + norm(desc) + ' ', ws = norm(q).split(/\s+/).filter(w => w.length > 2 && !STOP.has(w) && !['food', 'dish', 'vegetarian', 'with'].includes(w));
   if (!ws.length) return 0.5;
   const tem = ws.filter(w => d.includes(w.slice(0, Math.max(4, w.length - 1))));
   return tem.length / ws.length;
@@ -126,7 +128,7 @@ module.exports = async function (req, res) {
     const row = id.startsWith('m-') ? await receitaComunidade(id) : await receitaDoApp(id, req.headers.host);
     if (!row) { res.statusCode = 404; res.setHeader('Cache-Control', 'public, s-maxage=600'); return res.end('receita'); }
     const fotos = await melhores(row);
-    if (!fotos.length) { res.statusCode = 404; res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=604800'); return res.end('sem foto'); }
+    if (!fotos.length) { res.statusCode = 404; res.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=3600'); return res.end('sem foto'); }
     const f = fotos[(v - 1) % fotos.length];
     res.statusCode = 302; res.setHeader('Location', f.u); res.setHeader('X-Fonte', f.fonte);
     res.setHeader('Cache-Control', 'public, max-age=604800, s-maxage=2592000');

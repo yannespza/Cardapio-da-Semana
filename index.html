@@ -887,7 +887,8 @@ try{FC=JSON.parse(localStorage.getItem(FKEY)||"{}")||{};}catch(e){}
 try{MF=JSON.parse(localStorage.getItem(MKEY)||"{}")||{};}catch(e){}
 function salvaFC(){try{localStorage.setItem(FKEY,JSON.stringify(FC));}catch(e){}}
 function fotoDe(r){if(!r)return "";if(MF[r.id])return MF[r.id];var c=FC[r.id]||{};
-  if(r.fotoOrig&&!c.semOrig)return r.fotoOrig;return "api/foto?id="+encodeURIComponent(r.id)+"&v="+(c.v||1);}
+  if(r.fotoOrig&&!c.semOrig)return r.fotoOrig;return "api/foto?id="+encodeURIComponent(r.id)+"&v="+(c.v||1)+"&f="+FOTOV;}
+var FOTOV=1;
 var filaF=[],emBusca=0,falhou={};
 function pinta(el,u){if(!u){el.classList.remove("has");el.style.backgroundImage="";return;}
   if(el.dataset.u===u)return;el.dataset.u=u;
