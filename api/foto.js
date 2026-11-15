@@ -1,5 +1,5 @@
 // Foto da receita: procura a melhor foto GRÁTIS para o prato e manda o celular direto para ela.
-// Ordem: Pexels (fotos profissionais, precisa da chave grátis PEXELS_KEY) → Wikimedia "Quality images" → Openverse (Flickr etc.).
+// Ordem: Unsplash (UNSPLASH_KEY) → Pixabay (PIXABAY_KEY) → Pexels (PEXELS_KEY) — bancos profissionais grátis, cada um precisa de uma chave grátis → Wikimedia "Quality images" → Openverse (Flickr etc.).
 // A escolha fica guardada no cache da Vercel, então cada prato é pesquisado uma vez só.
 const SB = 'https://obqxbokptruohrgjohuy.supabase.co';
 const SBK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9icXhib2twdHJ1b2hyZ2pvaHV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2NzUzNzEsImV4cCI6MjExMDI1MTM3MX0.mQllYqlGzQcdS2sRHPd1J1FM2K56w2q2h_gCzPoSb9Q';
@@ -73,6 +73,22 @@ function pontos(desc, q) {
 }
 const RUIM = /\b(map|logo|icon|diagram|flag|drawing|illustration|cartoon|vector|clipart|poster|menu|package|label|screenshot|text|people eating|hands? holding|plant|field|farm|market|supermarket|raw meat|butcher)\b/i;
 
+async function unsplash(c) {
+  const k = process.env.UNSPLASH_KEY; if (!k) return [];
+  const r = await fetch('https://api.unsplash.com/search/photos?per_page=15&orientation=landscape&content_filter=high&lang=' + c.lang.slice(0, 2) + '&query=' + encodeURIComponent(c.q), { headers: { Authorization: 'Client-ID ' + k, 'Accept-Version': 'v1' } });
+  if (!r.ok) { LOG.push('unsplash ' + r.status); return []; }
+  const j = await r.json(); LOG.push('unsplash ok ' + c.q + ' ' + (j.results || []).length);
+  return (j.results || []).map((p, i) => { const d = [p.alt_description, p.description, (p.tags || []).map(t => t.title).join(' ')].filter(Boolean).join(' ');
+    if (RUIM.test(d)) return null; return { u: p.urls.regular, s: pontos(d, c.q) * 2 + (15 - i) / 15, fonte: 'Unsplash' }; }).filter(x => x && x.s >= 1.2);
+}
+async function pixabay(c) {
+  const k = process.env.PIXABAY_KEY; if (!k) return [];
+  const r = await fetch('https://pixabay.com/api/?key=' + encodeURIComponent(k) + '&image_type=photo&category=food&orientation=horizontal&safesearch=true&per_page=20&order=popular&lang=' + c.lang.slice(0, 2) + '&q=' + encodeURIComponent(c.q.slice(0, 100)));
+  if (!r.ok) { LOG.push('pixabay ' + r.status); return []; }
+  const j = await r.json(); LOG.push('pixabay ok ' + c.q + ' ' + (j.hits || []).length);
+  return (j.hits || []).filter(h => !RUIM.test(h.tags || '')).map((h, i) => ({ u: h.largeImageURL || h.webformatURL, s: pontos(h.tags || '', c.q) * 2 + (20 - i) / 20 + Math.min(1, (h.likes || 0) / 200) * 0.3, fonte: 'Pixabay' }))
+    .filter(x => x.s >= 1.2);
+}
 async function pexels(c) {
   const k = process.env.PEXELS_KEY; if (!k) return [];
   const r = await fetch('https://api.pexels.com/v1/search?per_page=15&orientation=landscape&locale=' + c.lang + '&query=' + encodeURIComponent(c.q), { headers: { Authorization: k } });
@@ -108,7 +124,9 @@ async function melhores(row) {
   const out = [], visto = new Set();
   const junta = (a) => a.sort((x, y) => y.s - x.s).forEach(x => { if (!visto.has(x.u)) { visto.add(x.u); out.push(x); } });
   for (const c of consultas(row)) {
-    junta(await pexels(c).catch(() => []));
+    junta(await unsplash(c).catch(() => []));
+    if (out.length < 3) junta(await pixabay(c).catch(() => []));
+    if (out.length < 3) junta(await pexels(c).catch(() => []));
     if (out.length >= 3) return out;
   }
   for (const c of consultas(row)) {
