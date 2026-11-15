@@ -1,17 +1,16 @@
-// Foto da receita: gera uma vez com IA (estilo fotografia de livro de receitas), guarda no Supabase
-// e depois todo mundo recebe a mesma foto pronta, sem gerar de novo.
+// Foto da receita: procura a melhor foto GRÁTIS para o prato e manda o celular direto para ela.
+// Ordem: Pexels (fotos profissionais, precisa da chave grátis PEXELS_KEY) → Wikimedia "Quality images" → Openverse (Flickr etc.).
+// A escolha fica guardada no cache da Vercel, então cada prato é pesquisado uma vez só.
 const SB = 'https://obqxbokptruohrgjohuy.supabase.co';
 const SBK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9icXhib2twdHJ1b2hyZ2pvaHV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2NzUzNzEsImV4cCI6MjExMDI1MTM3MX0.mQllYqlGzQcdS2sRHPd1J1FM2K56w2q2h_gCzPoSb9Q';
-const BUCKET = 'cd-fotos';
-const MODELO = 'bfl/flux-3-image-klein';
 
-function slug(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
+function norm(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
+function slug(s) { return norm(s).replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
 
 let receitasApp = null, quando = 0;
 async function receitaDoApp(id, host) {
   if (!receitasApp || Date.now() - quando > 10 * 60 * 1000) {
-    const r = await fetch('https://' + host + '/index.html', { headers: { 'x-foto': '1' } });
-    const html = await r.text(); const m = {};
+    const html = await (await fetch('https://' + host + '/index.html')).text(); const m = {};
     for (const ln of html.split('\n')) {
       if (!/^\["/.test(ln)) continue;
       try { const row = JSON.parse(ln.replace(/,\s*$/, '')); if (Array.isArray(row) && row.length === 10) m[slug(row[0])] = row; } catch (e) {}
@@ -25,60 +24,113 @@ async function receitaComunidade(id) {
   if (!r.ok) return null; const j = await r.json(); return j[0] ? j[0].dados : null;
 }
 
-const EN = { frango: 'chicken', carne: 'beef', bovina: 'beef', bovino: 'beef', porco: 'pork', suino: 'pork', peixe: 'fish', camarao: 'shrimp', arroz: 'rice', feijao: 'beans', lentilha: 'lentils',
-  'grao-de-bico': 'chickpeas', macarrao: 'pasta', sopa: 'soup', creme: 'creamy soup', salada: 'salad', bolo: 'cake', torta: 'pie', pao: 'bread', ovos: 'eggs', ovo: 'egg', batata: 'potato',
-  mandioca: 'cassava', abobora: 'pumpkin', abobrinha: 'zucchini', berinjela: 'eggplant', cogumelos: 'mushrooms', brocolis: 'broccoli', queijo: 'cheese', legumes: 'vegetables', assado: 'roasted', assada: 'roasted', recheada: 'stuffed', recheado: 'stuffed' };
-function dica(nome) { const sl = '-' + slug(nome) + '-'; const w = Object.keys(EN).filter(k => sl.indexOf('-' + k + '-') >= 0).map(k => EN[k]); return w.length ? ' (' + [...new Set(w)].join(', ') + ')' : ''; }
-
-function prompt(row, v) {
-  const [nome, , cat, , , , , tags, ings] = row;
-  const principais = String(ings || '').split(';').map(s => s.replace(/#\w\s*$/, '').replace(/^\s*(\d+(?:[.,]\d+)?\s+\S+\s+|ag\s+)/, '').trim())
-    .filter(s => s && !/^(sal|azeite|óleo|oleo|água|agua|pimenta-do-reino)\b/i.test(s)).slice(0, 6).join(', ');
-  const veg = /(^|,)veg(,|$)/.test(tags || '') && cat !== 'doce' ? ' Fully vegetarian, absolutely no meat.' : '';
-  const angulo = ['three-quarter angle, 45 degrees', 'overhead flat lay', 'low side angle, close-up'][(v - 1) % 3];
-  const tipo = { doce: 'dessert', cafe: 'breakfast', lanche: 'snack', sopa: 'soup', salada: 'salad', massa: 'pasta dish', acomp: 'side dish' }[cat] || 'main dish';
-  return `Award-winning editorial food photography for a premium cookbook. The Brazilian ${tipo} "${nome}"${dica(nome)}, made with ${principais}.${veg} ` +
-    `Artfully plated on handmade ceramic, styled by a professional food stylist, garnished with fresh herbs. Soft natural window light, gentle shadows, shallow depth of field, ` +
-    `rich true-to-life colors, rustic linen and dark wood surface, ${angulo}. Appetizing, realistic, magazine quality. No text, no logos, no people, no hands.`;
+// Tradução dos nomes de prato para inglês (os bancos de fotos têm muito mais fotos com descrição em inglês)
+const FRASES = [['grao-de-bico', 'chickpea'], ['batata-doce', 'sweet potato'], ['couve-flor', 'cauliflower'], ['carne moida', 'ground beef'], ['pao de queijo', 'cheese bread'],
+  ['arroz doce', 'rice pudding'], ['pudim de leite', 'flan caramel pudding'], ['bolo de cenoura', 'carrot cake'], ['bolo de chocolate', 'chocolate cake'], ['feijao tropeiro', 'beans with cassava flour'],
+  ['frango assado', 'roast chicken'], ['peixe assado', 'baked fish'], ['salada de frutas', 'fruit salad'], ['caldo verde', 'kale potato soup'], ['escondidinho', 'shepherds pie'],
+  ['macarrao a bolonhesa', 'spaghetti bolognese'], ['a bolonhesa', 'bolognese'], ['a parmegiana', 'parmigiana'], ['a milanesa', 'breaded cutlet'], ['ao sugo', 'tomato sauce'], ['alho e oleo', 'garlic and oil'],
+  ['torta de limao', 'lemon pie'], ['mousse de maracuja', 'passion fruit mousse'], ['pao de alho', 'garlic bread'], ['cachorro-quente', 'hot dog'], ['pe de moleque', 'peanut brittle']];
+const PAL = { frango: 'chicken', galinha: 'chicken', carne: 'beef', bife: 'steak', bovina: 'beef', bovino: 'beef', porco: 'pork', suino: 'pork', lombo: 'pork loin', costelinha: 'pork ribs', costela: 'ribs',
+  linguica: 'sausage', peixe: 'fish', tilapia: 'tilapia', salmao: 'salmon', camarao: 'shrimp', bacalhau: 'cod', atum: 'tuna', sardinha: 'sardines', arroz: 'rice', feijao: 'beans', lentilha: 'lentil',
+  macarrao: 'pasta', espaguete: 'spaghetti', penne: 'penne', talharim: 'tagliatelle', lasanha: 'lasagna', nhoque: 'gnocchi', risoto: 'risotto', sopa: 'soup', caldo: 'broth', creme: 'cream soup',
+  salada: 'salad', bolo: 'cake', torta: 'pie', quiche: 'quiche', pao: 'bread', ovos: 'eggs', ovo: 'egg', omelete: 'omelette', panqueca: 'pancakes', tapioca: 'tapioca', cuscuz: 'couscous',
+  batata: 'potato', batatas: 'potatoes', mandioca: 'cassava', abobora: 'pumpkin', abobrinha: 'zucchini', berinjela: 'eggplant', cogumelos: 'mushrooms', cogumelo: 'mushroom', brocolis: 'broccoli',
+  espinafre: 'spinach', cenoura: 'carrot', tomate: 'tomato', milho: 'corn', queijo: 'cheese', legumes: 'vegetables', palmito: 'palm hearts', pimentao: 'bell pepper', vagem: 'green beans',
+  strogonoff: 'stroganoff', hamburguer: 'burger', pizza: 'pizza', curry: 'curry', moqueca: 'moqueca fish stew', feijoada: 'feijoada', falafel: 'falafel', homus: 'hummus', tofu: 'tofu', chili: 'chili',
+  tacos: 'tacos', burrito: 'burrito', quesadilla: 'quesadilla', yakisoba: 'yakisoba noodles', ratatouille: 'ratatouille', polenta: 'polenta', brigadeiro: 'brigadeiro', mousse: 'mousse',
+  sorvete: 'ice cream', chocolate: 'chocolate', banana: 'banana', limao: 'lemon', coco: 'coconut', granola: 'granola', iogurte: 'yogurt', vitamina: 'smoothie', smoothie: 'smoothie', brownie: 'brownie',
+  cookies: 'cookies', sanduiche: 'sandwich', wrap: 'wrap', coxinha: 'coxinha', esfiha: 'sfiha', pastel: 'pastel', empada: 'pie', empadao: 'pot pie', farofa: 'farofa', pure: 'mashed', vinagrete: 'salsa',
+  assado: 'roasted', assada: 'roasted', grelhado: 'grilled', grelhada: 'grilled', frito: 'fried', frita: 'fried', empanado: 'breaded', recheada: 'stuffed', recheado: 'stuffed', gratinada: 'gratin',
+  cremoso: 'creamy', cremosa: 'creamy', vegetariano: 'vegetarian', vegetariana: 'vegetarian', integral: 'whole grain', mexidos: 'scrambled', acebolado: 'with onions', ensopado: 'stew', refogada: 'sauteed' };
+const TIRA = /\b(caseir[oa]s?|de liquidificador|na airfryer|na air fryer|de panela de pressao|rapid[oa]s?|facil|fit|da vovo|simples|de frigideira|de forno|no forno|de latinha|de panela|prato feito)\b/g;
+const STOP = new Set(['de', 'da', 'do', 'das', 'dos', 'com', 'e', 'a', 'o', 'ao', 'na', 'no', 'em', 'para']);
+function ingles(nome) {
+  let t = ' ' + norm(nome).replace(/\([^)]*\)/g, ' ').replace(TIRA, ' ') + ' ';
+  const achados = [];
+  for (const [pt, en] of FRASES) if (t.includes(' ' + pt + ' ')) { achados.push(en); t = t.replace(' ' + pt + ' ', ' '); }
+  t.split(/\s+/).filter(w => w && !STOP.has(w)).forEach(w => { if (PAL[w]) achados.push(PAL[w]); });
+  return [...new Set(achados)].join(' ');
 }
+function consultas(row) {
+  const nome = row[0], pt = norm(nome).replace(/\([^)]*\)/g, ' ').replace(TIRA, ' ').replace(/\s+/g, ' ').trim();
+  const en = ingles(nome), veg = /(^|,)veg(,|$)/.test(row[7] || '') && row[2] !== 'doce';
+  const qs = [];
+  if (en) qs.push({ q: en + (veg && !/vegetarian/.test(en) ? ' vegetarian' : ''), lang: 'en-US' });
+  qs.push({ q: pt, lang: 'pt-BR' });
+  if (en) qs.push({ q: en.split(' ').slice(0, 2).join(' ') + ' food', lang: 'en-US' });
+  return qs;
+}
+// pontua pelo texto da foto: precisa ter a palavra principal do prato
+function pontos(desc, q) {
+  const d = ' ' + norm(desc) + ' ', ws = norm(q).split(/\s+/).filter(w => w.length > 2 && !STOP.has(w) && !['food', 'vegetarian', 'with'].includes(w));
+  if (!ws.length) return 0.5;
+  const tem = ws.filter(w => d.includes(w.slice(0, Math.max(4, w.length - 1))));
+  return tem.length / ws.length;
+}
+const RUIM = /\b(map|logo|icon|diagram|flag|drawing|illustration|cartoon|vector|clipart|poster|menu|package|label|screenshot|text|people eating|hands? holding|plant|field|farm|market|supermarket|raw meat|butcher)\b/i;
 
-async function gerar(texto, token) {
-  const pedir = (corpo) => fetch('https://ai-gateway.vercel.sh/v1/images/generations', {
-    method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
-  const base = { model: MODELO, prompt: texto, n: 1, providerOptions: { blackForestLabs: { outputFormat: 'jpeg' } } };
-  let r = await pedir(Object.assign({ size: '1024x768' }, base));
-  if (r.status === 400) r = await pedir(base);
-  if (!r.ok) throw new Error('gerar ' + r.status + ' ' + (await r.text()).slice(0, 300));
-  const j = await r.json(); const d = j.data && j.data[0];
-  if (d && d.b64_json) return Buffer.from(d.b64_json, 'base64');
-  if (d && d.url) { const im = await fetch(d.url); return Buffer.from(await im.arrayBuffer()); }
-  throw new Error('sem imagem');
+async function pexels(c) {
+  const k = process.env.PEXELS_KEY; if (!k) return [];
+  const r = await fetch('https://api.pexels.com/v1/search?per_page=15&orientation=landscape&locale=' + c.lang + '&query=' + encodeURIComponent(c.q), { headers: { Authorization: k } });
+  if (!r.ok) return [];
+  const j = await r.json();
+  return (j.photos || []).filter(p => !RUIM.test(p.alt || '')).map((p, i) => ({ u: p.src.large || p.src.medium, s: pontos(p.alt || '', c.q) * 2 + (15 - i) / 15, fonte: 'Pexels' }))
+    .filter(x => x.s >= 1.2);
+}
+async function commons(c) {
+  const busca = async (extra) => {
+    const r = await fetch('https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=20&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=1024&gsrsearch='
+      + encodeURIComponent(c.q + ' filetype:bitmap' + extra), { headers: { 'User-Agent': 'CardapioDaSemana/1.0 (app pessoal)' } });
+    if (!r.ok) return [];
+    const j = await r.json(); const ps = j.query && j.query.pages ? Object.values(j.query.pages) : [];
+    return ps.sort((a, b) => (a.index || 0) - (b.index || 0)).map(p => {
+      const ii = p.imageinfo && p.imageinfo[0]; if (!ii || !/jpe?g|png|webp/.test(ii.mime || '')) return null;
+      if (ii.width < 800 || ii.height < 500 || ii.width / ii.height > 1.9 || ii.width / ii.height < 0.7 || RUIM.test(p.title)) return null;
+      const s = pontos(p.title.replace(/^File:/, '').replace(/[_-]/g, ' '), c.q); if (s < 0.5) return null;
+      return { u: ii.thumburl || ii.url, s: s + (extra ? 1 : 0), fonte: 'Wikimedia' };
+    }).filter(Boolean);
+  };
+  const boas = await busca(' incategory:"Quality_images"');
+  return boas.length ? boas : await busca('');
+}
+async function openverse(c) {
+  const r = await fetch('https://api.openverse.org/v1/images/?page_size=20&mature=false&category=photograph&size=large&aspect_ratio=wide,square&q=' + encodeURIComponent(c.q));
+  if (!r.ok) return [];
+  const j = await r.json();
+  return (j.results || []).filter(x => !RUIM.test((x.title || '') + ' ' + (x.tags || []).map(t => t.name).join(' ')))
+    .map(x => ({ u: x.url, s: pontos((x.title || '') + ' ' + (x.tags || []).map(t => t.name).join(' '), c.q), fonte: 'Openverse' })).filter(x => x.s >= 0.6);
+}
+async function melhores(row) {
+  const out = [], visto = new Set();
+  const junta = (a) => a.sort((x, y) => y.s - x.s).forEach(x => { if (!visto.has(x.u)) { visto.add(x.u); out.push(x); } });
+  for (const c of consultas(row)) {
+    junta(await pexels(c).catch(() => []));
+    if (out.length >= 3) return out;
+  }
+  for (const c of consultas(row)) {
+    junta(await commons(c).catch(() => []));
+    if (out.length >= 3) return out;
+  }
+  if (out.length < 3) junta(await openverse(consultas(row)[0]).catch(() => []));
+  return out;
 }
 
 module.exports = async function (req, res) {
   const q = new URL(req.url, 'http://x').searchParams;
   const id = String(q.get('id') || ''), v = Math.min(3, Math.max(1, parseInt(q.get('v'), 10) || 1));
   if (!/^[a-z0-9-]{2,90}$/.test(id)) { res.statusCode = 400; return res.end('id'); }
-  const nome = id + '.v' + v + '.jpg', pub = SB + '/storage/v1/object/public/' + BUCKET + '/' + nome;
-  const pronta = () => { res.statusCode = 302; res.setHeader('Location', pub); res.setHeader('Cache-Control', 'public, max-age=604800, s-maxage=31536000, immutable'); res.end(); };
   try {
-    const h = await fetch(pub, { method: 'HEAD' });
-    if (h.ok) return pronta();
     const row = id.startsWith('m-') ? await receitaComunidade(id) : await receitaDoApp(id, req.headers.host);
     if (!row) { res.statusCode = 404; res.setHeader('Cache-Control', 'public, s-maxage=600'); return res.end('receita'); }
-    const token = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || req.headers['x-vercel-oidc-token'];
-    if (!token) throw new Error('sem token do AI Gateway');
-    const img = await gerar(prompt(row, v), token);
-    const up = await fetch(SB + '/storage/v1/object/' + BUCKET + '/' + nome, { method: 'POST',
-      headers: { apikey: SBK, Authorization: 'Bearer ' + SBK, 'Content-Type': 'image/jpeg', 'x-upsert': 'false', 'Cache-Control': '31536000' }, body: img });
-    if (up.ok || up.status === 409 || up.status === 400) {
-      const ok2 = await fetch(pub, { method: 'HEAD' }); if (ok2.ok) return pronta();
-    }
-    console.error('upload falhou', up.status, (await up.text()).slice(0, 200));
-    res.statusCode = 200; res.setHeader('Content-Type', 'image/jpeg'); res.setHeader('Cache-Control', 'public, max-age=3600'); return res.end(img);
+    const fotos = await melhores(row);
+    if (!fotos.length) { res.statusCode = 404; res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=604800'); return res.end('sem foto'); }
+    const f = fotos[(v - 1) % fotos.length];
+    res.statusCode = 302; res.setHeader('Location', f.u); res.setHeader('X-Fonte', f.fonte);
+    res.setHeader('Cache-Control', 'public, max-age=604800, s-maxage=2592000');
+    return res.end();
   } catch (e) {
     console.error('foto', id, e && e.message);
     res.statusCode = 503; res.setHeader('Cache-Control', 'no-store'); return res.end('indisponivel');
   }
 };
-module.exports.prompt = prompt;
+module.exports.consultas = consultas;

@@ -881,7 +881,7 @@ function importarHTML(){
   h+='<div class="foot"><button class="btn line" data-act="impVoltar" style="min-height:56px">Outro link</button><button class="btn green" data-act="impSalvar">Salvar no app</button></div>';
   return h;}
 
-/* ===================== Fotos das receitas (criadas por IA, iguais para todos) ===================== */
+/* ===================== Fotos das receitas (melhores fotos grátis da internet, iguais para todos) ===================== */
 var FKEY="cardapio-fotos-v2",MKEY="cardapio-minhas-fotos-v1",FC={},MF={};
 try{FC=JSON.parse(localStorage.getItem(FKEY)||"{}")||{};}catch(e){}
 try{MF=JSON.parse(localStorage.getItem(MKEY)||"{}")||{};}catch(e){}
@@ -913,7 +913,7 @@ function trocarFoto(id){var r=BY[id];if(!r)return;
   if(MF[id]){delete MF[id];try{localStorage.setItem(MKEY,JSON.stringify(MF));}catch(e){}aplicaFoto(id);toast("Voltou para a foto do app");return;}
   var c=FC[id]=FC[id]||{};
   if(r.fotoOrig&&!c.semOrig){c.semOrig=true;c.v=1;}else{c.v=((c.v||1)%3)+1;if(c.v===1&&r.fotoOrig)c.semOrig=false;}
-  salvaFC();delete falhou[id];aplicaFoto(id);toast("Preparando outra foto… pode levar alguns segundos");}
+  salvaFC();delete falhou[id];aplicaFoto(id);toast("Trocando a foto…");}
 function minhaFoto(id,f){if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){
     var mx=900,w=im.width,h=im.height,k=Math.min(1,mx/Math.max(w,h)),cv=document.createElement("canvas");cv.width=Math.round(w*k);cv.height=Math.round(h*k);
     cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);MF[id]=cv.toDataURL("image/jpeg",.78);
@@ -1346,9 +1346,9 @@ function diaHTML(){
 function abrirDia(d){var x=sugerirDia(ui.wk,d,false,null);ui.sheet={type:"dia",d:d,draft:x.res};drawSheet(true);}
 function openSheet(o){ui.sheet=o;drawSheet(true);}
 /* ---------- novidades da versão ---------- */
-var VERSAO=8;
+var VERSAO=9;
 var NOVIDADES=[
- {e:"🖼️",t:"Fotos novas, de livro de receitas",d:"Cada receita ganhou uma foto criada especialmente para ela, com cara de fotografia profissional. A primeira vez que uma foto aparece pode levar alguns segundos; depois fica pronta para todo mundo. Não gostou? Toque em Outra foto.",tab:"receitas",sel:".grid .rc",dica:"As fotos aparecem conforme você rola"},
+ {e:"🖼️",t:"Fotos melhores",d:"O app agora procura as melhores fotos grátis de cada prato em bancos de fotos profissionais. Não gostou de uma? Abra a receita e toque em Outra foto (ou use uma foto sua).",tab:"receitas",sel:".grid .rc",dica:"As fotos aparecem conforme você rola"},
  {e:"🤝",t:"Receitas importadas valem para todos",d:"Toda receita importada por qualquer pessoa entra no app de todo mundo. Quando chegar receita nova, o app avisa ao abrir. Elas ficam no filtro Importadas.",tab:"receitas",sel:".cats",dica:"Veja o filtro Importadas"},
  {e:"⚡",t:"Busca na internet mais direta",d:"O botão Abrir receita vai direto para a melhor receita no site certo. Copie o link lá e volte: o botão Importar a receita copiada já aparece na tela.",tab:"receitas",sel:"#q",dica:"Busque algo e role até o fim"},
  {e:"📸",t:"Fotos das receitas",d:"As receitas agora aparecem com fotos reais, buscadas na internet. Não gostou de uma? Abra a receita e toque em Outra foto ou Usar foto minha.",tab:"receitas",sel:".grid .rc",dica:"As fotos aparecem conforme você rola"},
